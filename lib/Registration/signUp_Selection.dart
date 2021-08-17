@@ -49,10 +49,10 @@ class _signUp_SelectionState extends State<signUp_Selection> {
                 child: basicButton(
                     cwhite, () {}, "Register with Email", cButtoncolor)),
             SizedBox(height: 10.sp),
-            // Container(
-            //     width: query.width * 0.8,
-            //     height: query.height * 0.085,
-            //     child: basicButton(cwhite, () {}, "Login", cOrange)),
+            Container(
+                width: query.width * 0.8,
+                height: query.height * 0.085,
+                child: basicButton(cwhite, () {}, "Login", cOrange)),
           ],
         ),
       ),
