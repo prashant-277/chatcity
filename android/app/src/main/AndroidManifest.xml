@@ -1,7 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.theappideas.chatcity">
    <application
-        android:label="chatcity"
+        android:label="ChatCity"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
