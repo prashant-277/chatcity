@@ -22,6 +22,7 @@ class _splashScreenState extends State<splashScreen> {
         nextScreen: signUp_Selection(),
         duration: 1000,
         pageTransitionType: PageTransitionType.fade,
+        splashTransition: SplashTransition.fadeTransition,
       ),
     );
   }

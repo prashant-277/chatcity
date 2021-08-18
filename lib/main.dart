@@ -17,7 +17,7 @@ class MyApp extends StatelessWidget {
       builder: (context, orientation, deviceType) {
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'Skicom',
+          title: 'ChatCity',
           theme: ThemeData(
             primaryColor: Color(0xff382177),
           ),
@@ -25,7 +25,5 @@ class MyApp extends StatelessWidget {
         );
       },
     );
-
-
   }
 }

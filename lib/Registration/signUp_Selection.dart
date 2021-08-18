@@ -1,6 +1,8 @@
+import 'package:chatcity/Registration/RegisterwithEmail.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:sizer/sizer.dart';
 
 class signUp_Selection extends StatefulWidget {
@@ -47,12 +49,20 @@ class _signUp_SelectionState extends State<signUp_Selection> {
                 width: query.width * 0.8,
                 height: query.height * 0.085,
                 child: basicButton(
-                    cwhite, () {}, "Register with Email", cButtoncolor)),
+                    cwhite, () {
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          type: PageTransitionType.fade,
+                          alignment: Alignment.bottomCenter,
+                          duration: Duration(milliseconds: 300),
+                          child: RegisterwithEmail()));
+                }, "Register with Email", cButtoncolor)),
             SizedBox(height: 10.sp),
-            // Container(
-            //     width: query.width * 0.8,
-            //     height: query.height * 0.085,
-            //     child: basicButton(cwhite, () {}, "Login", cOrange)),
+            Container(
+                width: query.width * 0.8,
+                height: query.height * 0.085,
+                child: basicButton(cwhite, () {}, "Login", cOrange)),
           ],
         ),
       ),
