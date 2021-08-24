@@ -1,3 +1,4 @@
+import 'package:chatcity/dashboard_page.dart';
 import 'package:chatcity/splashScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

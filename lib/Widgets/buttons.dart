@@ -26,7 +26,7 @@ class basicButton extends StatelessWidget {
             color: textcolor),
       ),
       onPressed: onPressed,
-      padding: EdgeInsets.fromLTRB(40, 15, 40, 15)
+      padding: EdgeInsets.fromLTRB(40, 10, 40, 10)
     );
   }
 }

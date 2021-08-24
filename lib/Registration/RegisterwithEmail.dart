@@ -1,9 +1,12 @@
+import 'package:chatcity/Registration/otpSent_successfully.dart';
+import 'package:chatcity/TermsofService.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/textfield.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:sizer/sizer.dart';
 
 class RegisterwithEmail extends StatefulWidget {
@@ -19,6 +22,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     var query = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: cwhite,
+      resizeToAvoidBottomInset:false,
       appBar: BaseAppBar(
         appBar: AppBar(),
         backgroundColor: cwhite,
@@ -91,15 +95,24 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                     Padding(
                       padding: const EdgeInsets.only(left: 15.0, right: 15),
                       child: Container(
-                          width: query.width,
-                          height: query.height * 0.082,
+                          width: 90.w,
+                          height: 7.5.h,
                           child: basicButton(
-                              cwhite, () {}, "Continue", cButtoncolor)),
+                              cwhite, () {
+                            Navigator.push(
+                                context,
+                                PageTransition(
+                                    type: PageTransitionType.fade,
+                                    alignment: Alignment.bottomCenter,
+                                    duration: Duration(milliseconds: 300),
+                                    child: otpSent_successfully()));
+                          }, "Continue", cButtoncolor)),
                     ),
                   ],
                 ),
               ),
             ),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Image.asset(
@@ -139,7 +152,13 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                     text: "Terms of Service",
                     recognizer: TapGestureRecognizer()
                       ..onTap = () async {
-
+                        Navigator.push(
+                            context,
+                            PageTransition(
+                                type: PageTransitionType.fade,
+                                alignment: Alignment.bottomCenter,
+                                duration: Duration(milliseconds: 300),
+                                child: TermsofService()));
                       },
                   ),
                 ],

@@ -1,4 +1,5 @@
 import 'package:chatcity/Registration/RegisterwithEmail.dart';
+import 'package:chatcity/Registration/login_Screen.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class _signUp_SelectionState extends State<signUp_Selection> {
     var query = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: cwhite,
+      resizeToAvoidBottomInset:false,
       body: Container(
         height: query.height,
         width: query.width,
@@ -46,8 +48,8 @@ class _signUp_SelectionState extends State<signUp_Selection> {
             ),
             SizedBox(height: 20.sp),
             Container(
-                width: query.width * 0.8,
-                height: query.height * 0.085,
+                width: 90.w,
+                height: 7.5.h,
                 child: basicButton(
                     cwhite, () {
                   Navigator.push(
@@ -60,9 +62,17 @@ class _signUp_SelectionState extends State<signUp_Selection> {
                 }, "Register with Email", cButtoncolor)),
             SizedBox(height: 10.sp),
             Container(
-                width: query.width * 0.8,
-                height: query.height * 0.085,
-                child: basicButton(cwhite, () {}, "Login", cOrange)),
+                width: 90.w,
+                height: 7.5.h,
+                child: basicButton(cwhite, () {
+                  Navigator.push(
+                      context,
+                      PageTransition(
+                          type: PageTransitionType.fade,
+                          alignment: Alignment.bottomCenter,
+                          duration: Duration(milliseconds: 300),
+                          child: login_Screen()));
+                }, "Login", cOrange)),
           ],
         ),
       ),

@@ -31,6 +31,15 @@ dependencies:
   sizer:
   animated_splash_screen:
   page_transition: ^2.0.0
+  otp_text_field: ^1.1.1
+  fluttertoast:
+  image_picker: ^0.6.7+22
+  camera:
+  permission_handler: ^4.3.0
+  http:
+  flutter_datetime_picker:
+  custom_radio_grouped_button: ^1.0.6+1
+  share: ^2.0.4
 dev_dependencies:
   flutter_test:
     sdk: flutter

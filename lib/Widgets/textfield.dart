@@ -50,7 +50,7 @@ class textfield extends StatelessWidget {
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8.0),
               borderSide: BorderSide(
-                color: cChatbackground,
+                color: gray,
                 width: 1.0,
               ),
             ),
