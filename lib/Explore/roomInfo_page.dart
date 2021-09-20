@@ -1,12 +1,21 @@
+import 'dart:convert';
+
 import 'package:chatcity/Explore/userProfile_page.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+import 'package:chatcity/url.dart';
+import 'package:http/http.dart' as http;
 
 class roomInfo_page extends StatefulWidget {
-  const roomInfo_page({Key key}) : super(key: key);
+  var roomId;
+
+  roomInfo_page(this.roomId);
 
   @override
   _roomInfo_pageState createState() => _roomInfo_pageState();
@@ -15,6 +24,55 @@ class roomInfo_page extends StatefulWidget {
 class _roomInfo_pageState extends State<roomInfo_page> {
   bool notification = false;
   int join = 0;
+  List userList = [];
+  final url1 = url.basicUrl;
+
+  var roomdata;
+  bool _isLoading = true;
+  @override
+  void initState() {
+    super.initState();
+    getRoomInfo();
+  }
+
+  Future<void> getRoomInfo() async {
+
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var url = "$url1/showRoomDetails";
+
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+    map["room_id"] = widget.roomId.toString();
+
+    Map<String, String> headers = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    final response = await http.post(url, body: map, headers: headers);
+    final responseJson = json.decode(response.body);
+    print("res showRoomDetails  " + responseJson.toString());
+
+
+    setState(() {
+      userList = responseJson["data"]["users"];
+      roomdata = responseJson["data"];
+      _isLoading = false;
+
+    });
+
+    for(int i=0;i<=userList.length;i++){
+      if(userList[i]["id"].toString()==prefs.getString("userId").toString()){
+        setState(() {
+          join=1;
+        });
+      }else{
+        setState(() {
+          join=0;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +91,33 @@ class _roomInfo_pageState extends State<roomInfo_page> {
           Padding(
             padding: const EdgeInsets.only(right: 15.0, top: 12, bottom: 12),
             child: InkWell(
-              onTap: () {
-                setState(() {
-                  if (join == 1) {
-                    join = 0;
-                  } else {
+              onTap: () async {
+                if (join == 0) {
+                  SharedPreferences prefs =
+                      await SharedPreferences.getInstance();
+
+                  var url = "$url1/joinRoom";
+
+                  var map = new Map<String, dynamic>();
+                  map["userid"] = prefs.getString("userId").toString();
+                  map["room_id"] = widget.roomId.toString();
+                  map["notification"] = notification == true ? "1" : "0";
+
+                  Map<String, String> headers = {
+                    "API-token": prefs.getString("api_token").toString()
+                  };
+
+                  final response =
+                      await http.post(url, body: map, headers: headers);
+                  final responseJson = json.decode(response.body);
+                  print("res joinRoom  " + responseJson.toString());
+                  setState(() {
                     join = 1;
-                  }
-                });
+                  });
+                } else {
+                  //join = 1;
+                  displayToast("Exit room");
+                }
               },
               child: Container(
                 //width: query.width * 0.17,
@@ -65,7 +142,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
           )
         ],
       ),
-      body: Container(
+      body: _isLoading==true ? SpinKitRipple(color: cfooterpurple): Container(
         height: query.height,
         width: query.width,
         color: cwhite,
@@ -75,13 +152,17 @@ class _roomInfo_pageState extends State<roomInfo_page> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               SizedBox(),
-              Image.asset(
-                "Assets/Icons/img5.png",
-                height: 18.h,
-              ),
+              ClipRRect(
+                  borderRadius: BorderRadius.circular(100.0),
+                  child: FadeInImage(
+                      image: NetworkImage(roomdata["image"].toString()),
+                      fit: BoxFit.cover,
+                      width: 90.sp,
+                      height: 90.sp,
+                      placeholder: AssetImage("Assets/Images/giphy.gif"))),
               Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Text("London Boys",
+                child: Text(roomdata["name"].toString(),
                     style: TextStyle(
                         fontFamily: "SFPro",
                         fontWeight: FontWeight.w700,
@@ -167,7 +248,10 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(8.0),
-                            child: Text("Public",
+                            child: Text(
+                                roomdata["type"].toString() == "0"
+                                    ? "Public"
+                                    : "Private",
                                 style: TextStyle(
                                     fontFamily: "SFPro",
                                     fontWeight: FontWeight.w500,
@@ -200,7 +284,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                     child: ListView.builder(
                         physics: AlwaysScrollableScrollPhysics(),
                         shrinkWrap: true,
-                        itemCount: 20,
+                        itemCount: userList.length,
                         itemBuilder: (context, index) {
                           return Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -216,19 +300,29 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                                               alignment: Alignment.bottomCenter,
                                               duration:
                                                   Duration(milliseconds: 300),
-                                              child: userProfile_page()));
+                                              child: userProfile_page(
+                                                  userList[index])));
                                     },
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Image.asset(
-                                        "Assets/Icons/img5.png",
-                                        height: 5.h,
-                                      ),
+                                      child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(100.0),
+                                          child: FadeInImage(
+                                              image: NetworkImage(
+                                                  userList[index]["image"]
+                                                      .toString()),
+                                              fit: BoxFit.cover,
+                                              width: 25.sp,
+                                              height: 25.sp,
+                                              placeholder: AssetImage(
+                                                  "Assets/Images/giphy.gif"))),
                                     ),
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.all(8.0),
-                                    child: Text("Nova",
+                                    child: Text(
+                                        userList[index]["username"].toString(),
                                         style: TextStyle(
                                             fontFamily: "SFPro",
                                             fontWeight: FontWeight.w500,

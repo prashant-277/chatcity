@@ -1,20 +1,61 @@
+import 'dart:convert';
+
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 import 'chat_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:chatcity/url.dart';
 
 class userProfile_page extends StatefulWidget {
-  const userProfile_page({Key key}) : super(key: key);
+  var userList;
+
+  userProfile_page(this.userList);
+
+
 
   @override
   _userProfile_pageState createState() => _userProfile_pageState();
 }
 
 class _userProfile_pageState extends State<userProfile_page> {
+  final url1 = url.basicUrl;
+  String name, image, email,quickboxid = "";
+  @override
+  void initState() {
+    super.initState();
+    getUserDetails();
+  }
+
+  Future<void> getUserDetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var url = "$url1/getUserDetails";
+
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+    map["get_user_id"] = widget.userList["id"].toString();
+
+    Map<String, String> headers = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    final response = await http.post(url, body: map, headers: headers);
+    final responseJson = json.decode(response.body);
+    print("res getUserDetails  " + responseJson.toString());
+    setState(() {
+      name = responseJson["data"]["username"].toString();
+      image = responseJson["data"]["image"].toString();
+      email = responseJson["data"]["email"].toString();
+      quickboxid = responseJson["data"]["quickboxid"].toString();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -36,13 +77,19 @@ class _userProfile_pageState extends State<userProfile_page> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Image.asset(
-                "Assets/Icons/img5.png",
-                height: 18.h,
-              ),
+              ClipRRect(
+                  borderRadius:
+                  BorderRadius.circular(100.0),
+                  child: FadeInImage(
+                      image: NetworkImage(image.toString()),
+                      fit: BoxFit.cover,
+                      width: 90.sp,
+                      height: 90.sp,
+                      placeholder: AssetImage(
+                          "Assets/Images/giphy.gif"))),
               Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Text("London Boys",
+                child: Text(name.toString(),
                     style: TextStyle(
                         fontFamily: "SFPro",
                         fontWeight: FontWeight.w700,
@@ -67,9 +114,8 @@ class _userProfile_pageState extends State<userProfile_page> {
                         width: 7.w,
                       ),
                     ),
-                    Container(
-                      width: 200.sp,
-                      child: Text("prashan@gmail.com",
+                    Expanded(
+                      child: Text(email.toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontWeight: FontWeight.w400,
@@ -97,7 +143,7 @@ class _userProfile_pageState extends State<userProfile_page> {
                             type: PageTransitionType.fade,
                             alignment: Alignment.bottomCenter,
                             duration: Duration(milliseconds: 300),
-                            child: chat_page()));
+                            child: chat_page(quickboxid)));
                   }, "Open private chat", cButtoncolor)),
               SizedBox(height: 2.h),
               Container(

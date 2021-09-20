@@ -2,8 +2,11 @@ import 'package:chatcity/Registration/RegisterwithEmail.dart';
 import 'package:chatcity/Registration/login_Screen.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
+import 'package:chatcity/dashboard_page.dart';
+import 'package:chatcity/test.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 class signUp_Selection extends StatefulWidget {
@@ -15,11 +18,33 @@ class signUp_Selection extends StatefulWidget {
 
 class _signUp_SelectionState extends State<signUp_Selection> {
   @override
+  void initState() {
+    super.initState();
+    checkIsLogin();
+  }
+
+  Future<void> checkIsLogin() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString("api_token") != null) {
+      Navigator.pushReplacement(
+          context,
+          PageTransition(
+              type: PageTransitionType.fade,
+              alignment: Alignment.bottomCenter,
+              duration: Duration(milliseconds: 300),
+              child: dashboard_page()));
+    } else {
+
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
+
     return Scaffold(
       backgroundColor: cwhite,
-      resizeToAvoidBottomInset:false,
+      resizeToAvoidBottomInset: false,
       body: Container(
         height: query.height,
         width: query.width,
@@ -27,7 +52,6 @@ class _signUp_SelectionState extends State<signUp_Selection> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-
             Image.asset(
               "Assets/Images/logo.png",
               height: 130.sp,
@@ -50,8 +74,7 @@ class _signUp_SelectionState extends State<signUp_Selection> {
             Container(
                 width: 90.w,
                 height: 7.5.h,
-                child: basicButton(
-                    cwhite, () {
+                child: basicButton(cwhite, () {
                   Navigator.push(
                       context,
                       PageTransition(

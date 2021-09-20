@@ -1,17 +1,25 @@
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:otp_text_field/otp_text_field.dart';
 import 'package:otp_text_field/style.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:sizer/sizer.dart';
 
 import 'emailRegistration_signUp.dart';
 class confirmAccount extends StatefulWidget {
-  const confirmAccount({Key key}) : super(key: key);
+  var userData;
+
+  confirmAccount(this.userData);
+
+
+
 
   @override
   _confirmAccountState createState() => _confirmAccountState();
@@ -55,7 +63,7 @@ class _confirmAccountState extends State<confirmAccount> {
                     Container(
                         width: query.width * 0.8,
                         child: Text(
-                          "We'll sent an SMS with 4-digit code to 0123456789",
+                          "We'll sent an Email with 4-digit code to "+ widget.userData["data"]["email"].toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontSize: medium,
@@ -99,14 +107,31 @@ class _confirmAccountState extends State<confirmAccount> {
               Container(
                   width: 90.w,
                   height: 7.5.h,
-                  child: basicButton(cwhite, () {
-                    Navigator.push(
-                        context,
-                        PageTransition(
-                            type: PageTransitionType.fade,
-                            alignment: Alignment.bottomCenter,
-                            duration: Duration(milliseconds: 300),
-                            child: emailRegistration_signUp()));
+                  child: basicButton(cwhite, () async {
+                    print(widget.userData.toString());
+                    print(userotp);
+                    if(widget.userData["data"]["otp"].toString() == userotp.toString()){
+                      SharedPreferences prefs = await SharedPreferences.getInstance();
+                      prefs.setString("api_token", widget.userData["data"]["api_token"].toString());
+                      prefs.setString("userEmail", widget.userData["data"]["email"].toString());
+                      prefs.setString("userId", widget.userData["data"]["id"].toString());
+                      prefs.setString("role_id", widget.userData["data"]["role_id"].toString());
+                      prefs.setString("quickboxid", widget.userData["data"]["quickboxid"].toString());
+
+                      Navigator.push(
+                          context,
+                          PageTransition(
+                              type: PageTransitionType.fade,
+                              alignment: Alignment.bottomCenter,
+                              duration: Duration(milliseconds: 300),
+                              child: emailRegistration_signUp()));
+
+                      displayToast(widget.userData["message"].toString());
+
+                    }else{
+                      displayToast("Please enter valid OTP");
+                    }
+
                   }, "Confirm",cButtoncolor)),
               SizedBox(
                 height: 25,

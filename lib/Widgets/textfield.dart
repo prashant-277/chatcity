@@ -37,7 +37,6 @@ class textfield extends StatelessWidget {
         controller: controller,
         textCapitalization: textcapitalization,
         maxLength: textlength,
-
        // inputFormatters: [FilteringTextInputFormatter.deny(new RegExp(r" "))],
         decoration: InputDecoration(
             contentPadding: EdgeInsets.fromLTRB(15.0, 18.0, 15.0, 18.0),
@@ -54,6 +53,8 @@ class textfield extends StatelessWidget {
                 width: 1.0,
               ),
             ),
+            fillColor: cwhite,
+            filled: true,
             hintStyle: TextStyle(
               color: cGray,
               fontFamily: "SFPro",

@@ -68,7 +68,7 @@ class _createRoom_DialogState extends State<createRoom_Dialog> {
                         type: PageTransitionType.fade,
                         alignment: Alignment.bottomCenter,
                         duration: Duration(milliseconds: 300),
-                        child: createPublic_room()));
+                        child: createPublic_room("0")));
               },
               child: Row(
                 children: [
@@ -111,7 +111,7 @@ class _createRoom_DialogState extends State<createRoom_Dialog> {
                         type: PageTransitionType.fade,
                         alignment: Alignment.bottomCenter,
                         duration: Duration(milliseconds: 300),
-                        child: createPrivate_room()));
+                        child: createPrivate_room("1")));
               },
               child: Row(
                 children: [

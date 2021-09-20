@@ -23,6 +23,8 @@ class _forgotPasswordState extends State<forgotPassword> {
     var query = MediaQuery.of(context).size;
     return Scaffold(
         backgroundColor: cwhite,
+        resizeToAvoidBottomInset:false,
+
         appBar: BaseAppBar(
           appBar: AppBar(),
           backgroundColor: cwhite,

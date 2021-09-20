@@ -39,6 +39,8 @@ class _resetPasswordState extends State<resetPassword> {
     var query = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: cwhite,
+      resizeToAvoidBottomInset:false,
+
       appBar: BaseAppBar(
         appBar: AppBar(),
         backgroundColor: cwhite,

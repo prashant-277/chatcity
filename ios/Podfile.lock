@@ -9,7 +9,16 @@ PODS:
     - Flutter
   - permission_handler (4.3.0):
     - Flutter
+  - QuickBlox (2.17.10)
+  - Quickblox-WebRTC (2.7.6):
+    - QuickBlox (>= 2.7)
+  - quickblox_sdk (0.0.1-alpha):
+    - Flutter
+    - QuickBlox (~> 2.17.10)
+    - Quickblox-WebRTC (~> 2.7.6)
   - share (0.0.1):
+    - Flutter
+  - shared_preferences (0.0.1):
     - Flutter
   - Toast (4.0.0)
 
@@ -19,10 +28,14 @@ DEPENDENCIES:
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - permission_handler (from `.symlinks/plugins/permission_handler/ios`)
+  - quickblox_sdk (from `.symlinks/plugins/quickblox_sdk/ios`)
   - share (from `.symlinks/plugins/share/ios`)
+  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
 
 SPEC REPOS:
   trunk:
+    - QuickBlox
+    - Quickblox-WebRTC
     - Toast
 
 EXTERNAL SOURCES:
@@ -36,8 +49,12 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/image_picker/ios"
   permission_handler:
     :path: ".symlinks/plugins/permission_handler/ios"
+  quickblox_sdk:
+    :path: ".symlinks/plugins/quickblox_sdk/ios"
   share:
     :path: ".symlinks/plugins/share/ios"
+  shared_preferences:
+    :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
   camera: 3164201dc344383e62282964016528c4f5a9ad50
@@ -45,9 +62,13 @@ SPEC CHECKSUMS:
   fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
   permission_handler: 5c75cfde1229eb85f22d367c093900fac03c6c9e
+  QuickBlox: 49d85c6e1782993fb2383001301b788a8d7dcad3
+  Quickblox-WebRTC: 162d2421d91cfb3d4f7e01f87e095633ca52bb1d
+  quickblox_sdk: 9ce8b6d99695835a8a3333dc7ac9acd49a44fb13
   share: 0b2c3e82132f5888bccca3351c504d0003b3b410
+  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
 
-PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
+PODFILE CHECKSUM: 30517025a2fecca2d72dac25f08abb5b9a8f1a56
 
 COCOAPODS: 1.10.2

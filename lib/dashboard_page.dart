@@ -2,11 +2,19 @@ import 'package:chatcity/Explore/Explore_page.dart';
 import 'package:chatcity/Request/requestPage.dart';
 import 'package:chatcity/Settings/settings.dart';
 import 'package:chatcity/constants.dart';
+import 'package:chatcity/credentials.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:quickblox_sdk/auth/module.dart';
+import 'package:quickblox_sdk/models/qb_session.dart';
+import 'package:quickblox_sdk/models/qb_user.dart';
+import 'package:quickblox_sdk/quickblox_sdk.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 import 'All Rooms/allRooms_page.dart';
 import 'CreateRooms/createRoom_Dialog.dart';
+import 'data_holder.dart';
 
 class dashboard_page extends StatefulWidget {
   const dashboard_page({Key key}) : super(key: key);
@@ -18,6 +26,55 @@ class dashboard_page extends StatefulWidget {
 class _dashboard_pageState extends State<dashboard_page> {
   int index = 0;
 
+
+  @override
+  void initState() {
+    super.initState();
+    init();
+
+
+  }
+
+  void init() async {
+    try {
+      await QB.settings.init(APP_ID, AUTH_KEY, AUTH_SECRET, ACCOUNT_KEY);
+      login();
+    } on PlatformException catch (e) {
+      // Some error occurred, look at the exception message for more details
+      print(e);
+    }
+  }
+  Future<void> login() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      QBLoginResult result = await QB.auth
+          .login(prefs.getString("userEmail").toString(), USER_PASSWORD);
+
+      QBUser qbUser = result.qbUser;
+      QBSession qbSession = result.qbSession;
+
+      qbSession.applicationId = int.parse(APP_ID);
+
+      DataHolder.getInstance().setSession(qbSession);
+      DataHolder.getInstance().setUser(qbUser);
+
+      print("user id login"+qbUser.id.toString());
+      connect();
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }
+  void connect() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      await QB.chat.connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
+
+      print(int.parse(prefs.getString("quickboxid")));
+    } on PlatformException catch (e) {
+      print(e.message);
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

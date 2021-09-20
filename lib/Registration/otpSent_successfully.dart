@@ -5,13 +5,25 @@ import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:sizer/sizer.dart';
 class otpSent_successfully extends StatefulWidget {
-  const otpSent_successfully({Key key}) : super(key: key);
+  var responseJson;
 
+  otpSent_successfully(this.responseJson);
+
+
+
+//9824067738
+//9824249792
+//
   @override
   _otpSent_successfullyState createState() => _otpSent_successfullyState();
 }
 
 class _otpSent_successfullyState extends State<otpSent_successfully> {
+  @override
+  void initState() {
+    super.initState();
+    print(widget.responseJson.toString());
+  }
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -61,7 +73,7 @@ class _otpSent_successfullyState extends State<otpSent_successfully> {
                           type: PageTransitionType.fade,
                           alignment: Alignment.bottomCenter,
                           duration: Duration(milliseconds: 300),
-                          child: confirmAccount()));
+                          child: confirmAccount(widget.responseJson)));
                 }, "Continue", cButtoncolor)),
 
           ],
