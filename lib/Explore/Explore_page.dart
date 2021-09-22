@@ -10,6 +10,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:http/http.dart' as http;
@@ -196,12 +197,13 @@ class _Explore_pageState extends State<Explore_page> {
                       color: cButtoncolor,
                       onPressed: () {
                         Navigator.push(
-                            context,
-                            PageTransition(
-                                type: PageTransitionType.fade,
-                                alignment: Alignment.bottomCenter,
-                                duration: Duration(milliseconds: 300),
-                                child: filter_page())).then((value) => getAllRooms());
+                                context,
+                                PageTransition(
+                                    type: PageTransitionType.fade,
+                                    alignment: Alignment.bottomCenter,
+                                    duration: Duration(milliseconds: 300),
+                                    child: filter_page()))
+                            .then((value) => getAllRooms());
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -231,14 +233,8 @@ class _Explore_pageState extends State<Explore_page> {
                             return Padding(
                               padding: const EdgeInsets.all(2.0),
                               child: ListTile(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      PageTransition(
-                                          type: PageTransitionType.fade,
-                                          alignment: Alignment.bottomCenter,
-                                          duration: Duration(milliseconds: 300),
-                                          child: chat_page(roomData[index])));
+                                onTap: () async {
+                                  isConnected(roomData[index]);
                                 },
                                 title: Row(
                                   mainAxisAlignment:
@@ -329,6 +325,45 @@ class _Explore_pageState extends State<Explore_page> {
       });
       //displayToast(responseJson["message"].toString());
 
+    }
+  }
+
+  void isConnected(roomData) async {
+    try {
+      bool connected = await QB.chat.isConnected();
+      connected == true ? joinDialog(roomData) : connect(roomData);
+    } on PlatformException catch (e) {
+      print(e.toString());
+    }
+  }
+
+  void joinDialog(roomData) async {
+    try {
+      //await QB.chat.joinDialog(roomData["dialogId"]);
+      Navigator.push(
+          context,
+          PageTransition(
+              type: PageTransitionType.fade,
+              alignment: Alignment.bottomCenter,
+              duration: Duration(milliseconds: 300),
+              child: chat_page(roomData)));
+
+    } on PlatformException catch (e) {
+      print(e);
+
+    }
+  }
+
+  void connect(roomData) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      await QB.chat
+          .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
+      joinDialog(roomData);
+      print("id ---- " + int.parse(prefs.getString("quickboxid")).toString());
+    } on PlatformException catch (e) {
+      print(e.message);
     }
   }
 }

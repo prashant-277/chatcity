@@ -12,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
 import 'package:quickblox_sdk/models/qb_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
@@ -38,7 +37,6 @@ class _createPrivate_roomState extends State<createPrivate_room> {
   File _image1;
   String urlimg1;
   String document_path1;
-  PermissionStatus _status;
   TextEditingController groupname_controller = TextEditingController();
   String _dialogId;
 
@@ -107,7 +105,7 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                                           width:
                                               MediaQuery.of(context).size.width,
                                           child: FlatButton(
-                                            onPressed: _askPermissionD1,
+                                            onPressed: imageSelectorCameraD1,
                                             child: Row(
                                               children: <Widget>[
                                                 Text("Camera"),
@@ -285,29 +283,6 @@ class _createPrivate_roomState extends State<createPrivate_room> {
     );
   }
 
-
-
-  void _askPermissionD1() {
-    PermissionHandler().requestPermissions([PermissionGroup.camera]).then(
-        _onStatusRequestedD1);
-  }
-
-  void _onStatusRequestedD1(Map<PermissionGroup, PermissionStatus> value) {
-    final status = value[PermissionGroup.camera];
-    if (status == PermissionStatus.granted) {
-      imageSelectorCameraD1();
-    } else {
-      _updateStatus(status);
-    }
-  }
-
-  _updateStatus(PermissionStatus value) {
-    if (value != _status) {
-      setState(() {
-        _status = value;
-      });
-    }
-  }
 
   void imageSelectorCameraD1() async {
     Navigator.pop(context);

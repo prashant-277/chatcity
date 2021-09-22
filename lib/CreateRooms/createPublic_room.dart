@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:quickblox_sdk/auth/module.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
 import 'package:quickblox_sdk/models/qb_dialog.dart';
@@ -43,10 +42,10 @@ class _createPublic_roomState extends State<createPublic_room> {
   File _image1;
   String urlimg1;
   String document_path1;
-  PermissionStatus _status;
   TextEditingController groupname_controller = TextEditingController();
   String _dialogId;
   var roomData;
+
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -112,7 +111,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                                           width:
                                               MediaQuery.of(context).size.width,
                                           child: FlatButton(
-                                            onPressed: _askPermissionD1,
+                                            onPressed: imageSelectorCameraD1,
                                             child: Row(
                                               children: <Widget>[
                                                 Text("Camera"),
@@ -211,77 +210,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                       height: 7.5.h,
                       child: basicButton(cwhite, () async {
                         if (_formKey.currentState.validate()) {
-                          SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-
-                          print(prefs.getString("userId").toString());
-                          print(groupname_controller.text.toString());
-                          print(widget.roomType.toString());
-                          print(prefs.getString("api_token").toString());
-
-                          var postUri = Uri.parse("$url1/createRoom");
-                          var request =
-                              new http.MultipartRequest("POST", postUri);
-                          request.fields['userid'] =
-                              prefs.getString("userId").toString();
-                          request.fields['name'] =
-                              groupname_controller.text.toString();
-                          request.fields['type'] = widget.roomType.toString();
-
-                          request.headers["API-token"] =
-                              prefs.getString("api_token").toString();
-
-                          document_path1 != null
-                              ? request.files.add(await MultipartFile.fromPath(
-                                  'image', document_path1))
-                              : request.fields["image"] = "";
-
-                          request.send().then((response) async {
-                            if (response.statusCode == 200) {
-                              print("Uploaded!");
-
-                              print("--------> " +
-                                  response.statusCode.toString());
-
-                              final responseStream =
-                                  await response.stream.bytesToString();
-                              final responseJson = json.decode(responseStream);
-
-                              print("createRoom -- " + responseJson.toString());
-                              if (responseJson["status"].toString() ==
-                                  "success") {
-                                displayToast(
-                                    responseJson["message"].toString());
-
-                                setState(() {
-                                  roomData = responseJson["data"];
-                                });
-
-
-                                isConnected();
-
-                                /*Timer(
-                                    Duration(seconds: 1),
-                                    () => Navigator.pushReplacement(
-                                        context,
-                                        PageTransition(
-                                            type: PageTransitionType.fade,
-                                            alignment: Alignment.bottomCenter,
-                                            duration:
-                                                Duration(milliseconds: 300),
-                                            child: chat_page(responseJson["data"]))));*/
-                              } else {
-                                displayToast(
-                                    responseJson["message"].toString());
-                              }
-                            } else {
-                              final responseStream =
-                                  await response.stream.bytesToString();
-                              final responseJson = json.decode(responseStream);
-
-                              print("Not Uploaded");
-                            }
-                          });
+                          isConnected();
                         } else {
                           //displayToast(responseJson["message"].toString());
                         }
@@ -342,8 +271,8 @@ class _createPublic_roomState extends State<createPublic_room> {
   void createDialog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<int> occupantsIds = new List<int>.from([130739631]);
-    String dialogName = "FLUTTER_CHAT_" + DateTime.now().millisecond.toString();
+    List<int> occupantsIds = new List<int>.from([]);
+    String dialogName = "Public Room " + DateTime.now().millisecond.toString();
 
     int dialogType = QBChatDialogTypes.PUBLIC_CHAT;
 
@@ -354,41 +283,15 @@ class _createPublic_roomState extends State<createPublic_room> {
       if (createdDialog != null) {
         _dialogId = createdDialog.id;
         prefs.setString("_dialogId", _dialogId);
-        Navigator.pushReplacement(
-                context,
-                PageTransition(
-                    type: PageTransitionType.fade,
-                    alignment: Alignment.bottomCenter,
-                    duration: Duration(milliseconds: 300),
-                    child: chat_page(roomData)));
+
+        createRoom();
+
         print("Dialog id" + _dialogId);
       } else {
         print("Else");
       }
     } on PlatformException catch (e) {
       print(e);
-    }
-  }
-
-  void _askPermissionD1() {
-    PermissionHandler().requestPermissions([PermissionGroup.camera]).then(
-        _onStatusRequestedD1);
-  }
-
-  void _onStatusRequestedD1(Map<PermissionGroup, PermissionStatus> value) {
-    final status = value[PermissionGroup.camera];
-    if (status == PermissionStatus.granted) {
-      imageSelectorCameraD1();
-    } else {
-      _updateStatus(status);
-    }
-  }
-
-  _updateStatus(PermissionStatus value) {
-    if (value != _status) {
-      setState(() {
-        _status = value;
-      });
     }
   }
 
@@ -427,6 +330,59 @@ class _createPublic_roomState extends State<createPublic_room> {
     }
     setState(() {
       _image1 = imageFile1;
+    });
+  }
+
+  Future<void> createRoom() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var postUri = Uri.parse("$url1/createRoom");
+    var request = new http.MultipartRequest("POST", postUri);
+    request.fields['userid'] = prefs.getString("userId").toString();
+    request.fields['name'] = groupname_controller.text.toString();
+    request.fields['type'] = widget.roomType.toString();
+    request.fields['dialogId'] = _dialogId.toString();
+
+    request.headers["API-token"] = prefs.getString("api_token").toString();
+
+    document_path1 != null
+        ? request.files
+            .add(await MultipartFile.fromPath('image', document_path1))
+        : request.fields["image"] = "";
+
+    request.send().then((response) async {
+      if (response.statusCode == 200) {
+        print("Uploaded!");
+
+        print("--------> " + response.statusCode.toString());
+
+        final responseStream = await response.stream.bytesToString();
+        final responseJson = json.decode(responseStream);
+
+        print("createRoom -- " + responseJson.toString());
+        if (responseJson["status"].toString() == "success") {
+          displayToast(responseJson["message"].toString());
+
+          setState(() {
+            roomData = responseJson["data"];
+          });
+
+          Navigator.pushReplacement(
+              context,
+              PageTransition(
+                  type: PageTransitionType.fade,
+                  alignment: Alignment.bottomCenter,
+                  duration: Duration(milliseconds: 300),
+                  child: chat_page(roomData)));
+        } else {
+          displayToast(responseJson["message"].toString());
+        }
+      } else {
+        final responseStream = await response.stream.bytesToString();
+        final responseJson = json.decode(responseStream);
+
+        print("Not Uploaded");
+      }
     });
   }
 }

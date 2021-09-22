@@ -238,7 +238,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<int> occupantsIds = new List<int>.from(oopID);
-    String dialogName = "FLUTTER_CHAT_" + DateTime.now().millisecond.toString();
+    String dialogName = "Private Room" + DateTime.now().millisecond.toString();
 
 
     int dialogType = QBChatDialogTypes.GROUP_CHAT;
@@ -251,6 +251,8 @@ class _friend_invitePageState extends State<friend_invitePage> {
       if (createdDialog != null) {
         _dialogId = createdDialog.id;
         prefs.setString("_dialogId", _dialogId);
+
+
         Navigator.push(
             context,
             PageTransition(

@@ -191,7 +191,8 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
 
   Future<bool> isRegistered(String email) async {
     bool isValid = false;
-
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
     var url = "$url1/verifyEmail";
     var map = new Map<String, dynamic>();
     map["email"] = email.toString();
@@ -206,9 +207,10 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
         isValid = true;
         createUser(email.toString());
         print("fail ---- " + responseJson("message").toString());
-
+        pr.hide();
       } else {
         displayToast("The email has already been taken.");
+        pr.hide();
         print("not fail ---- " + responseJson("message").toString());
 
       }

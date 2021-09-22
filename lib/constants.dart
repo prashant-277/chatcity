@@ -34,7 +34,7 @@ const String CHAT_ENDPOINT = "";
 const String JANUS_SERVER_URL = "";
 
 const String USER_LOGIN = "prashant";
-const int LOGGED_USER_ID = 130614547;
+const int LOGGED_USER_ID = 130739939;
 const int OPPONENT_ID = 130614351;
 
 const List<int> OPPONENTS_IDS = [OPPONENT_ID];

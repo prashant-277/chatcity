@@ -17,7 +17,6 @@ import 'package:page_transition/page_transition.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:http/http.dart' as http;
 import 'package:chatcity/url.dart';
 
@@ -34,7 +33,6 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
   File _image1;
   String urlimg1;
   String document_path1;
-  PermissionStatus _status;
   final url1 = url.basicUrl;
   TextEditingController username_controller = TextEditingController();
   TextEditingController phonenum_controller = TextEditingController();
@@ -50,14 +48,6 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
     setState(() {});
   }
 
-  @override
-  void initState() {
-    super.initState();
-
-    PermissionHandler()
-        .checkPermissionStatus(PermissionGroup.camera)
-        .then(_updateStatus);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +200,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
                                                       .size
                                                       .width,
                                                   child: FlatButton(
-                                                    onPressed: _askPermissionD1,
+                                                    onPressed: imageSelectorCameraD1,
                                                     child: Row(
                                                       children: <Widget>[
                                                         Text("Camera"),
@@ -496,27 +486,6 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
     );
   }
 
-  void _askPermissionD1() {
-    PermissionHandler().requestPermissions([PermissionGroup.camera]).then(
-        _onStatusRequestedD1);
-  }
-
-  void _onStatusRequestedD1(Map<PermissionGroup, PermissionStatus> value) {
-    final status = value[PermissionGroup.camera];
-    if (status == PermissionStatus.granted) {
-      imageSelectorCameraD1();
-    } else {
-      _updateStatus(status);
-    }
-  }
-
-  _updateStatus(PermissionStatus value) {
-    if (value != _status) {
-      setState(() {
-        _status = value;
-      });
-    }
-  }
 
   void imageSelectorCameraD1() async {
     Navigator.pop(context);

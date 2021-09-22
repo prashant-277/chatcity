@@ -35,7 +35,6 @@ dependencies:
   fluttertoast:
   image_picker: ^0.6.7+22
   camera:
-  permission_handler: ^4.3.0
   http:
   flutter_datetime_picker:
   custom_radio_grouped_button: ^1.0.6+1
