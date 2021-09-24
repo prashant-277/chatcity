@@ -13,6 +13,7 @@ import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/auth/module.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
 import 'package:quickblox_sdk/models/qb_dialog.dart';
@@ -96,7 +97,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                                         fit: BoxFit.fill),
                               ),
                             ),
-                      iconSize: 100.sp,
+                      iconSize: 80.sp,
                       onPressed: () {
                         showDialog(
                             context: context,
@@ -210,7 +211,10 @@ class _createPublic_roomState extends State<createPublic_room> {
                       height: 7.5.h,
                       child: basicButton(cwhite, () async {
                         if (_formKey.currentState.validate()) {
+                          final ProgressDialog pr = _getProgress(context);
+                          pr.show();
                           isConnected();
+                          //login();
                         } else {
                           //displayToast(responseJson["message"].toString());
                         }
@@ -264,15 +268,16 @@ class _createPublic_roomState extends State<createPublic_room> {
       print(int.parse(prefs.getString("quickboxid")));
       createDialog();
     } on PlatformException catch (e) {
-      print(e.message);
+      print("disconnect " + e.toString());
     }
   }
 
   void createDialog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    List<int> occupantsIds = new List<int>.from([]);
-    String dialogName = "Public Room " + DateTime.now().millisecond.toString();
+
+    List<int> occupantsIds = new List<int>.from(Platform.isAndroid ? [int.parse(prefs.getString("quickboxid"))]:[]);
+    String dialogName = groupname_controller.text.toString();
 
     int dialogType = QBChatDialogTypes.PUBLIC_CHAT;
 
@@ -291,7 +296,8 @@ class _createPublic_roomState extends State<createPublic_room> {
         print("Else");
       }
     } on PlatformException catch (e) {
-      print(e);
+      print("not create " + e.toString());
+
     }
   }
 
@@ -335,13 +341,15 @@ class _createPublic_roomState extends State<createPublic_room> {
 
   Future<void> createRoom() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
     var postUri = Uri.parse("$url1/createRoom");
     var request = new http.MultipartRequest("POST", postUri);
     request.fields['userid'] = prefs.getString("userId").toString();
     request.fields['name'] = groupname_controller.text.toString();
     request.fields['type'] = widget.roomType.toString();
     request.fields['dialogId'] = _dialogId.toString();
+    request.fields['occupantsId'] = "";
 
     request.headers["API-token"] = prefs.getString("api_token").toString();
 
@@ -366,7 +374,7 @@ class _createPublic_roomState extends State<createPublic_room> {
           setState(() {
             roomData = responseJson["data"];
           });
-
+          pr.hide();
           Navigator.pushReplacement(
               context,
               PageTransition(
@@ -375,6 +383,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                   duration: Duration(milliseconds: 300),
                   child: chat_page(roomData)));
         } else {
+          pr.hide();
           displayToast(responseJson["message"].toString());
         }
       } else {
@@ -385,4 +394,8 @@ class _createPublic_roomState extends State<createPublic_room> {
       }
     });
   }
+}
+
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context);
 }

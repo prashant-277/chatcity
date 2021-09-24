@@ -58,7 +58,7 @@ class _dashboard_pageState extends State<dashboard_page> {
       DataHolder.getInstance().setSession(qbSession);
       DataHolder.getInstance().setUser(qbUser);
 
-      print("user id login"+qbUser.id.toString());
+      print("user id login "+ qbUser.id.toString());
       connect();
     } on PlatformException catch (e) {
       print(e);
@@ -70,9 +70,10 @@ class _dashboard_pageState extends State<dashboard_page> {
     try {
       await QB.chat.connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
 
-      print(int.parse(prefs.getString("quickboxid")));
+      print("+++++ " + int.parse(prefs.getString("quickboxid")).toString());
+
     } on PlatformException catch (e) {
-      print(e.message);
+      print("=== "  + e.toString());
     }
   }
   @override

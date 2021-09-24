@@ -23,9 +23,7 @@ import 'friend_invitePage.dart';
 import 'package:http/http.dart' as http;
 
 class createPrivate_room extends StatefulWidget {
-  var roomType;
 
-  createPrivate_room(this.roomType);
 
   @override
   _createPrivate_roomState createState() => _createPrivate_roomState();
@@ -67,7 +65,7 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
-                    height: query.height / 6,
+                    height: 110.sp,
                     child: IconButton(
                       hoverColor: Colors.transparent,
                       splashColor: Colors.transparent,
@@ -85,8 +83,8 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                                         fit: BoxFit.fill,
                                       )
                                     : Image.file(_image1,
-                                        height: query.height / 1,
-                                        width: query.width / 1,
+                                        height: 100.sp,
+
                                         fit: BoxFit.fill),
                               ),
                             ),
@@ -205,12 +203,18 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                       child: basicButton(cwhite, () async {
                         if (_formKey.currentState.validate()) {
 
-                          SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
+                          Navigator.pushReplacement(context,
+                              PageTransition(
+                                  type: PageTransitionType.fade,
+                                  alignment: Alignment.bottomCenter,
+                                  duration: Duration(milliseconds: 300),
+                                  child: friend_invitePage(groupname_controller.text.toString(),document_path1)));
+
+/*                          SharedPreferences prefs = await SharedPreferences.getInstance();
 
                           print(prefs.getString("userId").toString());
                           print(groupname_controller.text.toString());
-                          print(widget.roomType.toString());
+
                           print(prefs.getString("api_token").toString());
 
                           var postUri = Uri.parse("$url1/createRoom");
@@ -220,7 +224,6 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                               prefs.getString("userId").toString();
                           request.fields['name'] =
                               groupname_controller.text.toString();
-                          request.fields['type'] = widget.roomType.toString();
 
                           request.headers["API-token"] =
                               prefs.getString("api_token").toString();
@@ -269,11 +272,13 @@ class _createPrivate_roomState extends State<createPrivate_room> {
 
                               print("Not Uploaded");
                             }
-                          });
+                          });*/
                         } else {
                           //displayToast(responseJson["message"].toString());
                         }
-                      }, "Next", cButtoncolor)),
+                      },
+
+                          "Next", cButtoncolor)),
                 ],
               ),
             ),

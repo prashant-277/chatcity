@@ -62,7 +62,7 @@ class _createRoom_DialogState extends State<createRoom_Dialog> {
               ),
 
               onPressed: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                     context,
                     PageTransition(
                         type: PageTransitionType.fade,
@@ -105,13 +105,13 @@ class _createRoom_DialogState extends State<createRoom_Dialog> {
 
               ),
               onPressed: () {
-                Navigator.push(
+                Navigator.pushReplacement(
                     context,
                     PageTransition(
                         type: PageTransitionType.fade,
                         alignment: Alignment.bottomCenter,
                         duration: Duration(milliseconds: 300),
-                        child: createPrivate_room("1")));
+                        child: createPrivate_room()));
               },
               child: Row(
                 children: [

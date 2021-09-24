@@ -33,6 +33,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
   void initState() {
     super.initState();
     getRoomInfo();
+
   }
 
   Future<void> getRoomInfo() async {

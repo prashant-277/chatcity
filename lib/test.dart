@@ -88,21 +88,21 @@ class _testPageState extends State<testPage> {
   void connect() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      await QB.chat.connect(130702381, USER_PASSWORD);
+      await QB.chat.connect(130787759, USER_PASSWORD);
     } on PlatformException catch (e) {
       print(e);
     }
   }
 
   void createDialog() async {
-    List<int> occupantsIds = List.from([130702275,130702381]);
-    String dialogName = "FLUTTER_CHAT_" + DateTime
+    List<int> occupantsIds = List.from([130787759]);
+    String dialogName = "Test" + DateTime
         .now()
         .millisecond
         .toString();
     String dialogPhoto = "some photo url";
 
-    int dialogType = QBChatDialogTypes.GROUP_CHAT;
+    int dialogType = QBChatDialogTypes.PUBLIC_CHAT;
 
     try {
       QBDialog createdDialog = await QB.chat.createDialog(
@@ -120,7 +120,7 @@ class _testPageState extends State<testPage> {
 
   void sendMessage() async {
     String messageBody =
-        "Hello from flutter prashant" + "\n From user: " + LOGGED_USER_ID.toString();
+        "Hello from flutter prashant" + "\n From user: ";
 
     try {
       Map<String, String> properties = Map();

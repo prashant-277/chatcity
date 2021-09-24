@@ -31,7 +31,7 @@ class _chat_pageState extends State<chat_page> {
 
   List message = [];
   String chatmessage = "";
-  String _messageId , userId;
+  String userId,_messageId;
 
   @override
   void initState() {
@@ -45,6 +45,7 @@ class _chat_pageState extends State<chat_page> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getString("quickboxid").toString();
+
     });
   }
 
@@ -58,10 +59,12 @@ class _chat_pageState extends State<chat_page> {
           .getDialogMessages(widget.roomData["dialogId"].toString());
       int countMessages = messages.length;
 
-      // if (countMessages > 0) {
-      //   _messageId = messages[0].id;
-      //}
-      print(messages[3].body);
+      if (countMessages > 0) {
+        _messageId = messages[0].id;
+        print("_messageId " + _messageId);
+      }
+      print(messages[0].body);
+      print("_messageId " + countMessages.toString());
       return messages;
     } on PlatformException catch (e) {}
   }
@@ -122,7 +125,6 @@ class _chat_pageState extends State<chat_page> {
               builder: (context, snapshot) {
                 if(snapshot.hasData){
                   WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-
                   return ListView.builder(
                     controller: _scrollController,
                     itemCount:snapshot.data.length,
@@ -132,23 +134,23 @@ class _chat_pageState extends State<chat_page> {
                         padding:
                         EdgeInsets.only(left: 14, right: 14, top: 10, bottom: 10),
                         child: Align(
-                          alignment: (snapshot.data[index].senderId.toString() == userId
+                          alignment: (snapshot.data[index].senderId.toString() == userId.toString()
                               ? Alignment.topRight
                               : Alignment.topLeft),
                           child: Container(
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(20),
 
-                              gradient: snapshot.data[index].senderId.toString() == userId
+                              gradient: snapshot.data[index].senderId.toString() == userId.toString()
                                   ? LinearGradient(
                                   colors: [Color(0xff382177), Color(0xff9760A4)])
-                                  : LinearGradient(colors: [cfooterGray, cfooterGray]),
+                                  : LinearGradient(colors: [gray, gray]),
 
                             ),
                             padding: EdgeInsets.all(15),
                             child: Text(
                                 snapshot.data[index].body.toString(),
-                              style: TextStyle(color: Colors.white),
+                              style: TextStyle(color: snapshot.data[index].senderId.toString() == userId.toString() ? cwhite :cBlack),
                             ),
                           ),
                         ),
@@ -229,6 +231,7 @@ class _chat_pageState extends State<chat_page> {
                       print(message);
                       chat_controller.clear();
                     });*/
+
 
                     isConnected();
                   },

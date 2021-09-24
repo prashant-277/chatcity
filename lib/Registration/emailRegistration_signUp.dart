@@ -296,6 +296,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
                         textcapitalization: TextCapitalization.words,
                         functionValidate: commonValidation,
                         suffixIcon: null,
+                        textlength: 10,
                         prefixIcon: new IconButton(
                           icon: new Image.asset(
                             'Assets/Icons/phone.png',

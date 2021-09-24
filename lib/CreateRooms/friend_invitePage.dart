@@ -1,12 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:chatcity/Explore/chat_page.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:http/http.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/auth/module.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
 import 'package:quickblox_sdk/models/qb_dialog.dart';
@@ -21,9 +25,14 @@ import 'package:http/http.dart' as http;
 import '../data_holder.dart';
 
 class friend_invitePage extends StatefulWidget {
-  var roomData;
+  var groupImage;
+  var groupName;
 
-  friend_invitePage(this.roomData);
+  friend_invitePage(this.groupName, this.groupImage);
+
+  /*var roomData;
+
+  friend_invitePage(this.roomData);*/
 
   @override
   _friend_invitePageState createState() => _friend_invitePageState();
@@ -33,6 +42,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
   List select = [];
   List oopID = [];
   List userList = [];
+  List roomData = [];
   final url1 = url.basicUrl;
   String _dialogId;
   bool _isLoading = true;
@@ -67,16 +77,18 @@ class _friend_invitePageState extends State<friend_invitePage> {
 
   @override
   Widget build(BuildContext context) {
-    var query = MediaQuery
-        .of(context)
-        .size;
+    var query = MediaQuery.of(context).size;
     return Scaffold(
         backgroundColor: cwhite,
         floatingActionButton: FloatingActionButton(
           child: Image.asset("Assets/Icons/create1.png"),
           elevation: 0,
           onPressed: () {
-            login();
+            //login();
+            final ProgressDialog pr = _getProgress(context);
+            pr.show();
+            isConnected();
+
           },
         ),
         appBar: commanAppBar(
@@ -126,71 +138,72 @@ class _friend_invitePageState extends State<friend_invitePage> {
             child: _isLoading == true
                 ? SpinKitRipple(color: cfooterpurple)
                 : Container(
-              height: query.height,
-              width: query.width,
-              color: cwhite,
-              child: ListView.builder(
-                physics: AlwaysScrollableScrollPhysics(),
-                itemCount: userList.length,
-                itemBuilder: (context, index) {
-                  return ListTile(
-                    //selectedTileColor: Color(0xFFD1C4E9),
-                    contentPadding: EdgeInsets.zero,
-                    onTap: () {
-                      setState(() {
-                        if (select.contains(index)) {
-                          select.remove(index);
-                          oopID.remove(int.parse(
-                              userList[index]["quickboxid"].toString()));
-                        } else {
-                          select.add(index);
-                          oopID.add(int.parse(
-                              userList[index]["quickboxid"].toString()));
-                        }
-                        print(oopID);
-                      });
-                    },
-                    title: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 20.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(userList[index]["username"].toString(),
-                              style: TextStyle(
-                                fontFamily: "SFPro",
-                                fontSize: medium,
-                                color: cBlack,
-                                fontWeight: FontWeight.w400,
-                              )),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 20.0),
-                            child: select.contains(index)
-                                ? Image.asset("Assets/Icons/selected.png",
-                                width: 16.sp)
-                                : Container(),
-                          )
-                        ],
-                      ),
+                    height: query.height,
+                    width: query.width,
+                    color: cwhite,
+                    child: ListView.builder(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      itemCount: userList.length,
+                      itemBuilder: (context, index) {
+                        return ListTile(
+                          //selectedTileColor: Color(0xFFD1C4E9),
+                          contentPadding: EdgeInsets.zero,
+                          onTap: () {
+                            setState(() {
+                              if (select.contains(index)) {
+                                select.remove(index);
+                                oopID.remove(int.parse(
+                                    userList[index]["quickboxid"].toString()));
+                              } else {
+                                select.add(index);
+                                oopID.add(int.parse(
+                                    userList[index]["quickboxid"].toString()));
+                              }
+                              print(oopID);
+                            });
+                          },
+                          title: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 20.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(userList[index]["username"].toString(),
+                                    style: TextStyle(
+                                      fontFamily: "SFPro",
+                                      fontSize: medium,
+                                      color: cBlack,
+                                      fontWeight: FontWeight.w400,
+                                    )),
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 20.0),
+                                  child: select.contains(index)
+                                      ? Image.asset("Assets/Icons/selected.png",
+                                          width: 16.sp)
+                                      : Container(),
+                                )
+                              ],
+                            ),
+                          ),
+                          leading: Padding(
+                              padding: const EdgeInsets.only(left: 30.0),
+                              child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(100.0),
+                                  child: FadeInImage(
+                                      image: NetworkImage(
+                                          userList[index]["image"].toString()),
+                                      fit: BoxFit.cover,
+                                      width: 30.sp,
+                                      height: 30.sp,
+                                      placeholder: AssetImage(
+                                          "Assets/Images/giphy.gif")))),
+                        );
+                      },
                     ),
-                    leading: Padding(
-                        padding: const EdgeInsets.only(left: 30.0),
-                        child: ClipRRect(
-                            borderRadius: BorderRadius.circular(100.0),
-                            child: FadeInImage(
-                                image: NetworkImage(
-                                    userList[index]["image"].toString()),
-                                fit: BoxFit.cover,
-                                width: 30.sp,
-                                height: 30.sp,
-                                placeholder: AssetImage(
-                                    "Assets/Images/giphy.gif")))),
-                  );
-                },
-              ),
-            ),
+                  ),
           ),
         ));
   }
+
   Future<void> login() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
@@ -205,7 +218,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
       DataHolder.getInstance().setSession(qbSession);
       DataHolder.getInstance().setUser(qbUser);
 
-      print("user id login"+qbUser.id.toString());
+      print("user id login" + qbUser.id.toString());
       isConnected();
     } on PlatformException catch (e) {
       print(e);
@@ -215,17 +228,18 @@ class _friend_invitePageState extends State<friend_invitePage> {
   void isConnected() async {
     try {
       bool connected = await QB.chat.isConnected();
-      connected==true? createDialog():connect();
-
+      connected == true ? createDialog() : connect();
     } on PlatformException catch (e) {
       print("false");
     }
   }
+
   void connect() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
-      await QB.chat.connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
+      await QB.chat
+          .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
 
       print(int.parse(prefs.getString("quickboxid")));
       createDialog();
@@ -240,34 +254,100 @@ class _friend_invitePageState extends State<friend_invitePage> {
     List<int> occupantsIds = new List<int>.from(oopID);
     String dialogName = "Private Room" + DateTime.now().millisecond.toString();
 
-
     int dialogType = QBChatDialogTypes.GROUP_CHAT;
 
     try {
-      QBDialog createdDialog = await QB.chat.createDialog(
-          occupantsIds, dialogName,
-          dialogType: dialogType);
+      QBDialog createdDialog = await QB.chat
+          .createDialog(occupantsIds, dialogName, dialogType: dialogType);
 
       if (createdDialog != null) {
         _dialogId = createdDialog.id;
         prefs.setString("_dialogId", _dialogId);
 
-
-        Navigator.push(
+        createPrivateRoom(_dialogId);
+        /*Navigator.push(
             context,
             PageTransition(
                 type: PageTransitionType.fade,
                 alignment: Alignment.bottomCenter,
                 duration: Duration(milliseconds: 300),
-                child: chat_page(widget.roomData)));
-        print("Dialog id"+_dialogId);
-      }else{
+                child: chat_page(widget.roomData)));*/
+        print("Dialog id" + _dialogId);
+      } else {
         print("Else");
       }
-
     } on PlatformException catch (e) {
       print(e);
     }
   }
 
+  Future<void> createPrivateRoom(String dialogId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
+    print(prefs.getString("userId").toString());
+    print(widget.groupName.toString());
+    print(_dialogId.toString());
+    print(oopID.toString());
+    print(widget.groupImage.toString());
+
+    var postUri = Uri.parse("$url1/createRoom");
+    var request = new http.MultipartRequest("POST", postUri);
+    request.fields['userid'] = prefs.getString("userId").toString();
+    request.fields['name'] = widget.groupName.toString();
+    request.fields['type'] = "1";
+    request.fields['dialogId'] = _dialogId.toString();
+    request.fields['occupantsId'] = oopID.toString();
+
+
+    request.headers["API-token"] = prefs.getString("api_token").toString();
+
+    widget.groupImage != null
+        ? request.files
+            .add(await MultipartFile.fromPath('image', widget.groupImage))
+        : request.fields["image"] = "";
+
+    request.send().then((response) async {
+      if (response.statusCode == 200) {
+        print("Uploaded!");
+
+        print("--------> " + response.statusCode.toString());
+
+        final responseStream = await response.stream.bytesToString();
+        final responseJson = json.decode(responseStream);
+
+        print("createRoom -- " + responseJson.toString());
+        if (responseJson["status"].toString() == "success") {
+          displayToast(responseJson["message"].toString());
+
+          setState(() {
+            roomData = responseJson["data"];
+          });
+
+          pr.hide();
+          Timer(
+              Duration(seconds: 1),
+              () => Navigator.pushReplacement(
+                  context,
+                  PageTransition(
+                      type: PageTransitionType.fade,
+                      alignment: Alignment.bottomCenter,
+                      duration: Duration(milliseconds: 300),
+                      child: chat_page(roomData))));
+        } else {
+          pr.hide();
+          displayToast(responseJson["message"].toString());
+        }
+      } else {
+        final responseStream = await response.stream.bytesToString();
+        final responseJson = json.decode(responseStream);
+
+        print("Not Uploaded");
+      }
+    });
+  }
+}
+
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context);
 }

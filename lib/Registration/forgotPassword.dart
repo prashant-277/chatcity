@@ -1,12 +1,17 @@
+import 'dart:convert';
+
 import 'package:chatcity/Registration/emailSent_Successfully.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/textfield.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
-
+import 'package:progress_dialog/progress_dialog.dart';
+import 'package:http/http.dart' as http;
 import '../constants.dart';
 import 'package:sizer/sizer.dart';
+import 'package:chatcity/url.dart';
 
 class forgotPassword extends StatefulWidget {
   @override
@@ -14,17 +19,16 @@ class forgotPassword extends StatefulWidget {
 }
 
 class _forgotPasswordState extends State<forgotPassword> {
-
   final _formKey = GlobalKey<FormState>();
   TextEditingController email_controller = TextEditingController();
+  final url1 = url.basicUrl;
 
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
     return Scaffold(
         backgroundColor: cwhite,
-        resizeToAvoidBottomInset:false,
-
+        resizeToAvoidBottomInset: false,
         appBar: BaseAppBar(
           appBar: AppBar(),
           backgroundColor: cwhite,
@@ -74,26 +78,54 @@ class _forgotPasswordState extends State<forgotPassword> {
                       ),
                       parametersValidate: "Please enter Email",
                       textInputType: TextInputType.emailAddress,
-
+                      textcapitalization: TextCapitalization.none,
                     ),
                   ),
                   Container(
                       width: 90.w,
                       height: 7.5.h,
-                      child: basicButton(cwhite, () {
-                          Navigator.push(
-                              context,
-                              PageTransition(
-                                  type: PageTransitionType.fade,
-                                  alignment: Alignment.bottomCenter,
-                                  duration: Duration(milliseconds: 300),
-                                  child: emailSent_Successfully()));
+                      child: basicButton(cwhite, () async {
+                        if (_formKey.currentState.validate()) {
+                          final ProgressDialog pr = _getProgress(context);
+                          pr.show();
+                          var url = "$url1/password/remind";
 
-                      }, "Send",cButtoncolor)),
+                          var map = new Map<String, dynamic>();
+                          map["email"] = email_controller.text.toString();
+
+                          final response = await http.post(url, body: map);
+
+                          final responseJson = json.decode(response.body);
+                          print(
+                              "registerWithMail-- " + responseJson.toString());
+
+                          if (responseJson["status"].toString() == "fail") {
+                            displayToast(responseJson["message"].toString());
+                            pr.hide();
+
+                          } else {
+
+                            displayToast(responseJson["message"].toString());
+
+                            pr.hide();
+                            Navigator.pushReplacement(
+                                context,
+                                PageTransition(
+                                    type: PageTransitionType.fade,
+                                    alignment: Alignment.bottomCenter,
+                                    duration: Duration(milliseconds: 300),
+                                    child: emailSent_Successfully()));
+                          }
+                        } else {}
+                      }, "Send", cButtoncolor)),
                 ],
               ),
             ),
           ),
         ));
   }
+}
+
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context);
 }
