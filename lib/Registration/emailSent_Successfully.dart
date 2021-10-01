@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chatcity/Registration/login_Screen.dart';
 import 'package:chatcity/Registration/resetPassword.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
@@ -106,7 +107,7 @@ class _emailSent_SuccessfullyState extends State<emailSent_Successfully> {
                             type: PageTransitionType.fade,
                             alignment: Alignment.bottomCenter,
                             duration: Duration(milliseconds: 300),
-                            child: resetPassword()));
+                            child: login_Screen()));
                   }, "Continue", cButtoncolor)),
 
             ],

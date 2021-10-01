@@ -2,9 +2,12 @@ import 'dart:convert';
 
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
@@ -18,14 +21,18 @@ class userProfile_page extends StatefulWidget {
   userProfile_page(this.userList);
 
 
-
   @override
   _userProfile_pageState createState() => _userProfile_pageState();
 }
 
 class _userProfile_pageState extends State<userProfile_page> {
   final url1 = url.basicUrl;
-  String name, image, email,quickboxid = "";
+  String name,
+      image,
+      email,
+      quickboxid = "";
+  bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
@@ -53,12 +60,15 @@ class _userProfile_pageState extends State<userProfile_page> {
       image = responseJson["data"]["image"].toString();
       email = responseJson["data"]["email"].toString();
       quickboxid = responseJson["data"]["quickboxid"].toString();
+      _isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    var query = MediaQuery.of(context).size;
+    var query = MediaQuery
+        .of(context)
+        .size;
     return Scaffold(
       appBar: commanAppBar(
         appBar: AppBar(),
@@ -69,7 +79,9 @@ class _userProfile_pageState extends State<userProfile_page> {
         groupImage: Container(),
         imageIcon: Container(),
       ),
-      body: Container(
+      body: _isLoading == true
+          ? SpinKitRipple(color: cfooterpurple)
+          : Container(
         height: query.height,
         width: query.width,
         child: Padding(
@@ -130,7 +142,9 @@ class _userProfile_pageState extends State<userProfile_page> {
                   width: 90.w,
                   height: 7.5.h,
                   child:
-                      basicButton(cwhite, () async {}, "+ Add friend", cgreen)),
+                  basicButton(cwhite, () async {
+                    addfriend();
+                  }, "+ Add friend", cgreen)),
               SizedBox(height: 2.h),
               Container(
                   width: 90.w,
@@ -156,4 +170,32 @@ class _userProfile_pageState extends State<userProfile_page> {
       ),
     );
   }
+
+  Future<void> addfriend() async {
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
+
+    SharedPreferences prefs =
+        await SharedPreferences.getInstance();
+    var url = "$url1/addRemoveFriends";
+
+    var map = new Map<String, dynamic>();
+    map["login_id"] = prefs.getString("userId").toString();
+    map["join_user"] =widget.userList["id"].toString();
+    map["join_status"] ="1";
+
+    final response = await http.post(url, body: map);
+
+    final responseJson = json.decode(response.body);
+    print("login-- " +
+        responseJson.toString());
+
+    if (responseJson["status"].toString() == "success") {
+      displayToast("Add friend successfully");
+      pr.hide();
+    }
+  }
 }
+  ProgressDialog _getProgress(BuildContext context) {
+    return ProgressDialog(context);
+  }

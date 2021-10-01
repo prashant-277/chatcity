@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:chatcity/Registration/login_Screen.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/textfield.dart';
@@ -7,6 +8,8 @@ import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:chatcity/constants.dart';
+import 'package:flutter/services.dart';
+import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:chatcity/url.dart';
@@ -214,6 +217,15 @@ class _changePasswordState extends State<changePassword> {
 
                           if (responseJson["status"].toString() == "success") {
                             displayToast(responseJson["message"].toString());
+                            logout();
+
+                            prefs.remove("api_token");
+                            // prefs.setString("api_token", "");
+                            Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (context) => login_Screen()));
+
                           }else{
                             displayToast(responseJson["message"].toString());
 
@@ -229,5 +241,10 @@ class _changePasswordState extends State<changePassword> {
         ),
       ),
     );
+  }
+  Future<void> logout() async {
+    try {
+      await QB.auth.logout();
+    } on PlatformException catch (e) {}
   }
 }

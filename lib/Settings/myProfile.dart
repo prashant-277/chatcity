@@ -1,10 +1,16 @@
+import 'dart:convert';
+
 import 'package:chatcity/Settings/edit_Profile.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
+import 'package:chatcity/url.dart';
+import 'package:http/http.dart' as http;
 
 class myProfile extends StatefulWidget {
   const myProfile({Key key}) : super(key: key);
@@ -14,10 +20,52 @@ class myProfile extends StatefulWidget {
 }
 
 class _myProfileState extends State<myProfile> {
+
+  final url1 = url.basicUrl;
+  String name, image, email,phonenumber,birthdate = "";
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    getUserDetails();
+    print("ddd");
+  }
+
+  Future<void> getUserDetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var url = "$url1/getUserDetails";
+
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+    map["get_user_id"] = "";
+
+
+    Map<String, String> headers = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    final response = await http.post(url, body: map, headers: headers);
+    final responseJson = json.decode(response.body);
+    print("res getUserDetails  " + responseJson.toString());
+
+    setState(() {
+      name = responseJson["data"]["username"].toString();
+      image = responseJson["data"]["image"].toString();
+      email = responseJson["data"]["email"].toString();
+      phonenumber = responseJson["data"]["phone"].toString();
+      birthdate = responseJson["data"]["dob"].toString();
+      _isLoading = false;
+
+    });
+  }
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
+
       appBar: commanAppBar(
         appBar: AppBar(),
         groupImage: Container(),
@@ -28,7 +76,9 @@ class _myProfileState extends State<myProfile> {
         fontsize: medium,
       ),
       backgroundColor: cwhite,
-      body: Container(
+      body: _isLoading == true
+          ? SpinKitRipple(color: cfooterpurple)
+          : Container(
         height: query.height,
         width: query.width,
         child: Padding(
@@ -36,13 +86,19 @@ class _myProfileState extends State<myProfile> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              Image.asset(
-                "Assets/Icons/img5.png",
-                height: 12.h,
-              ),
+              ClipRRect(
+                  borderRadius:
+                  BorderRadius.circular(100.0),
+                  child: FadeInImage(
+                      image: NetworkImage(image.toString()),
+                      fit: BoxFit.cover,
+                      width: 90.sp,
+                      height: 90.sp,
+                      placeholder: AssetImage(
+                          "Assets/Images/giphy.gif"))),
               Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Text("London Boys",
+                child: Text(name.toString(),
                     style: TextStyle(
                         fontFamily: "SFPro",
                         fontWeight: FontWeight.w600,
@@ -80,7 +136,7 @@ class _myProfileState extends State<myProfile> {
                     ),
                     Container(
                       width: 200.sp,
-                      child: Text("prashan@gmail.com",
+                      child: Text(email.toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontWeight: FontWeight.w400,
@@ -110,7 +166,7 @@ class _myProfileState extends State<myProfile> {
                     ),
                     Container(
                       width: 200.sp,
-                      child: Text("+1 01234567890",
+                      child: Text(phonenumber.toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontWeight: FontWeight.w400,
@@ -140,7 +196,7 @@ class _myProfileState extends State<myProfile> {
                     ),
                     Container(
                       width: 200.sp,
-                      child: Text("20-05-1989",
+                      child: Text(birthdate.toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontWeight: FontWeight.w400,
@@ -162,7 +218,7 @@ class _myProfileState extends State<myProfile> {
                             type: PageTransitionType.fade,
                             alignment: Alignment.bottomCenter,
                             duration: Duration(milliseconds: 300),
-                            child: edit_Profile()));
+                            child: edit_Profile())).then((value) => getUserDetails());
                   }, "Edit Profile", cButtoncolor)),
             ],
           ),

@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:chatcity/Explore/chat_page.dart';
 import 'package:chatcity/Explore/filter_page.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -67,6 +68,7 @@ class _Explore_pageState extends State<Explore_page> {
   int search = 0;
   TextEditingController search_ctrl = TextEditingController();
   bool _isLoading = true;
+
 
   @override
   void initState() {
@@ -340,17 +342,10 @@ class _Explore_pageState extends State<Explore_page> {
   void joinDialog(roomData) async {
     try {
       //await QB.chat.joinDialog(roomData["dialogId"]);
-      Navigator.push(
-          context,
-          PageTransition(
-              type: PageTransitionType.fade,
-              alignment: Alignment.bottomCenter,
-              duration: Duration(milliseconds: 300),
-              child: chat_page(roomData)));
 
+      checktype(roomData);
     } on PlatformException catch (e) {
       print(e);
-
     }
   }
 
@@ -365,5 +360,55 @@ class _Explore_pageState extends State<Explore_page> {
     } on PlatformException catch (e) {
       print(e.message);
     }
+  }
+
+  Future<void> checktype(roomData) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int j = 0;
+    var url = "$url1/joinedRoomsList";
+
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+
+    Map<String, String> headers = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    final response = await http.post(url, body: map, headers: headers);
+    final responseJson = json.decode(response.body);
+    print("res joinedRoomsList  " + responseJson.toString());
+    setState(() {
+      if (roomData["type"].toString() == "0") {
+        Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.fade,
+                alignment: Alignment.bottomCenter,
+                duration: Duration(milliseconds: 300),
+                child: chat_page(roomData)));
+      } else {
+        for (int i = 0; i < responseJson["data"].length; i++) {
+          if (roomData["dialogId"] == responseJson["data"][i]["dialogId"]) {
+            print("if");
+            setState(() {
+              j = 1;
+            });
+          } else {
+            print("else");
+          }
+        }
+        if (j == 1) {
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.fade,
+                  alignment: Alignment.bottomCenter,
+                  duration: Duration(milliseconds: 300),
+                  child: chat_page(roomData)));
+        } else {
+          displayToast("You are not a member in this group");
+        }
+      }
+    });
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
@@ -78,9 +80,13 @@ class _shareAppState extends State<shareApp> {
                           width: 90.w,
                           height: 7.5.h,
                           child: basicButton(cwhite, () {
+                            Platform.isAndroid ?
                             Share.share(
-                                'check share',
-                                subject: 'Sharing on Email');
+                                "https://play.google.com/store",
+                                subject: 'Sharing store link') :
+                            Share.share(
+                                "https://www.apple.com/in/app-store/",
+                                subject: 'Sharing store link');
                           }, "Share", cButtoncolor)),
                     )
                   ],

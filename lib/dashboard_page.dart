@@ -26,13 +26,10 @@ class dashboard_page extends StatefulWidget {
 class _dashboard_pageState extends State<dashboard_page> {
   int index = 0;
 
-
   @override
   void initState() {
     super.initState();
     init();
-
-
   }
 
   void init() async {
@@ -40,10 +37,10 @@ class _dashboard_pageState extends State<dashboard_page> {
       await QB.settings.init(APP_ID, AUTH_KEY, AUTH_SECRET, ACCOUNT_KEY);
       login();
     } on PlatformException catch (e) {
-      // Some error occurred, look at the exception message for more details
       print(e);
     }
   }
+
   Future<void> login() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
@@ -58,24 +55,26 @@ class _dashboard_pageState extends State<dashboard_page> {
       DataHolder.getInstance().setSession(qbSession);
       DataHolder.getInstance().setUser(qbUser);
 
-      print("user id login "+ qbUser.id.toString());
+      print("user id login " + qbUser.id.toString());
       connect();
     } on PlatformException catch (e) {
       print(e);
     }
   }
+
   void connect() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
-      await QB.chat.connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
+      await QB.chat
+          .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
 
       print("+++++ " + int.parse(prefs.getString("quickboxid")).toString());
-
     } on PlatformException catch (e) {
-      print("=== "  + e.toString());
+      print("=== " + e.toString());
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -123,41 +122,26 @@ class _dashboard_pageState extends State<dashboard_page> {
             offstage: index != 1,
             child: new TickerMode(enabled: index == 1, child: allRooms_page()),
           ),
-          /*new Offstage(
-            offstage: index != 2,
-            child: new TickerMode(
-              enabled: index == 2,
-              child: Container(
-                color: cFacebook,
-              ),
-            ),
-          ),*/
           new Offstage(
             offstage: index != 2,
-            child: new TickerMode(
-              enabled: index == 2,
-              child: requestPage()
-            ),
+            child: new TickerMode(enabled: index == 2, child: requestPage()),
           ),
           new Offstage(
             offstage: index != 3,
-            child: new TickerMode(
-              enabled: index == 3,
-              child: settings_page()
-            ),
+            child: new TickerMode(enabled: index == 3, child: settings_page()),
           ),
         ],
       ),
       bottomNavigationBar: new BottomNavigationBar(
         showUnselectedLabels: true,
         showSelectedLabels: true,
-        //enableFeedback: false,
         backgroundColor: cwhite,
         selectedFontSize: 15.sp,
         unselectedFontSize: 15.sp,
         elevation: 10,
         type: BottomNavigationBarType.fixed,
         currentIndex: index,
+
         onTap: (int i) {
           setState(() {
             this.index = i;
@@ -213,20 +197,6 @@ class _dashboard_pageState extends State<dashboard_page> {
               ],
             ),
           ),
-          /*new BottomNavigationBarItem(
-            icon: IconButton(
-              icon: Container(),
-              onPressed: null,
-            ),
-            title: Text(
-              "Create",
-              style: TextStyle(
-                  fontSize: small,
-                  fontFamily: "SFPro",
-                  fontWeight: FontWeight.w500,
-                  color: index == 2 ? cfooterpurple : cGray),
-            ),
-          ),*/
           new BottomNavigationBarItem(
             icon: Padding(
               padding: const EdgeInsets.only(top: 0),
@@ -278,53 +248,5 @@ class _dashboard_pageState extends State<dashboard_page> {
         ],
       ),
     );
-    /*Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.only(bottom: 0.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-
-                children: [
-                  Container(
-                    height: 55.sp,
-                    width: 55.sp,
-                    decoration: BoxDecoration(
-                        color: cwhite,
-                        borderRadius: BorderRadius.all(Radius.circular(50.0))),
-                    child: new RawMaterialButton(
-                      onPressed: () {
-                        setState(() {
-                          index = 2;
-                        });
-                      },
-                      shape: new CircleBorder(),
-                      elevation: 0.0,
-                      child: Padding(
-                        padding: const EdgeInsets.all(6.0),
-                        child: Image.asset(
-                          index == 2
-                              ? 'Assets/Icons/create1.png'
-                              : "Assets/Icons/create1.png",
-                        ),
-                      ),
-                    ),
-                  ),
-                  Material(
-                    child: Text(
-                      "Create",
-                      style: TextStyle(
-                          fontSize: small,
-                          fontFamily: "SFPro",
-                          fontWeight: FontWeight.w500,
-                          color: index == 2 ? cfooterpurple : cGray),
-                    ),
-                  ),
-                  SizedBox(
-                    height: 4.h,
-                  )
-                ],
-              ),
-            )),*/
   }
 }

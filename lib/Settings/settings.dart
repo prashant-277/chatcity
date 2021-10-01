@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chatcity/Registration/login_Screen.dart';
 import 'package:chatcity/Settings/shareApp.dart';
 import 'package:chatcity/TermsofService.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
@@ -90,6 +91,7 @@ class _settings_pageState extends State<settings_page> {
               child: Image.asset(
                 "Assets/Icons/search.png",
                 width: 5.w,
+                color: Colors.transparent,
               ),
             ),
           ],
@@ -315,6 +317,10 @@ class _settings_pageState extends State<settings_page> {
                             await SharedPreferences.getInstance();
                         prefs.remove("api_token");
                         // prefs.setString("api_token", "");
+                        Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => login_Screen()));
                       },
                       child: Text(
                         "LOGOUT",

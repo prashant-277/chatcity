@@ -41,8 +41,9 @@ class friend_invitePage extends StatefulWidget {
 class _friend_invitePageState extends State<friend_invitePage> {
   List select = [];
   List oopID = [];
+  List userIDs = [];
   List userList = [];
-  List roomData = [];
+  var roomData;
   final url1 = url.basicUrl;
   String _dialogId;
   bool _isLoading = true;
@@ -147,6 +148,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
                       itemBuilder: (context, index) {
                         return ListTile(
                           //selectedTileColor: Color(0xFFD1C4E9),
+
                           contentPadding: EdgeInsets.zero,
                           onTap: () {
                             setState(() {
@@ -154,12 +156,17 @@ class _friend_invitePageState extends State<friend_invitePage> {
                                 select.remove(index);
                                 oopID.remove(int.parse(
                                     userList[index]["quickboxid"].toString()));
+                                userIDs.remove(int.parse(
+                                    userList[index]["id"].toString()));
                               } else {
                                 select.add(index);
                                 oopID.add(int.parse(
                                     userList[index]["quickboxid"].toString()));
+                                userIDs.add(int.parse(
+                                    userList[index]["id"].toString()));
                               }
                               print(oopID);
+                              print(userIDs);
                             });
                           },
                           title: Padding(
@@ -167,13 +174,15 @@ class _friend_invitePageState extends State<friend_invitePage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text(userList[index]["username"].toString(),
-                                    style: TextStyle(
-                                      fontFamily: "SFPro",
-                                      fontSize: medium,
-                                      color: cBlack,
-                                      fontWeight: FontWeight.w400,
-                                    )),
+                                Expanded(
+                                  child: Text(userList[index]["username"].toString(),
+                                      style: TextStyle(
+                                        fontFamily: "SFPro",
+                                        fontSize: medium,
+                                        color: cBlack,
+                                        fontWeight: FontWeight.w400,
+                                      )),
+                                ),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 20.0),
                                   child: select.contains(index)
@@ -252,7 +261,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     List<int> occupantsIds = new List<int>.from(oopID);
-    String dialogName = "Private Room" + DateTime.now().millisecond.toString();
+    String dialogName = widget.groupName.toString();
 
     int dialogType = QBChatDialogTypes.GROUP_CHAT;
 
@@ -283,13 +292,15 @@ class _friend_invitePageState extends State<friend_invitePage> {
 
   Future<void> createPrivateRoom(String dialogId) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final ProgressDialog pr = _getProgress(context);
+    final ProgressDialog pr = _getProgress(context,);
+
     pr.show();
     print(prefs.getString("userId").toString());
     print(widget.groupName.toString());
     print(_dialogId.toString());
     print(oopID.toString());
     print(widget.groupImage.toString());
+    print(userIDs.toString());
 
     var postUri = Uri.parse("$url1/createRoom");
     var request = new http.MultipartRequest("POST", postUri);
@@ -298,6 +309,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
     request.fields['type'] = "1";
     request.fields['dialogId'] = _dialogId.toString();
     request.fields['occupantsId'] = oopID.toString();
+    request.fields['requestUser'] = userIDs.toString();
 
 
     request.headers["API-token"] = prefs.getString("api_token").toString();
@@ -322,6 +334,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
 
           setState(() {
             roomData = responseJson["data"];
+
           });
 
           pr.hide();
@@ -341,7 +354,8 @@ class _friend_invitePageState extends State<friend_invitePage> {
       } else {
         final responseStream = await response.stream.bytesToString();
         final responseJson = json.decode(responseStream);
-
+        displayToast("Room is not creating, Try after sometime");
+        pr.hide();
         print("Not Uploaded");
       }
     });
@@ -349,5 +363,5 @@ class _friend_invitePageState extends State<friend_invitePage> {
 }
 
 ProgressDialog _getProgress(BuildContext context) {
-  return ProgressDialog(context);
+  return ProgressDialog(context,isDismissible: false);
 }

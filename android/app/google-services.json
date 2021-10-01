@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "294821085263",
+    "project_id": "chatcity-6840f",
+    "storage_bucket": "chatcity-6840f.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:294821085263:android:dea22c202dd40bec0b2a3a",
+        "android_client_info": {
+          "package_name": "com.theappideas.chatcity"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "294821085263-gn7gufk42v3akng2k2t71vqa1cf7vj0t.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.theappideas.chatcity",
+            "certificate_hash": "61a834cf01355dab8051201255526e374d37f6e5"
+          }
+        },
+        {
+          "client_id": "294821085263-9rlidr0c2v3s96qlmim01ph1q8vqniul.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBiwEtAtzWyF64RVZaCcswJcO4dg9r0c0U"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "294821085263-9rlidr0c2v3s96qlmim01ph1q8vqniul.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

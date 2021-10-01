@@ -389,7 +389,8 @@ class _createPublic_roomState extends State<createPublic_room> {
       } else {
         final responseStream = await response.stream.bytesToString();
         final responseJson = json.decode(responseStream);
-
+        displayToast("Room is not creating, Try after sometime");
+        pr.hide();
         print("Not Uploaded");
       }
     });
@@ -397,5 +398,5 @@ class _createPublic_roomState extends State<createPublic_room> {
 }
 
 ProgressDialog _getProgress(BuildContext context) {
-  return ProgressDialog(context);
+  return ProgressDialog(context,isDismissible: false);
 }

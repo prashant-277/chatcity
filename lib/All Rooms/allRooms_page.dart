@@ -137,6 +137,7 @@ class _allRooms_pageState extends State<allRooms_page> {
               child: Image.asset(
                 "Assets/Icons/search.png",
                 width: 5.w,
+                color: Colors.transparent,
               ),
             ),
           ],

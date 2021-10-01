@@ -3,6 +3,7 @@ import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
 import 'package:quickblox_sdk/models/qb_filter.dart';
@@ -31,21 +32,21 @@ class _chat_pageState extends State<chat_page> {
 
   List message = [];
   String chatmessage = "";
-  String userId,_messageId;
+  String userId, _messageId;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     print("hhhh ----- " + widget.roomData.toString());
     getuserId();
-
+    getDialogMessages();
   }
 
-  getuserId() async  {
+  getuserId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       userId = prefs.getString("quickboxid").toString();
-
     });
   }
 
@@ -63,15 +64,16 @@ class _chat_pageState extends State<chat_page> {
         _messageId = messages[0].id;
         print("_messageId " + _messageId);
       }
-      print(messages[0].body);
-      print("_messageId " + countMessages.toString());
+//      print("_messageId " + countMessages.toString());
+      setState(() {
+        _isLoading = false;
+      });
       return messages;
     } on PlatformException catch (e) {}
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       backgroundColor: cChatbackground,
       appBar: commanAppBar(
@@ -113,53 +115,70 @@ class _chat_pageState extends State<chat_page> {
                             type: PageTransitionType.fade,
                             alignment: Alignment.bottomCenter,
                             duration: Duration(milliseconds: 300),
-                            child: roomInfo_page(widget.roomData["id"])));
+                            child: roomInfo_page(widget.roomData["id"],widget.roomData["dialogId"])));
                   },
                   icon: Image.asset("Assets/Icons/info.png", width: 6.w))),
         ],
       ),
       body: Container(
-          child: StreamBuilder(
-              stream: Stream.periodic(Duration(seconds: 1))
-                  .asyncMap((i) => getDialogMessages()),
-              builder: (context, snapshot) {
-                if(snapshot.hasData){
-                  WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount:snapshot.data.length,
-                    padding: EdgeInsets.only(top: 10, bottom: 75),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding:
-                        EdgeInsets.only(left: 14, right: 14, top: 10, bottom: 10),
-                        child: Align(
-                          alignment: (snapshot.data[index].senderId.toString() == userId.toString()
-                              ? Alignment.topRight
-                              : Alignment.topLeft),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-
-                              gradient: snapshot.data[index].senderId.toString() == userId.toString()
-                                  ? LinearGradient(
-                                  colors: [Color(0xff382177), Color(0xff9760A4)])
-                                  : LinearGradient(colors: [gray, gray]),
-
+          child: _isLoading == true
+              ? SpinKitRipple(color: cfooterpurple)
+              : StreamBuilder(
+                  stream: Stream.periodic(Duration(seconds: 1))
+                      .asyncMap((i) => getDialogMessages()),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      WidgetsBinding.instance
+                          .addPostFrameCallback((_) => _scrollToBottom());
+                      return ListView.builder(
+                        controller: _scrollController,
+                        itemCount: snapshot.data.length,
+                        padding: EdgeInsets.only(top: 5, bottom: 75),
+                        itemBuilder: (context, index) {
+                          return Container(
+                            padding: EdgeInsets.only(
+                                left: 12, right: 12, top: 5, bottom: 5),
+                            child: Align(
+                              alignment:
+                                  (snapshot.data[index].senderId.toString() ==
+                                          userId.toString()
+                                      ? Alignment.topRight
+                                      : Alignment.topLeft),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  gradient: snapshot.data[index].senderId
+                                              .toString() ==
+                                          userId.toString()
+                                      ? LinearGradient(colors: [
+                                          Color(0xff382177),
+                                          Color(0xff9760A4)
+                                        ])
+                                      : LinearGradient(colors: [gray, gray]),
+                                ),
+                                padding: EdgeInsets.all(10),
+                                child: Text(
+                                  snapshot.data[index].body.toString(),
+                                  style: TextStyle(
+                                      color: snapshot.data[index].senderId
+                                                  .toString() ==
+                                              userId.toString()
+                                          ? cwhite
+                                          : cBlack),
+                                ),
+                              ),
                             ),
-                            padding: EdgeInsets.all(15),
-                            child: Text(
-                                snapshot.data[index].body.toString(),
-                              style: TextStyle(color: snapshot.data[index].senderId.toString() == userId.toString() ? cwhite :cBlack),
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       );
-                    },
-                  );
-                }
-                return Text(snapshot.data.toString());
-              })),
+                    }
+                    return Center(
+                        child: Text(
+                      "Loading...",
+                      style: TextStyle(
+                          color: cBlack, fontFamily: "SFPro", fontSize: medium),
+                    ));
+                  })),
       bottomSheet: Container(
           color: cwhite,
           height: 55.sp,
@@ -223,16 +242,6 @@ class _chat_pageState extends State<chat_page> {
                       chat_controller.clear();
                     });
 
-                    /*setState(() {
-                      message.add({
-                        "message": chat_controller.text.toString(),
-                        "receiver": 0
-                      });
-                      print(message);
-                      chat_controller.clear();
-                    });*/
-
-
                     isConnected();
                   },
                   child: Image.asset(
@@ -257,6 +266,7 @@ class _chat_pageState extends State<chat_page> {
       print(prefs.getString("_dialogId").toString());
       await QB.chat.sendMessage(widget.roomData["dialogId"],
           body: chatmessage, saveToHistory: true, properties: properties);
+      print("rec -------------");
     } on PlatformException catch (e) {
       print("send " + e.toString());
     }

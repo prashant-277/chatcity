@@ -419,7 +419,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
 
                       SharedPreferences prefs =
                           await SharedPreferences.getInstance();
-                      var postUri = Uri.parse("$url1/updateProfile");
+                      var postUri = Uri.parse("$url1/completeProfile");
                       var request = new http.MultipartRequest("POST", postUri);
                       request.fields['email'] =
                           prefs.getString("userEmail").toString();

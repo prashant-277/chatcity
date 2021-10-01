@@ -43,6 +43,11 @@ dependencies:
   quickblox_sdk:
   flutter_spinkit:
   progress_dialog:
+  firebase_auth: ^0.15.5+3
+  google_sign_in: ^4.4.1
+  sign_in_with_apple:
+  html2md:
+  flutter_facebook_login: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

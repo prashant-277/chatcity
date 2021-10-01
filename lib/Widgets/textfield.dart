@@ -62,7 +62,11 @@ class textfield extends StatelessWidget {
             ),
             hintText: hintText,
             suffixIcon: suffixIcon,
-            prefixIcon: prefixIcon),
+            prefixIcon: prefixIcon,
+          counterText: "",
+
+
+        ),
         validator: (value) {
           if (functionValidate != null) {
             String resultValidate =
