@@ -63,18 +63,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
       _isLoading = false;
     });
 
-    for (int i = 0; i <= userList.length; i++) {
-      if (userList[i]["id"].toString() ==
-          prefs.getString("userId").toString()) {
-        setState(() {
-          join = 1;
-        });
-      } else {
-        setState(() {
-          join = 0;
-        });
-      }
-    }
+
   }
   void leaveDialog() async {
     try {

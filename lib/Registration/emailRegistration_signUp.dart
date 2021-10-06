@@ -8,6 +8,7 @@ import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/textfield.dart';
 import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
@@ -21,7 +22,10 @@ import 'package:http/http.dart' as http;
 import 'package:chatcity/url.dart';
 
 class emailRegistration_signUp extends StatefulWidget {
-  const emailRegistration_signUp({Key key}) : super(key: key);
+  var responseJson;
+
+  emailRegistration_signUp(this.responseJson);
+
 
   @override
   _emailRegistration_signUpState createState() =>
@@ -48,6 +52,12 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
     setState(() {});
   }
 
+  @override
+  void initState() {
+    super.initState();
+    /*username_controller.text = widget.responseJson["username"].toString();
+    urlimg1 = widget.responseJson["image"].toString();*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -471,6 +481,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
                           final responseStream =
                               await response.stream.bytesToString();
                           final responseJson = json.decode(responseStream);
+                          print(responseJson);
                           print("Not Uploaded");
                           pr.hide();
                         }

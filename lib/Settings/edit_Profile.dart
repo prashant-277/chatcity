@@ -202,34 +202,27 @@ class _edit_ProfileState extends State<edit_Profile> {
                         },
                       ),
                       SizedBox(height: 3.h),
-                      InkWell(
-                        onTap: (){
-                          displayToast("You can not edit your username");
-                        },
-                        child: Container(
-                          width: query.width,
-                          decoration: BoxDecoration(
-                              color: cChatbackground,
-                              border: Border.all(color: cwhite, width: 0),
-                              borderRadius: BorderRadius.circular(10.0)),
-                          child: AbsorbPointer(
-                            child: textfield(
-                              controller: _usernameCtrl,
-                              textcapitalization: TextCapitalization.words,
-                              textInputType: TextInputType.name,
-                              obscureText: false,
-                              prefixIcon: Padding(
-                                padding: const EdgeInsets.all(12.0),
-                                child: Image.asset(
-                                  "Assets/Icons/user.png",
-                                  width: 20.0,
-                                  height: 20.0,
-                                ),
-                              ),
-                              hintText: "",
-                              parametersValidate: "Please enter Username",
+                      Container(
+                        width: query.width,
+                        decoration: BoxDecoration(
+                            color: cChatbackground,
+                            border: Border.all(color: cwhite, width: 0),
+                            borderRadius: BorderRadius.circular(10.0)),
+                        child: textfield(
+                          controller: _usernameCtrl,
+                          textcapitalization: TextCapitalization.words,
+                          textInputType: TextInputType.name,
+                          obscureText: false,
+                          prefixIcon: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Image.asset(
+                              "Assets/Icons/user.png",
+                              width: 20.0,
+                              height: 20.0,
                             ),
                           ),
+                          hintText: "",
+                          parametersValidate: "Please enter Username",
                         ),
                       ),
                       SizedBox(height: 2.h),

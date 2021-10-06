@@ -124,7 +124,7 @@ class _confirmAccountState extends State<confirmAccount> {
                               type: PageTransitionType.fade,
                               alignment: Alignment.bottomCenter,
                               duration: Duration(milliseconds: 300),
-                              child: emailRegistration_signUp()));
+                              child: emailRegistration_signUp("")));
 
                       displayToast(widget.userData["message"].toString());
 

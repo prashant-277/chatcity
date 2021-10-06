@@ -5,9 +5,12 @@ import 'package:chatcity/Settings/shareApp.dart';
 import 'package:chatcity/TermsofService.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -25,6 +28,9 @@ class settings_page extends StatefulWidget {
 
 class _settings_pageState extends State<settings_page> {
   bool noti_switch = false;
+  static final FacebookLogin facebookSignIn = new FacebookLogin();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   Future<bool> _onWillPop() {
     return showDialog(
@@ -313,6 +319,9 @@ class _settings_pageState extends State<settings_page> {
                       color: cRed,
                       onPressed: () async {
                         logout();
+                        facebookSignIn.logOut();
+                        _googleSignIn.disconnect();
+                        _auth.signOut();
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
                         prefs.remove("api_token");

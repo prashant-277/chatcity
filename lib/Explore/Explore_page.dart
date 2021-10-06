@@ -69,7 +69,6 @@ class _Explore_pageState extends State<Explore_page> {
   TextEditingController search_ctrl = TextEditingController();
   bool _isLoading = true;
 
-
   @override
   void initState() {
     super.initState();
@@ -81,6 +80,8 @@ class _Explore_pageState extends State<Explore_page> {
 
     var url = "$url1/getAllRooms";
 
+    print(prefs.getString("userId").toString());
+    print(prefs.getString("api_token").toString());
     var map = new Map<String, dynamic>();
     map["userid"] = prefs.getString("userId").toString();
 
@@ -365,6 +366,7 @@ class _Explore_pageState extends State<Explore_page> {
   Future<void> checktype(roomData) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     int j = 0;
+
     var url = "$url1/joinedRoomsList";
 
     var map = new Map<String, dynamic>();
@@ -377,15 +379,12 @@ class _Explore_pageState extends State<Explore_page> {
     final response = await http.post(url, body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res joinedRoomsList  " + responseJson.toString());
+
     setState(() {
       if (roomData["type"].toString() == "0") {
-        Navigator.push(
-            context,
-            PageTransition(
-                type: PageTransitionType.fade,
-                alignment: Alignment.bottomCenter,
-                duration: Duration(milliseconds: 300),
-                child: chat_page(roomData)));
+        print("public if ");
+        joinRoom(roomData);
+
       } else {
         for (int i = 0; i < responseJson["data"].length; i++) {
           if (roomData["dialogId"] == responseJson["data"][i]["dialogId"]) {
@@ -404,11 +403,99 @@ class _Explore_pageState extends State<Explore_page> {
                   type: PageTransitionType.fade,
                   alignment: Alignment.bottomCenter,
                   duration: Duration(milliseconds: 300),
-                  child: chat_page(roomData)));
+                  child: chat_page(roomData))).then((value) => getAllRooms());
         } else {
           displayToast("You are not a member in this group");
         }
       }
     });
+  }
+
+  Future<void> joinRoom(roomData) async {
+    int k = 0;
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if(roomData["users"].length==0){
+      var url = "$url1/joinRoom";
+
+      print(roomData["dialogId"].toString());
+
+      var map = new Map<String, dynamic>();
+      map["userid"] = prefs.getString("userId").toString();
+      map["dialogId"] = roomData["dialogId"].toString();
+
+      Map<String, String> headers = {
+        "API-token": prefs.getString("api_token").toString()
+      };
+
+      final response = await http.post(url, body: map, headers: headers);
+      final responseJson = json.decode(response.body);
+      print("res joinRoom  " + responseJson.toString());
+
+      if (responseJson["status"].toString() == "success") {
+        Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.fade,
+                alignment: Alignment.bottomCenter,
+                duration: Duration(milliseconds: 300),
+                child: chat_page(roomData)));
+        displayToast(responseJson["message"].toString());
+      } else {
+        displayToast(responseJson["message"].toString());
+      }
+    } else {
+      for (int i = 0; i < roomData["users"].length; i++) {
+        if (roomData["users"][i]["id"].toString() ==
+            prefs.getString("userId").toString()) {
+          setState(() {
+            k=1;
+          });
+
+        } else {
+
+        }
+      }
+      if(k==0){
+        var url = "$url1/joinRoom";
+
+        print(roomData["dialogId"].toString());
+
+        var map = new Map<String, dynamic>();
+        map["userid"] = prefs.getString("userId").toString();
+        map["dialogId"] = roomData["dialogId"].toString();
+
+        Map<String, String> headers = {
+          "API-token": prefs.getString("api_token").toString()
+        };
+
+        final response = await http.post(url, body: map, headers: headers);
+        final responseJson = json.decode(response.body);
+        print("res joinRoom  " + responseJson.toString());
+
+        if (responseJson["status"].toString() == "success") {
+          getAllRooms();
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.fade,
+                  alignment: Alignment.bottomCenter,
+                  duration: Duration(milliseconds: 300),
+                  child: chat_page(roomData)));
+          displayToast(responseJson["message"].toString());
+        } else {
+          displayToast(responseJson["message"].toString());
+        }
+      }else{
+        getAllRooms();
+        Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.fade,
+                alignment: Alignment.bottomCenter,
+                duration: Duration(milliseconds: 300),
+                child: chat_page(roomData)));
+      }
+    }
   }
 }

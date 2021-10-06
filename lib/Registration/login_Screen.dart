@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chatcity/Explore/Explore_page.dart';
+import 'package:chatcity/Registration/emailRegistration_signUp.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/textfield.dart';
@@ -39,7 +41,6 @@ class _login_ScreenState extends State<login_Screen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FacebookLogin facebookSignIn = new FacebookLogin();
 
-
   bool show = true;
   final _formKey = GlobalKey<FormState>();
   final url1 = url.basicUrl;
@@ -50,7 +51,6 @@ class _login_ScreenState extends State<login_Screen> {
     show = !show;
     setState(() {});
   }
-
 
   bool isLoggedIn = false;
   var profileData;
@@ -152,7 +152,6 @@ class _login_ScreenState extends State<login_Screen> {
                         height: 7.5.h,
                         child: basicButton(cwhite, () async {
                           if (_formKey.currentState.validate()) {
-
                             final ProgressDialog pr = _getProgress(context);
                             pr.show();
 
@@ -169,10 +168,10 @@ class _login_ScreenState extends State<login_Screen> {
                             final response = await http.post(url, body: map);
 
                             final responseJson = json.decode(response.body);
-                            print("login-- " +
-                                responseJson.toString());
+                            print("login-- " + responseJson.toString());
 
-                            if (responseJson["status"].toString() == "success") {
+                            if (responseJson["status"].toString() ==
+                                "success") {
                               login();
                               prefs.setString("api_token",
                                   responseJson["data"]["api_token"].toString());
@@ -182,8 +181,10 @@ class _login_ScreenState extends State<login_Screen> {
                                   responseJson["data"]["id"].toString());
                               prefs.setString("userEmail",
                                   responseJson["data"]["email"].toString());
-                              prefs.setString("quickboxid",
-                                  responseJson["data"]["quickboxid"].toString());
+                              prefs.setString(
+                                  "quickboxid",
+                                  responseJson["data"]["quickboxid"]
+                                      .toString());
                               Navigator.pushReplacement(
                                   context,
                                   PageTransition(
@@ -193,7 +194,6 @@ class _login_ScreenState extends State<login_Screen> {
                                       child: dashboard_page()));
 
                               displayToast(responseJson["message"].toString());
-
                             } else {
                               pr.hide();
                               displayToast(responseJson["message"].toString());
@@ -245,60 +245,72 @@ class _login_ScreenState extends State<login_Screen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 InkWell(
-
                                   child: Image.asset("Assets/Icons/google.png",
                                       height: 50.sp),
-                                  onTap: (){
-                                    _handleSignIn().then((FirebaseUser user) async {
-                                      print(user.email);
+                                  /*onTap: () {
+                                    _handleSignIn()
+                                        .then((FirebaseUser user) async {
+                                      createUser(user.email,user.photoUrl, user.uid, user.displayName);
                                     });
                                   },
-                                ),
+*/                                ),
                                 SizedBox(width: 10.sp),
                                 InkWell(
                                   child: Image.asset("Assets/Icons/fb.png",
                                       height: 50.sp),
-                                  onTap: (){
+                                  /*onTap: () {
                                     initiateFacebookLogin();
-                                  },
+                                  },*/
                                 ),
                                 SizedBox(width: 10.sp),
                                 InkWell(
-                                  child: Image.asset("Assets/Icons/apple.png",
-                                      height: 50.sp),
+                                    child: Image.asset("Assets/Icons/apple.png",
+                                        height: 50.sp),
                                     onTap: () async {
-                                    print("Click");
+                                      /*print("Click");
                                       {
                                         if (Platform.isAndroid) {
                                           var redirectURL = "";
-                                          var clientID = "com.appideas.chatcity";
-                                          final appleIdCredential = await SignInWithApple
-                                              .getAppleIDCredential(
-                                              scopes: [
-                                                AppleIDAuthorizationScopes.email,
-                                                AppleIDAuthorizationScopes.fullName,
+                                          var clientID =
+                                              "com.appideas.chatcity";
+                                          final appleIdCredential =
+                                              await SignInWithApple
+                                                  .getAppleIDCredential(
+                                                      scopes: [
+                                                AppleIDAuthorizationScopes
+                                                    .email,
+                                                AppleIDAuthorizationScopes
+                                                    .fullName,
                                               ],
-                                              webAuthenticationOptions: WebAuthenticationOptions(
-                                                  clientId: clientID,
-                                                  redirectUri: Uri.parse(redirectURL)));
+                                                      webAuthenticationOptions:
+                                                          WebAuthenticationOptions(
+                                                              clientId:
+                                                                  clientID,
+                                                              redirectUri:
+                                                                  Uri.parse(
+                                                                      redirectURL)));
                                           final oAuthProvider = OAuthProvider(
                                               providerId: 'apple.com');
-                                          final credential = oAuthProvider.getCredential(
-                                            idToken: appleIdCredential.identityToken,
-                                            accessToken: appleIdCredential.authorizationCode,
+                                          final credential =
+                                              oAuthProvider.getCredential(
+                                            idToken:
+                                                appleIdCredential.identityToken,
+                                            accessToken: appleIdCredential
+                                                .authorizationCode,
                                           );
                                           print(credential);
-
                                         } else {
-                                          final credential = await SignInWithApple
-                                              .getAppleIDCredential(
+                                          final credential =
+                                              await SignInWithApple.getAppleIDCredential(
                                             scopes: [
                                               AppleIDAuthorizationScopes.email,
                                               AppleIDAuthorizationScopes.fullName,
+
                                             ],
-                                            webAuthenticationOptions: WebAuthenticationOptions(
+                                            webAuthenticationOptions:
+                                                WebAuthenticationOptions(
                                               clientId:
-                                              'com.aboutyou.dart_packages.sign_in_with_apple.example',
+                                                  'com.aboutyou.dart_packages.sign_in_with_apple.example',
                                               redirectUri: Uri.parse(
                                                 'https://flutter-sign-in-with-apple-example.glitch.me/callbacks/sign_in_with_apple',
                                               ),
@@ -309,32 +321,44 @@ class _login_ScreenState extends State<login_Screen> {
 
                                           print(credential);
 
+                                          final ProgressDialog pr =
+                                              _getProgress(context);
+                                          pr.show();
+
+                                          createUser(credential.email.toString(),"",credential.userIdentifier.toString(),credential.givenName.toString());
+
                                           final signInWithAppleEndpoint = Uri(
                                             scheme: 'https',
-                                            host: 'flutter-sign-in-with-apple-example.glitch.me',
+                                            host:
+                                                'flutter-sign-in-with-apple-example.glitch.me',
                                             path: '/sign_in_with_apple',
                                             queryParameters: <String, String>{
-                                              'code': credential.authorizationCode,
+                                              'code':
+                                                  credential.authorizationCode,
                                               if (credential.givenName != null)
-                                                'firstName': credential.givenName,
+                                                'firstName':
+                                                    credential.givenName,
                                               if (credential.familyName != null)
-                                                'lastName': credential.familyName,
-                                              'useBundleId':
-                                              Platform.isIOS || Platform.isMacOS
+                                                'lastName':
+                                                    credential.familyName,
+                                              'useBundleId': Platform.isIOS ||
+                                                      Platform.isMacOS
                                                   ? 'true'
                                                   : 'false',
-                                              if (credential.state != null) 'state': credential
-                                                  .state,
+                                              if (credential.state != null)
+                                                'state': credential.state,
                                             },
                                           );
 
-                                          final session = await http.Client().post(
+                                          final session =
+                                              await http.Client().post(
                                             signInWithAppleEndpoint,
                                           );
                                           print(session);
                                         }
-                                      }}
-                                ),
+                                      }
+                                    */
+                                    }),
                               ],
                             ),
                           ),
@@ -375,22 +399,23 @@ class _login_ScreenState extends State<login_Screen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {
-      await QB.chat.connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
+      await QB.chat
+          .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
 
       pr.hide();
       print(int.parse(prefs.getString("quickboxid")));
-
     } on PlatformException catch (e) {
       print(e.message);
     }
   }
+
   Future<FirebaseUser> _handleSignIn() async {
     _auth.app.options.catchError((error) {
       print("error---->$error");
     });
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
-    await googleUser.authentication;
+        await googleUser.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
@@ -405,7 +430,7 @@ class _login_ScreenState extends State<login_Screen> {
   }
 
   Future<void> initiateFacebookLogin() async {
-    final facebookLoginResult = await facebookSignIn.logIn(['email']);
+    final facebookLoginResult = await facebookSignIn.logIn(['email','public_profile']);
 
     switch (facebookLoginResult.status) {
       case FacebookLoginStatus.error:
@@ -425,32 +450,81 @@ class _login_ScreenState extends State<login_Screen> {
         print("user Id +++++ " + profile["id"].toString());
         onLoginStatusChanged(true, profileData: profile);
 
-
-        /*var url = "$url1/facebook-login";
-
-
-
-        Map<String, String> header = {"_token": token};
-        print(profile["first_name"].toString());
-        var map = new Map<String, dynamic>();
-        map["f_name"] = profile["first_name"].toString();
-        map["l_name"] = profile["last_name"].toString();
-        map["email"] = profile["email"].toString();
-        map["imageUrl"] = profile["picture"]["data"]["url"].toString();
-        map["gender"] = "";
-        map["fb_id"] = profile["id"].toString();
-
-        final response = await http.post(url, body: map, headers: header);
-
-        final responseJson = json.decode(response.body);
-        print(responseJson.toString());
-        print(responseJson["data"]["api_token"].toString());*/
+        final ProgressDialog pr = _getProgress(context);
+        pr.show();
+        createUser(profile["email"].toString(),profile["picture"]["data"]["url"].toString(),profile["id"].toString(),profile["name"].toString());
 
         break;
+    }
+  }
+
+  Future<int> createUser(String email, String photoUrl, String uid, String displayName) async {
+    int userId;
+    try {
+      QBUser user = await QB.users.createUser(email, USER_PASSWORD);
+      userId = user.id;
+      registerwithEmail(userId.toString(), email,photoUrl,uid,displayName);
+    } on PlatformException catch (e) {}
+    print("userId " + userId.toString());
+   // registerwithEmail(userId.toString(), email,photoUrl,uid,displayName);
+    return userId;
+  }
+
+  Future<void> registerwithEmail(String qb_Id, String email, String photoUrl, String uid, String displayName) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
+    var url = "$url1/registerWithMail";
+
+    print("entered data " + email.toString() + qb_Id.toString() + uid.toString() + displayName.toString() + photoUrl.toString());
+    var map = new Map<String, dynamic>();
+    map["email"] = email.toString();
+    map["quickboxid"] = qb_Id.toString();
+    map["google_id"] = uid.toString();
+    map["facebook_id"] = uid.toString();
+    map["apple_id"] = uid.toString();
+    map["username"] = displayName.toString();
+    map["image"] = photoUrl.toString();
+
+    final response = await http.post(url, body: map);
+
+    final responseJson = json.decode(response.body);
+    print("registerWithMail-- " + responseJson.toString());
+
+    if (responseJson["status"].toString() == "fail") {
+      displayToast(responseJson["message"].toString());
+      pr.hide();
+    } else {
+      displayToast("Please check your mailbox");
+      pr.hide();
+
+      prefs.setString("api_token", responseJson["data"]["api_token"].toString());
+
+
+      if (responseJson["data"]["is_profile"].toString() == "1") {
+
+        Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.fade,
+                duration: Duration(milliseconds: 300),
+                alignment: Alignment.bottomCenter,
+                child: dashboard_page()));
+      } else {
+
+        prefs.setString("userEmail", email.toString());
+        Navigator.push(
+            context,
+            PageTransition(
+                type: PageTransitionType.fade,
+                duration: Duration(milliseconds: 300),
+                alignment: Alignment.bottomCenter,
+                child: emailRegistration_signUp(responseJson["data"])));
+      }
     }
   }
 }
 
 ProgressDialog _getProgress(BuildContext context) {
-  return ProgressDialog(context,isDismissible: false);
+  return ProgressDialog(context, isDismissible: false);
 }

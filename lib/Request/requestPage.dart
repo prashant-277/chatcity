@@ -8,6 +8,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -201,12 +202,14 @@ class _requestPageState extends State<requestPage> {
                 child: TabBarView(
                   physics: NeverScrollableScrollPhysics(),
                   children: [
-                    Container(
+                    _isLoading == true
+                        ? SpinKitRipple(color: cfooterpurple)
+                        : Container(
                       child: RefreshIndicator(
                         onRefresh: getMyfriednList,
                         child: ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
-                            itemCount: myfriendlist.length,
+                            itemCount: myfriendlist == []? "": myfriendlist.length,
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -294,13 +297,15 @@ class _requestPageState extends State<requestPage> {
                             }),
                       ),
                     ),
-                    Container(
+                    _isLoading == true
+                        ? SpinKitRipple(color: cfooterpurple)
+                        : Container(
                       child: RefreshIndicator(
                         onRefresh: getInvitaionList,
                         color: cButtoncolor,
                         child: ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
-                            itemCount: requestDetail.length,
+                            itemCount: requestDetail==[]?"":requestDetail.length,
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: const EdgeInsets.all(8.0),
