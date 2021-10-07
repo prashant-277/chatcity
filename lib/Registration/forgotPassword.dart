@@ -88,7 +88,8 @@ class _forgotPasswordState extends State<forgotPassword> {
                         if (_formKey.currentState.validate()) {
                           final ProgressDialog pr = _getProgress(context);
                           pr.show();
-                          var url = "$url1/password/remind";
+
+                          var url = "$url1/forgotPassword";
 
                           var map = new Map<String, dynamic>();
                           map["email"] = email_controller.text.toString();
@@ -96,16 +97,10 @@ class _forgotPasswordState extends State<forgotPassword> {
                           final response = await http.post(url, body: map);
 
                           final responseJson = json.decode(response.body);
-                          print(
-                              "registerWithMail-- " + responseJson.toString());
+                          print("forgotPassword-- " + responseJson.toString());
 
-                          if (responseJson["status"].toString() == "fail") {
-                            displayToast(responseJson["message"].toString());
-                            pr.hide();
-
-                          } else {
-
-                            displayToast(responseJson["message"].toString());
+                          if (responseJson["status"].toString() == "success") {
+                            displayToast(responseJson["data"].toString());
 
                             pr.hide();
                             Navigator.pushReplacement(
@@ -114,7 +109,11 @@ class _forgotPasswordState extends State<forgotPassword> {
                                     type: PageTransitionType.fade,
                                     alignment: Alignment.bottomCenter,
                                     duration: Duration(milliseconds: 300),
-                                    child: emailSent_Successfully()));
+                                    child: emailSent_Successfully(
+                                        email_controller.text.toString(),responseJson)));
+                          } else {
+                            displayToast(responseJson["data"].toString());
+                            pr.hide();
                           }
                         } else {}
                       }, "Send", cButtoncolor)),

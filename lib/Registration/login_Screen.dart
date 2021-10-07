@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:chatcity/Explore/Explore_page.dart';
+//import 'package:device_info/device_info.dart';
 import 'package:chatcity/Registration/emailRegistration_signUp.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
@@ -11,6 +11,8 @@ import 'package:chatcity/constants.dart';
 import 'package:chatcity/dashboard_page.dart';
 import 'package:chatcity/data_holder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+//import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
@@ -40,6 +42,10 @@ class _login_ScreenState extends State<login_Screen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FacebookLogin facebookSignIn = new FacebookLogin();
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+
+  /*var device_token;
+  var device_id;*/
 
   bool show = true;
   final _formKey = GlobalKey<FormState>();
@@ -62,6 +68,71 @@ class _login_ScreenState extends State<login_Screen> {
     });
   }
 
+  @override
+  void initState() {
+    super.initState();
+    firebaseCloudMessaging_Listeners();
+  }
+
+
+  void firebaseCloudMessaging_Listeners() {
+    if (Platform.isIOS) iOS_Permission();
+
+    _firebaseMessaging.getToken().then((token){
+      print(token);
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
+  }
+
+  void iOS_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true)
+    );
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings)
+    {
+      print("Settings registered: $settings");
+    });
+  }
+
+  /*Future<String> getDeviceId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+
+    if (Platform.isIOS) {
+      IosDeviceInfo iosDeviceInfo = await deviceInfo.iosInfo;
+
+      print("Device id---------" + iosDeviceInfo.identifierForVendor);
+
+      setState(() {
+        device_id = iosDeviceInfo.identifierForVendor;
+        prefs.setString("deviceId", device_id);
+      });
+      return iosDeviceInfo.identifierForVendor;
+    } else if (Platform.isAndroid) {
+      AndroidDeviceInfo androidDeviceInfo = await deviceInfo.androidInfo;
+      print("Device id---------" + androidDeviceInfo.androidId.toString());
+
+      setState(() {
+        device_id = androidDeviceInfo.androidId;
+        prefs.setString("deviceId", device_id);
+      });
+      return androidDeviceInfo.androidId; // unique ID on Android
+
+    }
+  }*/
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -247,27 +318,27 @@ class _login_ScreenState extends State<login_Screen> {
                                 InkWell(
                                   child: Image.asset("Assets/Icons/google.png",
                                       height: 50.sp),
-                                  /*onTap: () {
+                                  onTap: () {
                                     _handleSignIn()
                                         .then((FirebaseUser user) async {
-                                      createUser(user.email,user.photoUrl, user.uid, user.displayName);
+                                      createUser(user.email,user.photoUrl, user.uid, user.displayName,"google");
                                     });
                                   },
-*/                                ),
+                                ),
                                 SizedBox(width: 10.sp),
                                 InkWell(
                                   child: Image.asset("Assets/Icons/fb.png",
                                       height: 50.sp),
-                                  /*onTap: () {
+                                  onTap: () {
                                     initiateFacebookLogin();
-                                  },*/
+                                  },
                                 ),
                                 SizedBox(width: 10.sp),
                                 InkWell(
                                     child: Image.asset("Assets/Icons/apple.png",
                                         height: 50.sp),
                                     onTap: () async {
-                                      /*print("Click");
+                                      print("Click");
                                       {
                                         if (Platform.isAndroid) {
                                           var redirectURL = "";
@@ -325,7 +396,7 @@ class _login_ScreenState extends State<login_Screen> {
                                               _getProgress(context);
                                           pr.show();
 
-                                          createUser(credential.email.toString(),"",credential.userIdentifier.toString(),credential.givenName.toString());
+                                          createUser(credential.email.toString(),"",credential.userIdentifier.toString(),credential.givenName.toString(),"apple");
 
                                           final signInWithAppleEndpoint = Uri(
                                             scheme: 'https',
@@ -357,7 +428,6 @@ class _login_ScreenState extends State<login_Screen> {
                                           print(session);
                                         }
                                       }
-                                    */
                                     }),
                               ],
                             ),
@@ -452,39 +522,42 @@ class _login_ScreenState extends State<login_Screen> {
 
         final ProgressDialog pr = _getProgress(context);
         pr.show();
-        createUser(profile["email"].toString(),profile["picture"]["data"]["url"].toString(),profile["id"].toString(),profile["name"].toString());
+        createUser(profile["email"].toString(),profile["picture"]["data"]["url"].toString(),profile["id"].toString(),profile["name"].toString(),"facebook");
 
         break;
     }
   }
 
-  Future<int> createUser(String email, String photoUrl, String uid, String displayName) async {
+  Future<int> createUser(String email, String photoUrl, String uid, String displayName, String type) async {
     int userId;
     try {
       QBUser user = await QB.users.createUser(email, USER_PASSWORD);
       userId = user.id;
-      registerwithEmail(userId.toString(), email,photoUrl,uid,displayName);
-    } on PlatformException catch (e) {}
+      registerwithEmail(userId.toString(), email,photoUrl,uid,displayName,type);
+    } on PlatformException catch (e) {
+
+      registerwithEmail(userId.toString(), email,photoUrl,uid,displayName,type);
+    }
     print("userId " + userId.toString());
-   // registerwithEmail(userId.toString(), email,photoUrl,uid,displayName);
+
     return userId;
   }
 
-  Future<void> registerwithEmail(String qb_Id, String email, String photoUrl, String uid, String displayName) async {
+  Future<void> registerwithEmail(String qb_Id, String email, String photoUrl, String uid, String displayName, String type) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProgressDialog pr = _getProgress(context);
     pr.show();
     var url = "$url1/registerWithMail";
 
-    print("entered data " + email.toString() + qb_Id.toString() + uid.toString() + displayName.toString() + photoUrl.toString());
+    print("entered data " + email.toString() + qb_Id.toString() + uid.toString() + displayName.toString() + photoUrl.toString() + type.toString());
     var map = new Map<String, dynamic>();
     map["email"] = email.toString();
     map["quickboxid"] = qb_Id.toString();
-    map["google_id"] = uid.toString();
-    map["facebook_id"] = uid.toString();
-    map["apple_id"] = uid.toString();
+    map["google_id"] = type=="google" ? uid.toString() : "";
+    map["facebook_id"] = type=="facebook" ? uid.toString() : "";
+    map["apple_id"] = type=="apple"? uid.toString() : "";
     map["username"] = displayName.toString();
-    map["image"] = photoUrl.toString();
+    map['type'] = type.toString();
 
     final response = await http.post(url, body: map);
 
@@ -495,15 +568,18 @@ class _login_ScreenState extends State<login_Screen> {
       displayToast(responseJson["message"].toString());
       pr.hide();
     } else {
-      displayToast("Please check your mailbox");
+      //displayToast("Please check your mailbox");
       pr.hide();
 
       prefs.setString("api_token", responseJson["data"]["api_token"].toString());
+      prefs.setString("userEmail", responseJson["data"]["email"].toString());
+      prefs.setString("userId", responseJson["data"]["id"].toString());
+
 
 
       if (responseJson["data"]["is_profile"].toString() == "1") {
 
-        Navigator.push(
+        Navigator.pushReplacement(
             context,
             PageTransition(
                 type: PageTransitionType.fade,
@@ -513,13 +589,13 @@ class _login_ScreenState extends State<login_Screen> {
       } else {
 
         prefs.setString("userEmail", email.toString());
-        Navigator.push(
+        Navigator.pushReplacement(
             context,
             PageTransition(
                 type: PageTransitionType.fade,
                 duration: Duration(milliseconds: 300),
                 alignment: Alignment.bottomCenter,
-                child: emailRegistration_signUp(responseJson["data"])));
+                child: emailRegistration_signUp(responseJson["data"],"social")));
       }
     }
   }

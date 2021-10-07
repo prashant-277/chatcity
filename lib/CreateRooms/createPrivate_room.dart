@@ -88,7 +88,7 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                                         fit: BoxFit.fill),
                               ),
                             ),
-                      iconSize: 100.sp,
+                      iconSize: 80.sp,
                       onPressed: () {
                         showDialog(
                             context: context,

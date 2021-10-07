@@ -150,7 +150,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                 ),
               ),
             ),
-            Padding(
+            /*Padding(
               padding: const EdgeInsets.symmetric(horizontal: 15.0),
               child: Image.asset(
                 "Assets/Icons/loginwith.png",
@@ -165,20 +165,20 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                   InkWell(
                     child:
                         Image.asset("Assets/Icons/google.png", height: 50.sp),
-                    /*onTap: () {
+                    *//*onTap: () {
                       _handleSignIn().then((FirebaseUser user) async {
 
                         print(user.email);
                       });
-                    },*/
+                    },*//*
                   ),
                   SizedBox(width: 10.sp),
                   InkWell(
                     child: Image.asset("Assets/Icons/fb.png",
                         height: 50.sp),
-                    /*onTap: (){
+                    *//*onTap: (){
                       initiateFacebookLogin();
-                    },*/
+                    },*//*
                   ),
                   SizedBox(width: 10.sp),
                   InkWell(
@@ -187,7 +187,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                       onTap: () async {
                         print("Click");
                         {
-                          /*if (Platform.isAndroid) {
+                          *//*if (Platform.isAndroid) {
                             var redirectURL = "";
                             var clientID = "com.appideas.chatcity";
                             final appleIdCredential = await SignInWithApple
@@ -250,12 +250,12 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                               signInWithAppleEndpoint,
                             );
                             print(session);
-                          }*/
+                          }*//*
                         }}
                   ),
                 ],
               ),
-            ),
+            ),*/
             RichText(
               textAlign: TextAlign.center,
               text: TextSpan(

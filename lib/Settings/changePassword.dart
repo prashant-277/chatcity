@@ -6,9 +6,13 @@ import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/textfield.dart';
 import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -23,6 +27,11 @@ class changePassword extends StatefulWidget {
 }
 
 class _changePasswordState extends State<changePassword> {
+
+  static final FacebookLogin facebookSignIn = new FacebookLogin();
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   bool show = true;
   bool show1 = true;
   bool show2 = true;
@@ -195,8 +204,10 @@ class _changePasswordState extends State<changePassword> {
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
 
-                        if (_newpswdCtrl.text.toString() == _confirmpswdCtrl.text.toString()) {
-
+                        if (_newpswdCtrl.text.toString() ==
+                            _confirmpswdCtrl.text.toString()) {
+                          final ProgressDialog pr = _getProgress(context);
+                          pr.show();
                           var url = "$url1/changePassword";
 
                           Map<String, String> header = {
@@ -205,7 +216,8 @@ class _changePasswordState extends State<changePassword> {
 
                           var map = new Map<String, dynamic>();
                           map["userid"] = prefs.getString("userId").toString();
-                          map["current_password"] = _oldpswdCtrl.text.toString();
+                          map["current_password"] =
+                              _oldpswdCtrl.text.toString();
                           map["new_password"] = _newpswdCtrl.text.toString();
                           map["confirm_pwd"] = _confirmpswdCtrl.text.toString();
 
@@ -216,19 +228,24 @@ class _changePasswordState extends State<changePassword> {
                           print(responseJson.toString());
 
                           if (responseJson["status"].toString() == "success") {
+                            pr.hide();
                             displayToast(responseJson["message"].toString());
-                            logout();
 
+                            logout();
+                            facebookSignIn.logOut();
+                            _googleSignIn.disconnect();
+                            _auth.signOut();
                             prefs.remove("api_token");
                             // prefs.setString("api_token", "");
-                            Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => login_Screen()));
-
-                          }else{
+                            Navigator.of(context).pushAndRemoveUntil(
+                              MaterialPageRoute(
+                                builder: (BuildContext context) =>
+                                    login_Screen(),
+                              ),
+                              (Route route) => false,
+                            );
+                          } else {
                             displayToast(responseJson["message"].toString());
-
                           }
                         } else {
                           displayToast("Password not match");
@@ -242,9 +259,14 @@ class _changePasswordState extends State<changePassword> {
       ),
     );
   }
+
   Future<void> logout() async {
     try {
       await QB.auth.logout();
     } on PlatformException catch (e) {}
   }
+}
+
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context, isDismissible: false);
 }

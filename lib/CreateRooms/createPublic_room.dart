@@ -74,7 +74,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   Container(
-                    height: query.height / 6,
+                    height: 110.sp,
                     child: IconButton(
                       hoverColor: Colors.transparent,
                       splashColor: Colors.transparent,
@@ -375,6 +375,7 @@ class _createPublic_roomState extends State<createPublic_room> {
             roomData = responseJson["data"];
           });
           pr.hide();
+
           Navigator.pushReplacement(
               context,
               PageTransition(

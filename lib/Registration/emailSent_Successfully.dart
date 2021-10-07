@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:chatcity/Registration/forgetOtp.dart';
 import 'package:chatcity/Registration/login_Screen.dart';
 import 'package:chatcity/Registration/resetPassword.dart';
 import 'package:chatcity/Widgets/buttons.dart';
@@ -9,7 +10,13 @@ import 'package:flutter/services.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:sizer/sizer.dart';
 class emailSent_Successfully extends StatefulWidget {
-  const emailSent_Successfully({Key key}) : super(key: key);
+  var emailotp;
+
+  var otpData;
+
+  emailSent_Successfully(this.emailotp, this.otpData);
+
+
 
   @override
   _emailSent_SuccessfullyState createState() => _emailSent_SuccessfullyState();
@@ -107,7 +114,7 @@ class _emailSent_SuccessfullyState extends State<emailSent_Successfully> {
                             type: PageTransitionType.fade,
                             alignment: Alignment.bottomCenter,
                             duration: Duration(milliseconds: 300),
-                            child: login_Screen()));
+                            child: forgetOtp(widget.emailotp,widget.otpData)));
                   }, "Continue", cButtoncolor)),
 
             ],

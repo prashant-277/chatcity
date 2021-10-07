@@ -14,6 +14,7 @@ class filter_page extends StatefulWidget {
 }
 
 class _filter_pageState extends State<filter_page> {
+  String roomType = "";
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -73,6 +74,7 @@ class _filter_pageState extends State<filter_page> {
                 radioButtonValue: (value) {
                   setState(() {
                     print(value);
+                    roomType = value;
                   });
                 },
                 selectedColor: cfooterGray,
@@ -85,7 +87,16 @@ class _filter_pageState extends State<filter_page> {
                   width: 85.w,
                   height: 7.5.h,
                   child: basicButton(cwhite, () {
-                    Navigator.pop(context);
+                   if(roomType=="All Rooms"){
+                     Navigator.of(context).pop("");
+                   }
+                      if(roomType=="Public Rooms"){
+                        Navigator.of(context).pop("0");
+                      }
+                   if(roomType=="Private Rooms"){
+                     Navigator.of(context).pop("1");
+                   }
+
                   }, "Save", cButtoncolor))
             ],
           ),

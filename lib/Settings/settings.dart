@@ -326,10 +326,12 @@ class _settings_pageState extends State<settings_page> {
                             await SharedPreferences.getInstance();
                         prefs.remove("api_token");
                         // prefs.setString("api_token", "");
-                        Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => login_Screen()));
+                        Navigator.of(context).pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (BuildContext context) => login_Screen(),
+                          ),
+                          (Route route) => false,
+                        );
                       },
                       child: Text(
                         "LOGOUT",

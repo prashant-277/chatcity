@@ -8,6 +8,7 @@ import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/textfield.dart';
 import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
+import 'package:chatcity/dashboard_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,8 +25,9 @@ import 'package:chatcity/url.dart';
 class emailRegistration_signUp extends StatefulWidget {
   var responseJson;
 
-  emailRegistration_signUp(this.responseJson);
+  String social;
 
+  emailRegistration_signUp(this.responseJson, this.social);
 
   @override
   _emailRegistration_signUpState createState() =>
@@ -55,8 +57,8 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
   @override
   void initState() {
     super.initState();
-    /*username_controller.text = widget.responseJson["username"].toString();
-    urlimg1 = widget.responseJson["image"].toString();*/
+    username_controller.text = widget.social == "social" ? widget.responseJson["username"].toString() : "" ;
+    password_controller.text = widget.social == "social" ? "00000" : null;
   }
 
   @override
@@ -210,7 +212,8 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
                                                       .size
                                                       .width,
                                                   child: FlatButton(
-                                                    onPressed: imageSelectorCameraD1,
+                                                    onPressed:
+                                                        imageSelectorCameraD1,
                                                     child: Row(
                                                       children: <Widget>[
                                                         Text("Camera"),
@@ -429,6 +432,10 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
 
                       SharedPreferences prefs =
                           await SharedPreferences.getInstance();
+
+                      print(prefs.getString("userEmail").toString());
+                      print(prefs.getString("api_token").toString());
+
                       var postUri = Uri.parse("$url1/completeProfile");
                       var request = new http.MultipartRequest("POST", postUri);
                       request.fields['email'] =
@@ -465,13 +472,23 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
                             displayToast(responseJson["message"].toString());
                             Timer(
                                 Duration(seconds: 1),
-                                () => Navigator.pushReplacement(
-                                    context,
-                                    PageTransition(
-                                        type: PageTransitionType.fade,
-                                        alignment: Alignment.bottomCenter,
-                                        duration: Duration(milliseconds: 300),
-                                        child: login_Screen())));
+                                () => widget.social == "social"
+                                    ? Navigator.pushReplacement(
+                                        context,
+                                        PageTransition(
+                                            type: PageTransitionType.fade,
+                                            alignment: Alignment.bottomCenter,
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            child: dashboard_page()))
+                                    : Navigator.pushReplacement(
+                                        context,
+                                        PageTransition(
+                                            type: PageTransitionType.fade,
+                                            alignment: Alignment.bottomCenter,
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            child: login_Screen())));
                             pr.hide();
                           } else {
                             displayToast(responseJson["message"].toString());
@@ -481,7 +498,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
                           final responseStream =
                               await response.stream.bytesToString();
                           final responseJson = json.decode(responseStream);
-                          print(responseJson);
+                          print("Not Uploaded" + responseJson.toString());
                           print("Not Uploaded");
                           pr.hide();
                         }
@@ -497,7 +514,6 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
       ),
     );
   }
-
 
   void imageSelectorCameraD1() async {
     Navigator.pop(context);
@@ -537,6 +553,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
     });
   }
 }
+
 ProgressDialog _getProgress(BuildContext context) {
   return ProgressDialog(context);
 }

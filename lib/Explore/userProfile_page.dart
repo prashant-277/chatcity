@@ -30,19 +30,22 @@ class _userProfile_pageState extends State<userProfile_page> {
   String name,
       image,
       email,
-      quickboxid = "";
+      quickboxid,is_Friend,userid = "";
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
     getUserDetails();
+    print("ddd " + widget.userList.toString());
   }
 
   Future<void> getUserDetails() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     var url = "$url1/getUserDetails";
+
+    print("dasdsadadsad " + prefs.getString("userId").toString());
 
     var map = new Map<String, dynamic>();
     map["userid"] = prefs.getString("userId").toString();
@@ -60,6 +63,8 @@ class _userProfile_pageState extends State<userProfile_page> {
       image = responseJson["data"]["image"].toString();
       email = responseJson["data"]["email"].toString();
       quickboxid = responseJson["data"]["quickboxid"].toString();
+      is_Friend = responseJson["data"]["is_Friend"].toString();
+      userid = prefs.getString("userId").toString();
       _isLoading = false;
     });
   }
@@ -138,15 +143,21 @@ class _userProfile_pageState extends State<userProfile_page> {
                 ),
               ),
               SizedBox(height: 4.h),
-              Container(
+              userid == widget.userList["id"].toString() ? Container() : Container(
                   width: 90.w,
                   height: 7.5.h,
                   child:
                   basicButton(cwhite, () async {
-                    addfriend();
+                    if(is_Friend=="0"){
+                      addfriend();
+                    }else{
+                      displayToast(name.toString()+" is already your friend");
+                    }
+
+
                   }, "+ Add friend", cgreen)),
               SizedBox(height: 2.h),
-              Container(
+              userid == widget.userList["id"].toString() ? Container() : Container(
                   width: 90.w,
                   height: 7.5.h,
                   child: basicButton(
@@ -160,7 +171,7 @@ class _userProfile_pageState extends State<userProfile_page> {
                             child: chat_page(quickboxid)));
                   }, "Open private chat", cButtoncolor)),
               SizedBox(height: 2.h),
-              Container(
+              userid == widget.userList["id"].toString() ? Container() :   Container(
                   width: 90.w,
                   height: 7.5.h,
                   child: basicButton(cwhite, () async {}, "Block", cOrange)),
@@ -187,7 +198,7 @@ class _userProfile_pageState extends State<userProfile_page> {
     final response = await http.post(url, body: map);
 
     final responseJson = json.decode(response.body);
-    print("login-- " +
+    print("addRemoveFriends-- " +
         responseJson.toString());
 
     if (responseJson["status"].toString() == "success") {

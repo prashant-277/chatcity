@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -34,10 +35,13 @@ class _roomInfo_pageState extends State<roomInfo_page> {
   var roomdata;
   bool _isLoading = true;
 
+  String roomId;
+
   @override
   void initState() {
     super.initState();
     getRoomInfo();
+    roomId = widget.roomId.toString();
   }
 
   Future<void> getRoomInfo() async {
@@ -45,9 +49,11 @@ class _roomInfo_pageState extends State<roomInfo_page> {
 
     var url = "$url1/showRoomDetails";
 
+    print(prefs.getString("userId").toString());
+    print(widget.roomId.toString());
     var map = new Map<String, dynamic>();
     map["userid"] = prefs.getString("userId").toString();
-    map["room_id"] = widget.roomId.toString();
+    map["room_id"] = roomId;
 
     Map<String, String> headers = {
       "API-token": prefs.getString("api_token").toString()
@@ -62,17 +68,49 @@ class _roomInfo_pageState extends State<roomInfo_page> {
       roomdata = responseJson["data"];
       _isLoading = false;
     });
-
-
   }
+
   void leaveDialog() async {
     try {
       await QB.chat.leaveDialog(widget.dialogId);
       print("Success");
-      Navigator.pop(context);
-      Navigator.pop(context);
+      Navigator.pop(context,true);
+      Navigator.pop(context,true);
     } on PlatformException catch (e) {
       print(e);
+    }
+  }
+
+  exitRoom() async {
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var url = "$url1/leavegroup";
+
+    Map<String, String> header = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+    map["room_id"] = roomdata["id"].toString();
+
+    final response =
+        await http.post(Uri.parse(url), body: map, headers: header);
+
+    final responseJson = json.decode(response.body);
+    print(responseJson.toString());
+    if (responseJson["status"].toString() == "success") {
+      displayToast(responseJson["message"].toString());
+      pr.hide();
+      setState(() {
+        roomId = roomdata["id"].toString();
+        getRoomInfo();
+        leaveDialog();
+      });
+    } else {
+      displayToast(responseJson["message"].toString());
+      pr.hide();
     }
   }
 
@@ -121,8 +159,8 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                   displayToast("Exit room");
                 }
               },*/
-              onTap: (){
-                leaveDialog();
+              onTap: () {
+                exitRoom();
               },
               child: Container(
                 //width: query.width * 0.17,
@@ -292,78 +330,81 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                         ),
                         Container(
                           height: query.height / 4.0,
-                          child: ListView.builder(
-                              physics: AlwaysScrollableScrollPhysics(),
-                              shrinkWrap: true,
-                              itemCount: userList.length,
-                              itemBuilder: (context, index) {
-                                return Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
+                          child: RefreshIndicator(
+                            onRefresh: getRoomInfo,
+                            child: ListView.builder(
+                                physics: AlwaysScrollableScrollPhysics(),
+                                shrinkWrap: true,
+                                itemCount: userList.length,
+                                itemBuilder: (context, index) {
+                                  return InkWell(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          PageTransition(
+                                              type: PageTransitionType.fade,
+                                              alignment: Alignment.bottomCenter,
+                                              duration:
+                                                  Duration(milliseconds: 300),
+                                              child: userProfile_page(
+                                                  userList[index])));
+                                    },
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        InkWell(
-                                          onTap: () {
-                                            Navigator.push(
-                                                context,
-                                                PageTransition(
-                                                    type:
-                                                        PageTransitionType.fade,
-                                                    alignment:
-                                                        Alignment.bottomCenter,
-                                                    duration: Duration(
-                                                        milliseconds: 300),
-                                                    child: userProfile_page(
-                                                        userList[index])));
-                                          },
-                                          child: Padding(
-                                            padding: const EdgeInsets.all(8.0),
-                                            child: ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(
-                                                        100.0),
-                                                child: FadeInImage(
-                                                    image: NetworkImage(
-                                                        userList[index]["image"]
-                                                            .toString()),
-                                                    fit: BoxFit.cover,
-                                                    width: 25.sp,
-                                                    height: 25.sp,
-                                                    placeholder: AssetImage(
-                                                        "Assets/Images/giphy.gif"))),
-                                          ),
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          100.0),
+                                                  child: FadeInImage(
+                                                      image: NetworkImage(
+                                                          userList[index]
+                                                                  ["image"]
+                                                              .toString()),
+                                                      fit: BoxFit.cover,
+                                                      width: 25.sp,
+                                                      height: 25.sp,
+                                                      placeholder: AssetImage(
+                                                          "Assets/Images/giphy.gif"))),
+                                            ),
+                                            Padding(
+                                              padding:
+                                                  const EdgeInsets.all(8.0),
+                                              child: Text(
+                                                  userList[index]["username"]
+                                                      .toString(),
+                                                  style: TextStyle(
+                                                      fontFamily: "SFPro",
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: cBlack,
+                                                      fontSize: medium)),
+                                            ),
+                                          ],
                                         ),
                                         Padding(
                                           padding: const EdgeInsets.all(8.0),
                                           child: Text(
-                                              userList[index]["username"]
-                                                  .toString(),
+                                              roomdata["created_by"].toString() ==userList[index]["id"].toString()
+                                                  ? "Admin"
+                                                  : "",
                                               style: TextStyle(
                                                   fontFamily: "SFPro",
                                                   fontWeight: FontWeight.w500,
-                                                  color: cBlack,
-                                                  fontSize: medium)),
+                                                  color: cOrange,
+                                                  fontSize: 12.sp)),
                                         ),
                                       ],
                                     ),
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                          roomdata["created_by"].toString() ==
-                                                  userList[index]["id"]
-                                                      .toString()
-                                              ? "Admin"
-                                              : "",
-                                          style: TextStyle(
-                                              fontFamily: "SFPro",
-                                              fontWeight: FontWeight.w500,
-                                              color: cOrange,
-                                              fontSize: 12.sp)),
-                                    ),
-                                  ],
-                                );
-                              }),
+                                  );
+                                }),
+                          ),
                         ),
                       ],
                     ),
@@ -374,14 +415,19 @@ class _roomInfo_pageState extends State<roomInfo_page> {
     );
   }
 }
+
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context);
+}
+
 /*
 Sign In
 - Registration with email - get OTP
 - SignUp with quickblox registration
-- forget Password(app side completed, sent change password link to user's mailbox successfully)
+- forget Password
 - terms of service by api
 - login with quickblox login
-- google, facebook, apple(app side completed, remaining to registere in database)
+- google, facebook, apple
 Explore page
 - search
 - All group list

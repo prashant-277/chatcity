@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/Widgets/toastDisplay.dart';
@@ -9,10 +11,10 @@ import 'package:otp_text_field/style.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:sizer/sizer.dart';
-
 import 'emailRegistration_signUp.dart';
+import 'package:chatcity/url.dart';
+import 'package:http/http.dart' as http;
 class confirmAccount extends StatefulWidget {
   var userData;
 
@@ -27,6 +29,14 @@ class confirmAccount extends StatefulWidget {
 
 class _confirmAccountState extends State<confirmAccount> {
   var userotp;
+  final url1 = url.basicUrl;
+  String otp;
+
+  @override
+  void initState() {
+    super.initState();
+    otp = widget.userData["data"]["otp"].toString();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +120,7 @@ class _confirmAccountState extends State<confirmAccount> {
                   child: basicButton(cwhite, () async {
                     print(widget.userData.toString());
                     print(userotp);
-                    if(widget.userData["data"]["otp"].toString() == userotp.toString()){
+                    if(otp == userotp.toString()){
                       SharedPreferences prefs = await SharedPreferences.getInstance();
                       prefs.setString("api_token", widget.userData["data"]["api_token"].toString());
                       prefs.setString("userEmail", widget.userData["data"]["email"].toString());
@@ -124,7 +134,7 @@ class _confirmAccountState extends State<confirmAccount> {
                               type: PageTransitionType.fade,
                               alignment: Alignment.bottomCenter,
                               duration: Duration(milliseconds: 300),
-                              child: emailRegistration_signUp("")));
+                              child: emailRegistration_signUp("","")));
 
                       displayToast(widget.userData["message"].toString());
 
@@ -156,7 +166,32 @@ class _confirmAccountState extends State<confirmAccount> {
                           fontSize: medium,
                           fontWeight: FontWeight.w600),
                       text: "Resend",
-                      recognizer: TapGestureRecognizer()..onTap = () async {},
+                      recognizer: TapGestureRecognizer()..onTap = () async {
+                        final ProgressDialog pr = _getProgress(context);
+                        pr.show();
+
+                        var url = "$url1/forgotPassword";
+
+                        var map = new Map<String, dynamic>();
+                        map["email"] = widget.userData["data"]["email"].toString();
+
+                        final response = await http.post(url, body: map);
+
+                        final responseJson = json.decode(response.body);
+                        print("forgotPassword-- " + responseJson.toString());
+
+                        if (responseJson["status"].toString() == "success") {
+                          displayToast(responseJson["data"].toString());
+                          pr.hide();
+                          setState(() {
+                            otp = responseJson["otp"].toString();
+                          });
+                        } else {
+                          displayToast(responseJson["data"].toString());
+                          pr.hide();
+                        }
+
+                      },
                     ),
                   ],
                 ),
@@ -167,4 +202,7 @@ class _confirmAccountState extends State<confirmAccount> {
       ),
     );
   }
+}
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context, isDismissible: false);
 }
