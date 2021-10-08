@@ -12,7 +12,6 @@ import 'package:chatcity/dashboard_page.dart';
 import 'package:chatcity/data_holder.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-//import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
@@ -43,9 +42,8 @@ class _login_ScreenState extends State<login_Screen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FacebookLogin facebookSignIn = new FacebookLogin();
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-
-  /*var device_token;
-  var device_id;*/
+  var device_token;
+  var device_id;
 
   bool show = true;
   final _formKey = GlobalKey<FormState>();
@@ -72,15 +70,25 @@ class _login_ScreenState extends State<login_Screen> {
   void initState() {
     super.initState();
     firebaseCloudMessaging_Listeners();
+    //getDeviceId();
   }
 
+  Future<void> firebaseCloudMessaging_Listeners() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  void firebaseCloudMessaging_Listeners() {
     if (Platform.isIOS) iOS_Permission();
 
-    _firebaseMessaging.getToken().then((token){
-      print(token);
+    if (Platform.isAndroid) Android_Permission();
+
+    _firebaseMessaging.getToken().then((token) {
+      setState(() {
+        device_token = token;
+        print("fcm token  " + device_token);
+        prefs.setString("fcmToken", device_token.toString());
+      });
     });
+
+
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
@@ -97,15 +105,21 @@ class _login_ScreenState extends State<login_Screen> {
 
   void iOS_Permission() {
     _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true)
-    );
+        IosNotificationSettings(sound: true, badge: true, alert: true));
     _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings)
-    {
+        .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
     });
   }
 
+  void Android_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+  }
   /*Future<String> getDeviceId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -235,6 +249,7 @@ class _login_ScreenState extends State<login_Screen> {
                                 username_controller.text.toString();
                             map["password"] =
                                 password_controller.text.toString();
+                            map["fcm_token"] = device_token.toString();
 
                             final response = await http.post(url, body: map);
 
@@ -558,6 +573,7 @@ class _login_ScreenState extends State<login_Screen> {
     map["apple_id"] = type=="apple"? uid.toString() : "";
     map["username"] = displayName.toString();
     map['type'] = type.toString();
+    map["fcm_token"] = device_token.toString();
 
     final response = await http.post(url, body: map);
 
@@ -574,7 +590,6 @@ class _login_ScreenState extends State<login_Screen> {
       prefs.setString("api_token", responseJson["data"]["api_token"].toString());
       prefs.setString("userEmail", responseJson["data"]["email"].toString());
       prefs.setString("userId", responseJson["data"]["id"].toString());
-
 
 
       if (responseJson["data"]["is_profile"].toString() == "1") {

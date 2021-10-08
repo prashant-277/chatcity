@@ -1,13 +1,20 @@
+
+import 'dart:io';
+
 import 'package:chatcity/Explore/Explore_page.dart';
 import 'package:chatcity/Request/requestPage.dart';
 import 'package:chatcity/Settings/settings.dart';
 import 'package:chatcity/constants.dart';
-import 'package:chatcity/credentials.dart';
+
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:quickblox_sdk/auth/module.dart';
 import 'package:quickblox_sdk/models/qb_session.dart';
+import 'package:quickblox_sdk/models/qb_subscription.dart';
 import 'package:quickblox_sdk/models/qb_user.dart';
+import 'package:quickblox_sdk/push/constants.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -25,11 +32,23 @@ class dashboard_page extends StatefulWidget {
 
 class _dashboard_pageState extends State<dashboard_page> {
   int index = 0;
-
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  var device_token;
+  var device_id;
+  int _id;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
   @override
   void initState() {
     super.initState();
     init();
+    firebaseCloudMessaging_Listeners();
+
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    var android = new AndroidInitializationSettings('@mipmap/ic_launcher');
+    var iOS = new IOSInitializationSettings();
+    var initSetttings = new InitializationSettings(android: android, iOS: iOS);
+    flutterLocalNotificationsPlugin.initialize(initSetttings,
+        onSelectNotification: selectNotification);
   }
 
   void init() async {
@@ -57,6 +76,7 @@ class _dashboard_pageState extends State<dashboard_page> {
 
       print("user id login " + qbUser.id.toString());
       connect();
+      createPushSubscription();
     } on PlatformException catch (e) {
       print(e);
     }
@@ -141,7 +161,6 @@ class _dashboard_pageState extends State<dashboard_page> {
         elevation: 10,
         type: BottomNavigationBarType.fixed,
         currentIndex: index,
-
         onTap: (int i) {
           setState(() {
             this.index = i;
@@ -246,6 +265,94 @@ class _dashboard_pageState extends State<dashboard_page> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Future<void> firebaseCloudMessaging_Listeners() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (Platform.isIOS) iOS_Permission();
+
+    if (Platform.isAndroid) Android_Permission();
+
+    _firebaseMessaging.getToken().then((token) {
+      setState(() {
+        device_token = token;
+        print("fcm token  " + device_token);
+        prefs.setString("fcmToken", device_token.toString());
+      });
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
+  }
+
+  void iOS_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+  }
+
+  void Android_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+  }
+
+  Future<void> createPushSubscription() async {
+
+    try {
+      List<QBSubscription> subscriptions =
+          await QB.subscriptions.create(device_token, QBPushChannelNames.GCM);
+      int length = subscriptions.length;
+
+      if (length > 0) {
+        _id = subscriptions[0].id;
+      }
+
+    } on PlatformException catch (e) {
+      print("Subscription error " + e.toString());
+    }
+  }
+
+
+  showNotification(Map<String, dynamic> message) async {
+    var android = new AndroidNotificationDetails(
+        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
+        priority: Priority.high, importance: Importance.max);
+    var iOS = new IOSNotificationDetails(presentAlert: true);
+    var platform = new NotificationDetails(android: android, iOS: iOS);
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      message['title'],
+      message['body'],
+      platform,
+      payload: 'theappideas',
+    );
+  }
+  Future selectNotification(String payload) {
+    debugPrint("payload : $payload");
+    showDialog(
+      context: context,
+      builder: (_) => new AlertDialog(
+        title: new Text('Notification'),
+        content: new Text('$payload'),
       ),
     );
   }

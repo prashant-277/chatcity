@@ -49,6 +49,7 @@ dependencies:
   html2md:
   flutter_facebook_login: ^3.0.0
   firebase_messaging:
+  flutter_local_notifications:
   #device_info:
 dev_dependencies:
   flutter_test:

@@ -9,6 +9,7 @@ import 'package:chatcity/Widgets/textfield.dart';
 import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -35,6 +36,9 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static final FacebookLogin facebookSignIn = new FacebookLogin();
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  var device_token;
+  var device_id;
 
   final url1 = url.basicUrl;
   final _formKey = GlobalKey<FormState>();
@@ -43,6 +47,11 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
   bool isLoggedIn = false;
   var profileData;
 
+  @override
+  void initState() {
+    super.initState();
+    firebaseCloudMessaging_Listeners();
+  }
 
   void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
     setState(() {
@@ -51,6 +60,51 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     });
   }
 
+  Future<void> firebaseCloudMessaging_Listeners() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (Platform.isIOS) iOS_Permission();
+
+    if (Platform.isAndroid) Android_Permission();
+
+    _firebaseMessaging.getToken().then((token) {
+      setState(() {
+        device_token = token;
+        print("fcm token  " + device_token);
+        prefs.setString("fcmToken", device_token.toString());
+      });
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message $message');
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
+  }
+
+  void iOS_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+  }
+
+  void Android_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -165,20 +219,20 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                   InkWell(
                     child:
                         Image.asset("Assets/Icons/google.png", height: 50.sp),
-                    *//*onTap: () {
+                    */ /*onTap: () {
                       _handleSignIn().then((FirebaseUser user) async {
 
                         print(user.email);
                       });
-                    },*//*
+                    },*/ /*
                   ),
                   SizedBox(width: 10.sp),
                   InkWell(
                     child: Image.asset("Assets/Icons/fb.png",
                         height: 50.sp),
-                    *//*onTap: (){
+                    */ /*onTap: (){
                       initiateFacebookLogin();
-                    },*//*
+                    },*/ /*
                   ),
                   SizedBox(width: 10.sp),
                   InkWell(
@@ -187,7 +241,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                       onTap: () async {
                         print("Click");
                         {
-                          *//*if (Platform.isAndroid) {
+                          */ /*if (Platform.isAndroid) {
                             var redirectURL = "";
                             var clientID = "com.appideas.chatcity";
                             final appleIdCredential = await SignInWithApple
@@ -250,7 +304,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                               signInWithAppleEndpoint,
                             );
                             print(session);
-                          }*//*
+                          }*/ /*
                         }}
                   ),
                 ],
@@ -343,6 +397,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     var map = new Map<String, dynamic>();
     map["email"] = Email_controller.text.toString();
     map["quickboxid"] = qb_Id.toString();
+    map["fcm_token"] = device_token.toString();
 
     final response = await http.post(url, body: map);
 
@@ -385,6 +440,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     print("signed in " + user.displayName);
     return user;
   }
+
   Future<void> initiateFacebookLogin() async {
     final facebookLoginResult = await facebookSignIn.logIn(['email']);
 
@@ -405,27 +461,6 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
         print("profile******* " + profile.toString());
         print("user Id +++++ " + profile["id"].toString());
         onLoginStatusChanged(true, profileData: profile);
-
-
-        /*var url = "$url1/facebook-login";
-
-
-
-        Map<String, String> header = {"_token": token};
-        print(profile["first_name"].toString());
-        var map = new Map<String, dynamic>();
-        map["f_name"] = profile["first_name"].toString();
-        map["l_name"] = profile["last_name"].toString();
-        map["email"] = profile["email"].toString();
-        map["imageUrl"] = profile["picture"]["data"]["url"].toString();
-        map["gender"] = "";
-        map["fb_id"] = profile["id"].toString();
-
-        final response = await http.post(url, body: map, headers: header);
-
-        final responseJson = json.decode(response.body);
-        print(responseJson.toString());
-        print(responseJson["data"]["api_token"].toString());*/
 
         break;
     }

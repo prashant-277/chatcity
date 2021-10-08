@@ -9,11 +9,6 @@ class otpSent_successfully extends StatefulWidget {
 
   otpSent_successfully(this.responseJson);
 
-
-
-//9824067738
-//9824249792
-//
   @override
   _otpSent_successfullyState createState() => _otpSent_successfullyState();
 }

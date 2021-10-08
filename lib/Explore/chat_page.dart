@@ -6,9 +6,11 @@ import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
+import 'package:quickblox_sdk/models/qb_event.dart';
 import 'package:quickblox_sdk/models/qb_filter.dart';
 import 'package:quickblox_sdk/models/qb_message.dart';
 import 'package:quickblox_sdk/models/qb_sort.dart';
+import 'package:quickblox_sdk/notifications/constants.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -34,6 +36,7 @@ class _chat_pageState extends State<chat_page> {
   String chatmessage = "";
   String userId, _messageId;
   bool _isLoading = true;
+  int _id;
 
   @override
   void initState() {
@@ -267,6 +270,7 @@ class _chat_pageState extends State<chat_page> {
       await QB.chat.sendMessage(widget.roomData["dialogId"],
           body: chatmessage, saveToHistory: true, properties: properties);
       print("rec -------------");
+      createNotification();
     } on PlatformException catch (e) {
       print("send " + e.toString());
     }
@@ -291,6 +295,41 @@ class _chat_pageState extends State<chat_page> {
       print("id ---- " + int.parse(prefs.getString("quickboxid")).toString());
     } on PlatformException catch (e) {
       print(e.message);
+    }
+  }
+
+  Future<void> createNotification() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String type = QBNotificationEventTypes.ONE_SHOT;
+    String notificationEventType = QBNotificationTypes.PUSH;
+    int senderId = int.parse(prefs.getString("quickboxid"));
+
+    Map<String, Object> payload = Map();
+    payload["message"] = chatmessage;
+
+    try {
+      List<QBEvent> qbEventsList = await QB.events
+          .create(type, notificationEventType, senderId, payload);
+
+      for (int i = 0; i < qbEventsList.length; i++) {
+        QBEvent event = qbEventsList[i];
+        int notificationId = event.id;
+        _id = event.id;
+
+      }
+      getNotifications();
+    } on PlatformException catch (e) {
+      print("notification sent == " + e.toString());
+    }
+  }
+
+  Future<void> getNotifications() async {
+    try {
+      List<QBEvent> qbEventsList = await QB.events.get();
+      int count = qbEventsList.length;
+      print("count === " + count.toString());
+    } on PlatformException catch (e) {
+      print("count === " + e.toString());
     }
   }
 }
