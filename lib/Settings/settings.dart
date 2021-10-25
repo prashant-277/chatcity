@@ -123,7 +123,7 @@ class _settings_pageState extends State<settings_page> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
-                            "Push notification",
+                            "Push notifications",
                             style: TextStyle(
                                 fontFamily: "SFPro",
                                 fontWeight: FontWeight.w600,
@@ -294,7 +294,7 @@ class _settings_pageState extends State<settings_page> {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(
-                              "Terms & condition",
+                              "Terms & conditions",
                               style: TextStyle(
                                   fontFamily: "SFPro",
                                   fontWeight: FontWeight.w600,
@@ -326,6 +326,10 @@ class _settings_pageState extends State<settings_page> {
                           SharedPreferences prefs =
                               await SharedPreferences.getInstance();
                           prefs.remove("api_token");
+                          prefs.remove("quickboxid");
+                          prefs.remove("userId");
+                          prefs.remove("userEmail");
+                          prefs.remove("username");
                           // prefs.setString("api_token", "");
                           Navigator.of(context).pushAndRemoveUntil(
                             MaterialPageRoute(

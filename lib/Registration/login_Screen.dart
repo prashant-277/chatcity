@@ -566,8 +566,13 @@ class _login_ScreenState extends State<login_Screen> {
 
     print("entered data " + email.toString() + qb_Id.toString() + uid.toString() + displayName.toString() + photoUrl.toString() + type.toString());
     var map = new Map<String, dynamic>();
+    print(email.toString());
+    print(qb_Id.toString());
+    print(displayName.toString());
+    print(type.toString());
+    print(device_token.toString());
     map["email"] = email.toString();
-    map["quickboxid"] = qb_Id.toString();
+    qb_Id.toString()=="null"? "" : map["quickboxid"] = qb_Id.toString();
     map["google_id"] = type=="google" ? uid.toString() : "";
     map["facebook_id"] = type=="facebook" ? uid.toString() : "";
     map["apple_id"] = type=="apple"? uid.toString() : "";
@@ -590,7 +595,8 @@ class _login_ScreenState extends State<login_Screen> {
       prefs.setString("api_token", responseJson["data"]["api_token"].toString());
       prefs.setString("userEmail", responseJson["data"]["email"].toString());
       prefs.setString("userId", responseJson["data"]["id"].toString());
-
+      prefs.setString("username", responseJson["data"]["username"].toString());
+      prefs.setString("quickboxid",responseJson["data"]["quickboxid"].toString());
 
       if (responseJson["data"]["is_profile"].toString() == "1") {
 
@@ -610,7 +616,7 @@ class _login_ScreenState extends State<login_Screen> {
                 type: PageTransitionType.fade,
                 duration: Duration(milliseconds: 300),
                 alignment: Alignment.bottomCenter,
-                child: emailRegistration_signUp(responseJson["data"],"social")));
+                child: emailRegistration_signUp(responseJson["data"], "social")));
       }
     }
   }

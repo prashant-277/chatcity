@@ -97,7 +97,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                                         fit: BoxFit.fill),
                               ),
                             ),
-                      iconSize: 80.sp,
+                      iconSize: 100.sp,
                       onPressed: () {
                         showDialog(
                             context: context,
@@ -375,6 +375,7 @@ class _createPublic_roomState extends State<createPublic_room> {
             roomData = responseJson["data"];
           });
           pr.hide();
+
 
           Navigator.pushReplacement(
               context,

@@ -60,7 +60,7 @@ class _signUp_SelectionState extends State<signUp_Selection> {
             Container(
               width: query.width * 0.8,
               child: Text(
-                "Get one of the best chat apps loaded onto your phone, and you never have to worry about staying in touch. And staying in touch with friends and family is exactly what you'll want to do.",
+                "Get one of the best chat apps loaded into your phone, and you never have to worry about staying in touch. And staying in touch with friends and family is exactly what you'll want to do.",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   color: cBlack,

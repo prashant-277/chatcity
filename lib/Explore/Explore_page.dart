@@ -9,6 +9,7 @@ import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,10 +69,12 @@ class _Explore_pageState extends State<Explore_page> {
   TextEditingController search_ctrl = TextEditingController();
   bool _isLoading = true;
   var type;
+  var userId;
   @override
   void initState() {
     super.initState();
     getAllRooms();
+    getUserId();
   }
 
   Future<void> getAllRooms() async {
@@ -95,12 +98,17 @@ class _Explore_pageState extends State<Explore_page> {
     final responseJson = json.decode(response.body);
     print("res getAllRooms  " + responseJson.toString());
     setState(() {
-      roomData = [];
       roomData = responseJson["data"];
       _isLoading = false;
     });
   }
 
+  getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString("userId").toString();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -211,6 +219,11 @@ class _Explore_pageState extends State<Explore_page> {
                                     child: filter_page()))
                             .then((value) {
                           print("returned: $value");
+                          setState(() {
+                            search = 0;
+                            getAllRooms();
+                            search_ctrl.text = "";
+                          });
                           if (value == "0") {
                             setState(() {
                               type = 0;
@@ -235,6 +248,7 @@ class _Explore_pageState extends State<Explore_page> {
                           }
                           }
                         );
+
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -284,8 +298,7 @@ class _Explore_pageState extends State<Explore_page> {
                                           padding: const EdgeInsets.all(8.0),
                                           child: Image.asset(
                                               roomData[index]["type"]
-                                                          .toString() ==
-                                                      "0"
+                                                          .toString() == "0"
                                                   ? "Assets/Icons/public.png"
                                                   : "Assets/Icons/private.png",
                                               color: cfooterGray,
@@ -293,7 +306,8 @@ class _Explore_pageState extends State<Explore_page> {
                                         ),
                                       ],
                                     ),
-                                    Text("Time",
+                                    Text(roomData[index]["MessageCreatedTime"].toString()==""?"":
+                                        TimeAgo.timeAgoSinceDate(roomData[index]["MessageCreatedTime"].toString()),
                                         style: TextStyle(
                                           fontFamily: "SFPro",
                                           fontSize: small,
@@ -314,11 +328,14 @@ class _Explore_pageState extends State<Explore_page> {
                                         placeholder: AssetImage(
                                             "Assets/Images/giphy.gif"))),
                                 subtitle:
-                                    Text("Hi, Julian! see you after work?",
+                                    Text(roomData[index]["Message"].toString(),
                                         style: TextStyle(
                                           fontFamily: "SFPro",
                                           fontSize: small,
-                                          color: cGray,
+
+                                          color: roomData[index]["created_by"].toString()
+                                              == userId.toString() ? cButtoncolor : cGray,
+
                                           fontWeight: FontWeight.w500,
                                         )),
                               ),
@@ -551,11 +568,14 @@ class _Explore_pageState extends State<Explore_page> {
                 onPressed: () async {
                   var url = "$url1/joinRoom";
 
-                  print(roomData["dialogId"].toString());
+                  print("quick userId ---- "+prefs.getString("userId").toString());
+                  print("quick dialogId ---- "+roomData["dialogId"].toString());
+                  print("quick quickboxid ---- "+prefs.getString("quickboxid").toString());
 
                   var map = new Map<String, dynamic>();
                   map["userid"] = prefs.getString("userId").toString();
                   map["dialogId"] = roomData["dialogId"].toString();
+                  map["quickblox"] = prefs.getString("quickboxid").toString();
 
                   Map<String, String> headers = {
                     "API-token": prefs.getString("api_token").toString()
@@ -598,4 +618,34 @@ class _Explore_pageState extends State<Explore_page> {
       }
     }
   }
+}
+class TimeAgo{
+  static String timeAgoSinceDate(String dateString, {bool numericDates = true}) {
+    DateTime notificationDate = DateFormat("yyyy-MM-dd hh:mm:ss").parse(dateString);
+    final date2 = DateTime.now();
+    final difference = date2.difference(notificationDate);
+
+    if (difference.inDays > 8) {
+      return dateString;
+    } else if ((difference.inDays / 7).floor() >= 1) {
+      return (numericDates) ? '1 week ago' : 'Last week';
+    } else if (difference.inDays >= 2) {
+      return '${difference.inDays} days ago';
+    } else if (difference.inDays >= 1) {
+      return (numericDates) ? '1 day ago' : 'Yesterday';
+    } else if (difference.inHours >= 2) {
+      return '${difference.inHours} hours ago';
+    } else if (difference.inHours >= 1) {
+      return (numericDates) ? '1 hour ago' : 'An hour ago';
+    } else if (difference.inMinutes >= 2) {
+      return '${difference.inMinutes} minutes ago';
+    } else if (difference.inMinutes >= 1) {
+      return (numericDates) ? '1 minute ago' : 'A minute ago';
+    } else if (difference.inSeconds >= 3) {
+      return '${difference.inSeconds} seconds ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
 }

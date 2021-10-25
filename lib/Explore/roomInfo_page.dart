@@ -114,6 +114,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -364,8 +365,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                                                           100.0),
                                                   child: FadeInImage(
                                                       image: NetworkImage(
-                                                          userList[index]
-                                                                  ["image"]
+                                                          userList[index]["image"]
                                                               .toString()),
                                                       fit: BoxFit.cover,
                                                       width: 25.sp,
@@ -376,15 +376,18 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                                             Padding(
                                               padding:
                                                   const EdgeInsets.all(8.0),
-                                              child: Text(
-                                                  userList[index]["username"]
-                                                      .toString(),
-                                                  style: TextStyle(
-                                                      fontFamily: "SFPro",
-                                                      fontWeight:
-                                                          FontWeight.w500,
-                                                      color: cBlack,
-                                                      fontSize: medium)),
+                                              child: Container(
+                                                width: 50.w,
+                                                child: Text(
+                                                    userList[index]["username"]
+                                                        .toString(),
+                                                    style: TextStyle(
+                                                        fontFamily: "SFPro",
+                                                        fontWeight:
+                                                            FontWeight.w500,
+                                                        color: cBlack,
+                                                        fontSize: medium)),
+                                              ),
                                             ),
                                           ],
                                         ),

@@ -18,6 +18,7 @@ class BaseAppBar extends StatelessWidget implements PreferredSizeWidget {
       automaticallyImplyLeading: false,
       elevation: 0,
       leading: leadingIcon,
+      brightness: Brightness.dark,
       backgroundColor: backgroundColor,
       title: FlatButton(
         splashColor: Colors.transparent,
@@ -75,6 +76,7 @@ class commanAppBar extends StatelessWidget implements PreferredSizeWidget {
       elevation: 0,
       centerTitle: false,
       leading: leadingIcon,
+      brightness: Brightness.dark,
       backgroundColor: cfooterpurple,
       title: FlatButton(
         splashColor: Colors.transparent,

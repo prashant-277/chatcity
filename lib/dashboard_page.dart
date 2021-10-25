@@ -1,11 +1,8 @@
-
 import 'dart:io';
-
 import 'package:chatcity/Explore/Explore_page.dart';
 import 'package:chatcity/Request/requestPage.dart';
 import 'package:chatcity/Settings/settings.dart';
 import 'package:chatcity/constants.dart';
-
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +15,6 @@ import 'package:quickblox_sdk/push/constants.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-
 import 'All Rooms/allRooms_page.dart';
 import 'CreateRooms/createRoom_Dialog.dart';
 import 'data_holder.dart';
@@ -34,13 +30,13 @@ class _dashboard_pageState extends State<dashboard_page> {
   int index = 0;
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   var device_token;
-  var device_id;
   int _id;
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
   @override
   void initState() {
     super.initState();
     init();
+
     firebaseCloudMessaging_Listeners();
 
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
@@ -50,6 +46,8 @@ class _dashboard_pageState extends State<dashboard_page> {
     flutterLocalNotificationsPlugin.initialize(initSetttings,
         onSelectNotification: selectNotification);
   }
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   void init() async {
     try {
@@ -62,9 +60,14 @@ class _dashboard_pageState extends State<dashboard_page> {
 
   Future<void> login() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
+    print(prefs.getString("userEmail").toString());
+    print(int.parse(prefs.getString("quickboxid")));
+    print(USER_PASSWORD);
+
     try {
       QBLoginResult result = await QB.auth
           .login(prefs.getString("userEmail").toString(), USER_PASSWORD);
+
 
       QBUser qbUser = result.qbUser;
       QBSession qbSession = result.qbSession;
@@ -76,7 +79,6 @@ class _dashboard_pageState extends State<dashboard_page> {
 
       print("user id login " + qbUser.id.toString());
       connect();
-      createPushSubscription();
     } on PlatformException catch (e) {
       print(e);
     }
@@ -84,14 +86,14 @@ class _dashboard_pageState extends State<dashboard_page> {
 
   void connect() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     try {
       await QB.chat
           .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
-
       print("+++++ " + int.parse(prefs.getString("quickboxid")).toString());
+      createPushSubscription();
     } on PlatformException catch (e) {
       print("=== " + e.toString());
+      createPushSubscription();
     }
   }
 
@@ -274,7 +276,7 @@ class _dashboard_pageState extends State<dashboard_page> {
 
     if (Platform.isIOS) iOS_Permission();
 
-    if (Platform.isAndroid) Android_Permission();
+    //if (Platform.isAndroid) Android_Permission();
 
     _firebaseMessaging.getToken().then((token) {
       setState(() {
@@ -286,7 +288,8 @@ class _dashboard_pageState extends State<dashboard_page> {
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
-        print('on message $message');
+        print('on message ==== $message');
+        showNotification(message);
       },
       onResume: (Map<String, dynamic> message) async {
         print('on resume $message');
@@ -306,54 +309,55 @@ class _dashboard_pageState extends State<dashboard_page> {
     });
   }
 
-  void Android_Permission() {
+  /* void Android_Permission() {
     _firebaseMessaging.requestNotificationPermissions(
         IosNotificationSettings(sound: true, badge: true, alert: true));
     _firebaseMessaging.onIosSettingsRegistered
         .listen((IosNotificationSettings settings) {
       print("Settings registered: $settings");
     });
-  }
+  }*/
 
   Future<void> createPushSubscription() async {
-
     try {
       List<QBSubscription> subscriptions =
           await QB.subscriptions.create(device_token, QBPushChannelNames.GCM);
+
       int length = subscriptions.length;
 
       if (length > 0) {
         _id = subscriptions[0].id;
       }
-
+      print("Subscription ------- ");
     } on PlatformException catch (e) {
-      print("Subscription error " + e.toString());
+      print("Subscription error ---- " + e.toString());
     }
   }
 
+  void showNotification(Map<String, dynamic> msg) async {
+    //{notification: {title: title, body: test}, data: {notification_type: Welcome, body: body, badge: 1, sound: , title: farhana mam, click_action: FLUTTER_NOTIFICATION_CLICK, message: H R U, category_id: 2, product_id: 1, img_url: }}
+    print(msg);
+    print(msg['notification']);
+    var title = msg['notification']['title'];
+    var msge = msg['notification']['body'];
 
-  showNotification(Map<String, dynamic> message) async {
     var android = new AndroidNotificationDetails(
         'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
         priority: Priority.high, importance: Importance.max);
-    var iOS = new IOSNotificationDetails(presentAlert: true);
+    var iOS = new IOSNotificationDetails();
     var platform = new NotificationDetails(android: android, iOS: iOS);
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      message['title'],
-      message['body'],
-      platform,
-      payload: 'theappideas',
-    );
+    await flutterLocalNotificationsPlugin.show(0, title, msge, platform,
+        payload: msge);
   }
-  Future selectNotification(String payload) {
+
+  Future selectNotification(String payload) async {
     debugPrint("payload : $payload");
-    showDialog(
-      context: context,
-      builder: (_) => new AlertDialog(
-        title: new Text('Notification'),
-        content: new Text('$payload'),
-      ),
-    );
+    if (payload != null) {
+      debugPrint('notification payload:------ ${payload}');
+      await Navigator.push(
+        context,
+        new MaterialPageRoute(builder: (context) => dashboard_page()),
+      ).then((value) {});
+    }
   }
 }

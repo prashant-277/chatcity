@@ -364,12 +364,12 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
       if (!status.isEmpty && status == "fail") {
         isValid = true;
         createUser(email.toString());
-        print("fail ---- " + responseJson("message").toString());
+        print("fail ---- " + responseJson["message"].toString());
         pr.hide();
       } else {
         displayToast("The email has already been taken.");
         pr.hide();
-        print("not fail ---- " + responseJson("message").toString());
+        print("not fail ---- " + responseJson["message"].toString());
       }
     } else {
       displayToast(response.statusCode.toString());

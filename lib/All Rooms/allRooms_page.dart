@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:chatcity/Explore/Explore_page.dart';
 import 'package:chatcity/Explore/chat_page.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants.dart';
@@ -23,53 +25,63 @@ class allRooms_page extends StatefulWidget {
 
 class _allRooms_pageState extends State<allRooms_page> {
   int current_tab = 0;
+  String userId;
   Future<bool> _onWillPop() {
     return showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        content: Text('Do you want to exit an app?',style: TextStyle(
-            fontFamily: "SFPro",
-            fontWeight: FontWeight.w600,
-            color: cBlack,
-            fontSize: 14.sp)),
-        actions: <Widget>[
-          FlatButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text('No',style: TextStyle(
+      builder: (context) =>
+          AlertDialog(
+            content: Text('Do you want to exit an app?', style: TextStyle(
                 fontFamily: "SFPro",
                 fontWeight: FontWeight.w600,
                 color: cBlack,
                 fontSize: 14.sp)),
+            actions: <Widget>[
+              FlatButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: Text('No', style: TextStyle(
+                    fontFamily: "SFPro",
+                    fontWeight: FontWeight.w600,
+                    color: cBlack,
+                    fontSize: 14.sp)),
+              ),
+              FlatButton(
+                onPressed: () {
+                  if (Platform.isAndroid) {
+                    SystemNavigator.pop();
+                  } else if (Platform.isIOS) {
+                    exit(0);
+                  }
+                },
+                child: Text('Yes', style: TextStyle(
+                    fontFamily: "SFPro",
+                    fontWeight: FontWeight.w600,
+                    color: cBlack,
+                    fontSize: 14.sp)),
+              ),
+            ],
           ),
-          FlatButton(
-            onPressed: () {
-              if (Platform.isAndroid) {
-                SystemNavigator.pop();
-              } else if (Platform.isIOS) {
-                exit(0);
-              }
-            },
-            child: Text('Yes',style: TextStyle(
-                fontFamily: "SFPro",
-                fontWeight: FontWeight.w600,
-                color: cBlack,
-                fontSize: 14.sp)),
-          ),
-        ],
-      ),
-    ) ;
+    );
   }
+
   final url1 = url.basicUrl;
   List myroomList = [];
   List joinedroomList = [];
   bool _isLoading = true;
+
   @override
   void initState() {
     super.initState();
     getmyRoomsList();
     getjoinedRoomsList();
+    getUserId();
   }
-
+  getUserId() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userId = prefs.getString("userId").toString();
+    });
+  }
   Future<void> getmyRoomsList() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -114,7 +126,9 @@ class _allRooms_pageState extends State<allRooms_page> {
 
   @override
   Widget build(BuildContext context) {
-    var query = MediaQuery.of(context).size;
+    var query = MediaQuery
+        .of(context)
+        .size;
     return WillPopScope(
       onWillPop: _onWillPop,
       child: Scaffold(
@@ -205,10 +219,19 @@ class _allRooms_pageState extends State<allRooms_page> {
                               return Padding(
                                 padding: const EdgeInsets.all(5.0),
                                 child: ListTile(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        PageTransition(
+                                            type: PageTransitionType.fade,
+                                            alignment: Alignment.bottomCenter,
+                                            duration: Duration(
+                                                milliseconds: 300),
+                                            child: chat_page(myroomList[index])));
+                                  },
                                   title: Row(
                                     mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
+                                    MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
@@ -224,15 +247,17 @@ class _allRooms_pageState extends State<allRooms_page> {
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Image.asset(
-                                                myroomList[index]["type"].toString()== "0" ?
+                                                myroomList[index]["type"]
+                                                    .toString() == "0" ?
                                                 "Assets/Icons/public.png"
-                                                    :"Assets/Icons/private.png",
+                                                    : "Assets/Icons/private.png",
                                                 color: cfooterGray,
                                                 height: 2.h),
                                           ),
                                         ],
                                       ),
-                                      Text("Time",
+                                      Text(myroomList[index]["MessageCreatedTime"].toString()==""?"":
+                                      TimeAgo.timeAgoSinceDate(myroomList[index]["MessageCreatedTime"].toString()),
                                           style: TextStyle(
                                             fontFamily: "SFPro",
                                             fontSize: small,
@@ -246,17 +271,19 @@ class _allRooms_pageState extends State<allRooms_page> {
                                       BorderRadius.circular(100.0),
                                       child: FadeInImage(
                                           image: NetworkImage(
-                                              myroomList[index]["image"].toString()),
+                                              myroomList[index]["image"]
+                                                  .toString()),
                                           fit: BoxFit.cover,
                                           width: 40.sp,
                                           height: 40.sp,
                                           placeholder: AssetImage(
                                               "Assets/Images/giphy.gif"))),
-                                  subtitle: Text("Hi, Julian! see you after work?",
+                                  subtitle: Text(myroomList[index]["Message"].toString(),
                                       style: TextStyle(
                                         fontFamily: "SFPro",
                                         fontSize: small,
-                                        color: cGray,
+                                        color: myroomList[index]["created_by"].toString()
+                                            == userId.toString() ? cButtoncolor : cGray,
                                         fontWeight: FontWeight.w500,
                                       )),
                                 ),
@@ -277,14 +304,25 @@ class _allRooms_pageState extends State<allRooms_page> {
                               return Padding(
                                 padding: const EdgeInsets.all(5.0),
                                 child: ListTile(
-                                  onTap: () {},
+                                  onTap: () {
+                                    print("click");
+                                    Navigator.push(
+                                        context,
+                                        PageTransition(
+                                            type: PageTransitionType.fade,
+                                            alignment: Alignment.bottomCenter,
+                                            duration: Duration(
+                                                milliseconds: 300),
+                                            child: chat_page(joinedroomList[index])));
+                                  },
                                   title: Row(
                                     mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
-                                          Text(joinedroomList[index]["name"].toString(),
+                                          Text(joinedroomList[index]["name"]
+                                              .toString(),
                                               style: TextStyle(
                                                 fontFamily: "SFPro",
                                                 fontSize: medium,
@@ -295,15 +333,17 @@ class _allRooms_pageState extends State<allRooms_page> {
                                           Padding(
                                             padding: const EdgeInsets.all(8.0),
                                             child: Image.asset(
-                                                joinedroomList[index]["type"].toString()== "0" ?
-                                            "Assets/Icons/public.png"
-                                                    :"Assets/Icons/private.png",
+                                                joinedroomList[index]["type"]
+                                                    .toString() == "0" ?
+                                                "Assets/Icons/public.png"
+                                                    : "Assets/Icons/private.png",
                                                 color: cfooterGray,
                                                 height: 2.h),
                                           ),
                                         ],
                                       ),
-                                      Text("Time",
+                                      Text(joinedroomList[index]["MessageCreatedTime"].toString()==""?"":
+                                      TimeAgo.timeAgoSinceDate(joinedroomList[index]["MessageCreatedTime"].toString()),
                                           style: TextStyle(
                                             fontFamily: "SFPro",
                                             fontSize: small,
@@ -317,17 +357,19 @@ class _allRooms_pageState extends State<allRooms_page> {
                                       BorderRadius.circular(100.0),
                                       child: FadeInImage(
                                           image: NetworkImage(
-                                              joinedroomList[index]["image"].toString()),
+                                              joinedroomList[index]["image"]
+                                                  .toString()),
                                           fit: BoxFit.cover,
                                           width: 40.sp,
                                           height: 40.sp,
                                           placeholder: AssetImage(
                                               "Assets/Images/giphy.gif"))),
-                                  subtitle: Text("Hi, Julian! see you after work?",
+                                  subtitle: Text(joinedroomList[index]["Message"].toString(),
                                       style: TextStyle(
                                         fontFamily: "SFPro",
                                         fontSize: small,
-                                        color: cGray,
+                                        color: joinedroomList[index]["created_by"].toString()
+                                            == userId.toString() ? cButtoncolor : cGray,
                                         fontWeight: FontWeight.w500,
                                       )),
                                 ),

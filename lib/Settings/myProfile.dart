@@ -108,7 +108,7 @@ class _myProfileState extends State<myProfile> {
               SizedBox(height: 2.h),
               Row(
                 children: [
-                  Text("Personal info",
+                  Text("Personal information",
                       style: TextStyle(
                           fontFamily: "SFPro",
                           fontWeight: FontWeight.w600,

@@ -1,8 +1,6 @@
 import 'dart:io';
 
 import 'package:chatcity/Registration/forgetOtp.dart';
-import 'package:chatcity/Registration/login_Screen.dart';
-import 'package:chatcity/Registration/resetPassword.dart';
 import 'package:chatcity/Widgets/buttons.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
