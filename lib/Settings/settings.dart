@@ -1,23 +1,29 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:chatcity/Registration/login_Screen.dart';
 import 'package:chatcity/Settings/shareApp.dart';
 import 'package:chatcity/TermsofService.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 
 import 'changePassword.dart';
 import 'myProfile.dart';
+import 'package:chatcity/url.dart';
+import 'package:http/http.dart' as http;
 
 class settings_page extends StatefulWidget {
   const settings_page({Key key}) : super(key: key);
@@ -27,10 +33,12 @@ class settings_page extends StatefulWidget {
 }
 
 class _settings_pageState extends State<settings_page> {
-  bool noti_switch = false;
+  bool noti_switch = true;
   static final FacebookLogin facebookSignIn = new FacebookLogin();
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final url1 = url.basicUrl;
 
   Future<bool> _onWillPop() {
     return showDialog(
@@ -116,8 +124,8 @@ class _settings_pageState extends State<settings_page> {
                         border: Border.all(color: gray, width: 1),
                         borderRadius: BorderRadius.all(Radius.circular(8.0))),
                     child: Padding(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 15, vertical: 6),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -136,6 +144,14 @@ class _settings_pageState extends State<settings_page> {
                               onChanged: (value) {
                                 setState(() {
                                   noti_switch = value;
+                                  if (value == true) {
+                                    _firebaseMessaging.subscribeToTopic("chat");
+                                    displayToast("Enable Push notifications");
+                                  } else {
+                                    _firebaseMessaging
+                                        .unsubscribeFromTopic("chat");
+                                    displayToast("Disable Push notifications");
+                                  }
                                 });
                               })
                         ],
@@ -318,25 +334,8 @@ class _settings_pageState extends State<settings_page> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0)),
                         color: cRed,
-                        onPressed: () async {
+                        onPressed: () {
                           logout();
-                          facebookSignIn.logOut();
-                          _googleSignIn.disconnect();
-                          _auth.signOut();
-                          SharedPreferences prefs =
-                              await SharedPreferences.getInstance();
-                          prefs.remove("api_token");
-                          prefs.remove("quickboxid");
-                          prefs.remove("userId");
-                          prefs.remove("userEmail");
-                          prefs.remove("username");
-                          // prefs.setString("api_token", "");
-                          Navigator.of(context).pushAndRemoveUntil(
-                            MaterialPageRoute(
-                              builder: (BuildContext context) => login_Screen(),
-                            ),
-                            (Route route) => false,
-                          );
                         },
                         child: Text(
                           "LOGOUT",
@@ -357,8 +356,50 @@ class _settings_pageState extends State<settings_page> {
   }
 
   Future<void> logout() async {
-    try {
-      await QB.auth.logout();
-    } on PlatformException catch (e) {}
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
+    var url = "$url1/logout";
+
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+
+    Map<String, String> headers = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    final response = await http.post(url, body: map, headers: headers);
+    final responseJson = json.decode(response.body);
+    print("res logout  " + responseJson.toString());
+
+    if (responseJson["message"].toString() == "Logged Out") {
+      pr.hide();
+      try {
+        await QB.auth.logout();
+        print("logout");
+      } on PlatformException catch (e) {print("fail");}
+
+      facebookSignIn.logOut();
+      _googleSignIn.disconnect();
+      _auth.signOut();
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      prefs.remove("api_token");
+      prefs.remove("quickboxid");
+      prefs.remove("userId");
+      prefs.remove("userEmail");
+      prefs.remove("username");
+      // prefs.setString("api_token", "");
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(
+          builder: (BuildContext context) => login_Screen(),
+        ),
+        (Route route) => false,
+      );
+    }
   }
 }
+
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context);
+}
+

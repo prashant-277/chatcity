@@ -18,6 +18,7 @@ import FBSDKCoreKit
                 didFinishLaunchingWithOptions: launchOptions
      )
     GeneratedPluginRegistrant.register(with: self)
+    application.registerForRemoteNotifications()
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 

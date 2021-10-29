@@ -87,8 +87,7 @@ class _login_ScreenState extends State<login_Screen> {
         prefs.setString("fcmToken", device_token.toString());
       });
     });
-
-
+    
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
@@ -250,6 +249,7 @@ class _login_ScreenState extends State<login_Screen> {
                             map["password"] =
                                 password_controller.text.toString();
                             map["fcm_token"] = device_token.toString();
+                            map["device_type"] = Platform.isAndroid ? "android" : "ios";
 
                             final response = await http.post(url, body: map);
 
@@ -579,6 +579,8 @@ class _login_ScreenState extends State<login_Screen> {
     map["username"] = displayName.toString();
     map['type'] = type.toString();
     map["fcm_token"] = device_token.toString();
+    map["device_type"] = Platform.isAndroid ? "android" : "ios";
+
 
     final response = await http.post(url, body: map);
 

@@ -9,6 +9,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:quickblox_sdk/models/qb_subscription.dart';
+import 'package:quickblox_sdk/push/constants.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
@@ -20,6 +22,7 @@ class roomInfo_page extends StatefulWidget {
 
   var dialogId;
 
+
   roomInfo_page(this.roomId, this.dialogId);
 
   @override
@@ -27,7 +30,7 @@ class roomInfo_page extends StatefulWidget {
 }
 
 class _roomInfo_pageState extends State<roomInfo_page> {
-  bool notification = false;
+  bool notification = true;
   int join = 0;
   List userList = [];
   final url1 = url.basicUrl;
@@ -36,6 +39,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
   bool _isLoading = true;
 
   String roomId;
+  int _id;
 
   @override
   void initState() {
@@ -99,9 +103,10 @@ class _roomInfo_pageState extends State<roomInfo_page> {
         await http.post(Uri.parse(url), body: map, headers: header);
 
     final responseJson = json.decode(response.body);
-    print(responseJson.toString());
+    print("leavegroup " + responseJson.toString());
     if (responseJson["status"].toString() == "success") {
       displayToast(responseJson["message"].toString());
+      removePushSubscription();
       pr.hide();
       setState(() {
         roomId = roomdata["id"].toString();
@@ -114,6 +119,19 @@ class _roomInfo_pageState extends State<roomInfo_page> {
     }
   }
 
+  Future<void> removePushSubscription() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      print("subscriptions.remove "+_id.toString());
+
+      await QB.subscriptions.remove(int.parse(prefs.getString("pushId")));
+      print("success --- ");
+
+    } on PlatformException catch (e) {
+      print("remove --- "+e.toString());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -210,7 +228,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                                 AssetImage("Assets/Images/giphy.gif"))),
                     Padding(
                       padding: const EdgeInsets.all(10.0),
-                      child: Text(roomdata["name"].toString(),
+                      child: Text(roomdata["name"].toString(),maxLines: 1,
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontWeight: FontWeight.w700,
@@ -257,6 +275,11 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                                   setState(() {
                                     setState(() {
                                       notification = value;
+                                      if(value==false){
+                                        //removePushSubscription();
+                                      }else{
+                                        //createPushSubscription();
+                                      }
                                     });
                                   });
                                 },
@@ -417,6 +440,26 @@ class _roomInfo_pageState extends State<roomInfo_page> {
             ),
     );
   }
+  /*Future<void> createPushSubscription() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      print("device_token ==== "+ prefs.getString("fcmToken"));
+      List<QBSubscription> subscriptions =
+      await QB.subscriptions.create(prefs.getString("fcmToken"), QBPushChannelNames.GCM);
+      int length = subscriptions.length;
+
+      if (length > 0) {
+        _id = subscriptions[0].id;
+        prefs.setString("pushId", _id.toString());
+      }
+
+      print("Subscription ------- " + _id.toString());
+
+    } on PlatformException catch (e) {
+      print("Subscription error ---- " + e.toString());
+    }
+  }*/
 }
 
 ProgressDialog _getProgress(BuildContext context) {

@@ -28,26 +28,11 @@ class dashboard_page extends StatefulWidget {
 
 class _dashboard_pageState extends State<dashboard_page> {
   int index = 0;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
-  var device_token;
-  int _id;
-
   @override
   void initState() {
     super.initState();
     init();
-
-    firebaseCloudMessaging_Listeners();
-
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-    var android = new AndroidInitializationSettings('@mipmap/ic_launcher');
-    var iOS = new IOSInitializationSettings();
-    var initSetttings = new InitializationSettings(android: android, iOS: iOS);
-    flutterLocalNotificationsPlugin.initialize(initSetttings,
-        onSelectNotification: selectNotification);
   }
-
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   void init() async {
     try {
@@ -67,7 +52,6 @@ class _dashboard_pageState extends State<dashboard_page> {
     try {
       QBLoginResult result = await QB.auth
           .login(prefs.getString("userEmail").toString(), USER_PASSWORD);
-
 
       QBUser qbUser = result.qbUser;
       QBSession qbSession = result.qbSession;
@@ -90,10 +74,8 @@ class _dashboard_pageState extends State<dashboard_page> {
       await QB.chat
           .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
       print("+++++ " + int.parse(prefs.getString("quickboxid")).toString());
-      createPushSubscription();
     } on PlatformException catch (e) {
       print("=== " + e.toString());
-      createPushSubscription();
     }
   }
 
@@ -269,95 +251,5 @@ class _dashboard_pageState extends State<dashboard_page> {
         ],
       ),
     );
-  }
-
-  Future<void> firebaseCloudMessaging_Listeners() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    if (Platform.isIOS) iOS_Permission();
-
-    //if (Platform.isAndroid) Android_Permission();
-
-    _firebaseMessaging.getToken().then((token) {
-      setState(() {
-        device_token = token;
-        print("fcm token  " + device_token);
-        prefs.setString("fcmToken", device_token.toString());
-      });
-    });
-
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print('on message ==== $message');
-        showNotification(message);
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print('on resume $message');
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print('on launch $message');
-      },
-    );
-  }
-
-  void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-  }
-
-  /* void Android_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-  }*/
-
-  Future<void> createPushSubscription() async {
-    try {
-      List<QBSubscription> subscriptions =
-          await QB.subscriptions.create(device_token, QBPushChannelNames.GCM);
-
-      int length = subscriptions.length;
-
-      if (length > 0) {
-        _id = subscriptions[0].id;
-      }
-      print("Subscription ------- ");
-    } on PlatformException catch (e) {
-      print("Subscription error ---- " + e.toString());
-    }
-  }
-
-  void showNotification(Map<String, dynamic> msg) async {
-    //{notification: {title: title, body: test}, data: {notification_type: Welcome, body: body, badge: 1, sound: , title: farhana mam, click_action: FLUTTER_NOTIFICATION_CLICK, message: H R U, category_id: 2, product_id: 1, img_url: }}
-    print(msg);
-    print(msg['notification']);
-    var title = msg['notification']['title'];
-    var msge = msg['notification']['body'];
-
-    var android = new AndroidNotificationDetails(
-        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
-        priority: Priority.high, importance: Importance.max);
-    var iOS = new IOSNotificationDetails();
-    var platform = new NotificationDetails(android: android, iOS: iOS);
-    await flutterLocalNotificationsPlugin.show(0, title, msge, platform,
-        payload: msge);
-  }
-
-  Future selectNotification(String payload) async {
-    debugPrint("payload : $payload");
-    if (payload != null) {
-      debugPrint('notification payload:------ ${payload}');
-      await Navigator.push(
-        context,
-        new MaterialPageRoute(builder: (context) => dashboard_page()),
-      ).then((value) {});
-    }
   }
 }

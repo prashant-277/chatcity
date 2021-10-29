@@ -6,19 +6,16 @@ import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
-import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
-import 'package:quickblox_sdk/models/qb_event.dart';
-import 'package:quickblox_sdk/models/qb_filter.dart';
 import 'package:quickblox_sdk/models/qb_message.dart';
 import 'package:quickblox_sdk/models/qb_sort.dart';
-import 'package:quickblox_sdk/notifications/constants.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
 import 'package:chatcity/url.dart';
 import 'package:http/http.dart' as http;
+
 class chat_page extends StatefulWidget {
   var roomData;
 
@@ -35,29 +32,32 @@ class _chat_pageState extends State<chat_page> {
   _scrollToBottom() {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
   }
+
   final url1 = url.basicUrl;
 
   List message = [];
   List userList = [];
   var occupantsId = [];
-  String chatmessage,imgUrl = "";
+  String chatmessage, imgUrl = "";
   String userId, _messageId;
   bool _isLoading = true;
   int _id;
+  int _id1;
   DateTime now = DateTime.now();
   Timer mytimer;
-
 
   @override
   void initState() {
     super.initState();
     print("hhhh ----- " + widget.roomData.toString());
-    mytimer = Timer.periodic(Duration(milliseconds: 1000), (timer) {
+    mytimer = Timer.periodic(Duration(milliseconds: 3000), (timer) {
       getRoomInfo();
     });
     getuserId();
     getDialogMessages();
+    //createPushSubscription();
   }
+
   @override
   void dispose() {
     if (mytimer != null) {
@@ -86,12 +86,10 @@ class _chat_pageState extends State<chat_page> {
 
       if (countMessages > 0) {
         _messageId = messages[0].id;
-
       }
       setState(() {
         _isLoading = false;
       });
-
 
       return messages;
     } on PlatformException catch (e) {}
@@ -100,7 +98,7 @@ class _chat_pageState extends State<chat_page> {
   Future<void> getRoomInfo() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     var url = "$url1/showRoomDetails";
-    if(userList==[]){
+    if (userList == []) {
       print(prefs.getString("userId").toString());
       var map = new Map<String, dynamic>();
       map["userid"] = prefs.getString("userId").toString();
@@ -113,7 +111,8 @@ class _chat_pageState extends State<chat_page> {
       final response = await http.post(url, body: map, headers: headers);
       final responseJson = json.decode(response.body);
       print("res showRoomDetails  " + responseJson.toString());
-      print("res showRoomDetails occupantsId " + responseJson["data"]["occupantsId"][0]);
+      print("res showRoomDetails occupantsId " +
+          responseJson["data"]["occupantsId"][0]);
 
       setState(() {
         userList = responseJson["data"]["users"];
@@ -121,34 +120,34 @@ class _chat_pageState extends State<chat_page> {
         _isLoading = false;
       });
     }
-    else{
+    /*else{
       if(userList.length==occupantsId.length+1){
         print("DOne---");
         print("DOne---" + occupantsId.length.toString());
-      }
-      else{
-        var map = new Map<String, dynamic>();
-        map["userid"] = prefs.getString("userId").toString();
-        map["room_id"] = widget.roomData["id"].toString();
+      }*/
+    else {
+      var map = new Map<String, dynamic>();
+      map["userid"] = prefs.getString("userId").toString();
+      map["room_id"] = widget.roomData["id"].toString();
 
-        Map<String, String> headers = {
-          "API-token": prefs.getString("api_token").toString()
-        };
+      Map<String, String> headers = {
+        "API-token": prefs.getString("api_token").toString()
+      };
 
-        final response = await http.post(url, body: map, headers: headers);
-        final responseJson = json.decode(response.body);
-        print("res showRoomDetails  " + responseJson.toString());
+      final response = await http.post(url, body: map, headers: headers);
+      final responseJson = json.decode(response.body);
+      print("res showRoomDetails  " + responseJson.toString());
 
-        setState(() {
-          userList = responseJson["data"]["users"];
-          occupantsId = responseJson["data"]["occupantsId"];
-          _isLoading = false;
-        });
-        print("DOne---else " + occupantsId.length.toString());
-      }
+      setState(() {
+        userList = responseJson["data"]["users"];
+        occupantsId = responseJson["data"]["occupantsId"];
+        _isLoading = false;
+      });
+      print("DOne---else " + occupantsId.length.toString());
     }
-
   }
+
+  //}
 
   @override
   Widget build(BuildContext context) {
@@ -188,11 +187,13 @@ class _chat_pageState extends State<chat_page> {
                   padding: EdgeInsets.zero,
                   onPressed: () {
                     Navigator.push(
-                        context, PageTransition(
+                        context,
+                        PageTransition(
                             type: PageTransitionType.fade,
                             alignment: Alignment.bottomCenter,
                             duration: Duration(milliseconds: 300),
-                            child: roomInfo_page(widget.roomData["id"], widget.roomData["dialogId"])));
+                            child: roomInfo_page(widget.roomData["id"],
+                                widget.roomData["dialogId"])));
                   },
                   icon: Image.asset("Assets/Icons/info.png", width: 6.w))),
         ],
@@ -201,28 +202,34 @@ class _chat_pageState extends State<chat_page> {
           child: _isLoading == true
               ? SpinKitRipple(color: cfooterpurple)
               : StreamBuilder(
-              stream: Stream.periodic(Duration(seconds: 1))
-                  .asyncMap((i) => getDialogMessages()),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  WidgetsBinding.instance
-                      .addPostFrameCallback((_) => _scrollToBottom());
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: snapshot.data.length,
-                    padding: EdgeInsets.only(top: 5, bottom: 75),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: EdgeInsets.only(
-                            left: 13, right: 13, top: 8, bottom: 8),
-                        child: Row(
-                          mainAxisAlignment: snapshot.data[index].senderId.toString() ==
-                              userId.toString() ? MainAxisAlignment.end : MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-
-                            snapshot.data[index].senderId.toString() ==
-                                userId.toString() ? Text("") : get_Image(snapshot.data[index].senderId.toString()), /*ClipRRect(
+                  stream: Stream.periodic(Duration(seconds: 1))
+                      .asyncMap((i) => getDialogMessages()),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      WidgetsBinding.instance
+                          .addPostFrameCallback((_) => _scrollToBottom());
+                      return ListView.builder(
+                        controller: _scrollController,
+                        itemCount: snapshot.data.length,
+                        padding: EdgeInsets.only(top: 5, bottom: 75),
+                        itemBuilder: (context, index) {
+                          return Container(
+                            padding: EdgeInsets.only(
+                                left: 13, right: 13, top: 8, bottom: 8),
+                            child: Row(
+                              mainAxisAlignment:
+                                  snapshot.data[index].senderId.toString() ==
+                                          userId.toString()
+                                      ? MainAxisAlignment.end
+                                      : MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                snapshot.data[index].senderId.toString() ==
+                                        userId.toString()
+                                    ? Text("")
+                                    : get_Image(snapshot.data[index].senderId
+                                        .toString()),
+                                /*ClipRRect(
                             borderRadius:
                             BorderRadius.circular(100.0),
                             child: FadeInImage(
@@ -233,53 +240,58 @@ class _chat_pageState extends State<chat_page> {
                                 placeholder: AssetImage(
                                     "Assets/Images/giphy.gif"))),*/
 
-                            SizedBox(width: 2.w,),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: snapshot.data[index].senderId
-                                    .toString() == userId.toString() ? BorderRadius.only(
-                                    bottomLeft: Radius.circular(15),
-                                    bottomRight: Radius.circular(15),
-                                    topLeft: Radius.circular(15),
-                                    topRight:Radius.circular(1)):
-                                BorderRadius.only(
-                                    bottomLeft: Radius.circular(15),
-                                    bottomRight: Radius.circular(15),
-                                    topLeft: Radius.circular(1),
-                                    topRight:Radius.circular(15)),
-                                gradient: snapshot.data[index].senderId
-                                    .toString() == userId.toString()
-                                    ? LinearGradient(colors: [
-                                  Color(0xff382177),
-                                  Color(0xff9760A4)
-                                ])
-                                    : LinearGradient(colors: [gray, gray]),
-                              ),
-                              padding: EdgeInsets.all(10),
-                              child: Text(
-                                snapshot.data[index].body.toString(),
-                                style: TextStyle(
-                                  fontSize: small,
-                                    color: snapshot.data[index].senderId
-                                        .toString() ==
-                                        userId.toString()
-                                        ? cwhite
-                                        : cBlack),
-                              ),
+                                SizedBox(
+                                  width: 2.w,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: snapshot.data[index].senderId
+                                                .toString() ==
+                                            userId.toString()
+                                        ? BorderRadius.only(
+                                            bottomLeft: Radius.circular(15),
+                                            bottomRight: Radius.circular(15),
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(1))
+                                        : BorderRadius.only(
+                                            bottomLeft: Radius.circular(15),
+                                            bottomRight: Radius.circular(15),
+                                            topLeft: Radius.circular(1),
+                                            topRight: Radius.circular(15)),
+                                    gradient: snapshot.data[index].senderId
+                                                .toString() ==
+                                            userId.toString()
+                                        ? LinearGradient(colors: [
+                                            Color(0xff382177),
+                                            Color(0xff9760A4)
+                                          ])
+                                        : LinearGradient(colors: [gray, gray]),
+                                  ),
+                                  padding: EdgeInsets.all(10),
+                                  child: Text(
+                                    snapshot.data[index].body.toString(),
+                                    style: TextStyle(
+                                        fontSize: small,
+                                        color: snapshot.data[index].senderId
+                                                    .toString() ==
+                                                userId.toString()
+                                            ? cwhite
+                                            : cBlack),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
+                          );
+                        },
                       );
-                    },
-                  );
-                }
-                return Center(
-                    child: Text(
+                    }
+                    return Center(
+                        child: Text(
                       "Loading...",
                       style: TextStyle(
                           color: cBlack, fontFamily: "SFPro", fontSize: medium),
                     ));
-              })),
+                  })),
       bottomSheet: Container(
           color: cwhite,
           height: 55.sp,
@@ -292,12 +304,9 @@ class _chat_pageState extends State<chat_page> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  width: MediaQuery
-                      .of(context)
-                      .size
-                      .width / 1.25,
+                  width: MediaQuery.of(context).size.width / 1.25,
                   decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(50.0)),
+                      BoxDecoration(borderRadius: BorderRadius.circular(50.0)),
                   height: 35.sp,
                   child: TextField(
                     controller: chat_controller,
@@ -313,13 +322,13 @@ class _chat_pageState extends State<chat_page> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50.0),
                           borderSide:
-                          BorderSide(color: cChatbackground, width: 1)),
+                              BorderSide(color: cChatbackground, width: 1)),
                       contentPadding:
-                      EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                          EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(50.0)),
                           borderSide:
-                          BorderSide(color: cChatbackground, width: 1)),
+                              BorderSide(color: cChatbackground, width: 1)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
                         borderSide: BorderSide(
@@ -336,7 +345,7 @@ class _chat_pageState extends State<chat_page> {
                   ),
                 ),
                 InkWell(
-                  onTap: () {
+                  onTap: chat_controller.text.length==0 ? (){} :  () {
                     FocusScopeNode currentFocus = FocusScope.of(context);
                     if (!currentFocus.hasPrimaryFocus) {
                       currentFocus.unfocus();
@@ -370,7 +379,7 @@ class _chat_pageState extends State<chat_page> {
       await QB.chat.sendMessage(widget.roomData["dialogId"],
           body: chatmessage, saveToHistory: true, properties: properties);
       print("rec -------------");
-      createNotification();
+      //createNotification();
       saveLastMessage();
     } on PlatformException catch (e) {
       print("send " + e.toString());
@@ -399,17 +408,17 @@ class _chat_pageState extends State<chat_page> {
     }
   }
 
-  Future<void> createNotification() async {
+  /*Future<void> createNotification() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String type = QBNotificationEventTypes.ONE_SHOT;
     String notificationEventType = QBNotificationTypes.PUSH;
+    int pushType = QBNotificationPushTypes.GCM;
     int senderId = int.parse(prefs.getString("quickboxid"));
 
     Map<String, Object> payload = Map();
-    payload["message"] = chatmessage;
+    payload["message"] = chatmessage.toString();
     payload["body"] = widget.roomData["name"].toString();
     payload["user_id"] = widget.roomData["name"].toString();
-
 
     try {
       List<QBEvent> qbEventsList = await QB.events
@@ -434,36 +443,29 @@ class _chat_pageState extends State<chat_page> {
     } on PlatformException catch (e) {
       print("count error === " + e.toString());
     }
-  }
-
-
+  }*/
 
   Widget get_Image(String senderId) {
-
     var url;
-    for(int i = 0; i<userList.length;i++) {
-
+    for (int i = 0; i < userList.length; i++) {
       if (userList[i]["quickboxid"].toString() == senderId.toString()) {
-
         url = userList[i]["image"].toString();
 
         print("image ---- " + userList.toString());
 
         break;
       }
-
     }
     return ClipRRect(
-        borderRadius:
-        BorderRadius.circular(100.0),
+        borderRadius: BorderRadius.circular(100.0),
         child: FadeInImage(
-            image: NetworkImage(url.toString()=="null"?
-            "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png": url.toString()),
+            image: NetworkImage(url.toString() == "null"
+                ? "https://www.pngitem.com/pimgs/m/146-1468479_my-profile-icon-blank-profile-picture-circle-hd.png"
+                : url.toString()),
             fit: BoxFit.fill,
             width: 18.sp,
             height: 18.sp,
-            placeholder: AssetImage(
-                "Assets/Images/giphy.gif")));
+            placeholder: AssetImage("Assets/Images/giphy.gif")));
   }
 
   Future<void> saveLastMessage() async {
@@ -471,12 +473,10 @@ class _chat_pageState extends State<chat_page> {
 
     var url = "$url1/sendMessage";
 
-
     print(prefs.getString("userId").toString());
     print(widget.roomData["id"].toString());
     print(chatmessage.toString());
     print("sendMessage ---- " + now.toString());
-
 
     var map = new Map<String, dynamic>();
     map["userid"] = prefs.getString("userId").toString();
@@ -493,4 +493,24 @@ class _chat_pageState extends State<chat_page> {
     print("res sendMessage  " + responseJson.toString());
   }
 
+  /*Future<void> createPushSubscription() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      print("device_token ==== "+ prefs.getString("fcmToken"));
+      List<QBSubscription> subscriptions =
+      await QB.subscriptions.create(prefs.getString("fcmToken"), QBPushChannelNames.GCM);
+      int length = subscriptions.length;
+
+      if (length > 0) {
+        _id1 = subscriptions[0].id;
+        prefs.setString("pushId", _id1.toString());
+      }
+
+      print("Subscription ------- " + _id1.toString());
+
+    } on PlatformException catch (e) {
+      print("Subscription error ---- " + e.toString());
+    }
+  }*/
 }

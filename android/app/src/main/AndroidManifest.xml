@@ -18,8 +18,16 @@
     <uses-feature android:name="android.hardware.camera.autofocus" />
 
     <application
+        android:allowBackup="false"
         android:icon="@mipmap/chatcity"
         android:label="ChatCity">
+
+
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/chatcity" />
+
+
 
         <activity
             android:name=".MainActivity"

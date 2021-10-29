@@ -349,7 +349,7 @@ class _createPublic_roomState extends State<createPublic_room> {
     request.fields['name'] = groupname_controller.text.toString();
     request.fields['type'] = widget.roomType.toString();
     request.fields['dialogId'] = _dialogId.toString();
-    request.fields['occupantsId'] = "";
+    request.fields['occupantsId'] = prefs.getString("quickboxid").toString();
 
     request.headers["API-token"] = prefs.getString("api_token").toString();
 
@@ -375,8 +375,6 @@ class _createPublic_roomState extends State<createPublic_room> {
             roomData = responseJson["data"];
           });
           pr.hide();
-
-
           Navigator.pushReplacement(
               context,
               PageTransition(
@@ -391,6 +389,7 @@ class _createPublic_roomState extends State<createPublic_room> {
       } else {
         final responseStream = await response.stream.bytesToString();
         final responseJson = json.decode(responseStream);
+        print("responseJson === " + responseJson.toString());
         displayToast("Room is not creating, Try after sometime");
         pr.hide();
         print("Not Uploaded");

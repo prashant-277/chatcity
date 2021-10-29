@@ -6,8 +6,10 @@ import 'package:chatcity/Explore/filter_page.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:intl/intl.dart';
 import 'package:page_transition/page_transition.dart';
@@ -70,12 +72,26 @@ class _Explore_pageState extends State<Explore_page> {
   bool _isLoading = true;
   var type;
   var userId;
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  var device_token;
+  int _id;
+
   @override
   void initState() {
     super.initState();
     getAllRooms();
     getUserId();
+    //firebaseCloudMessaging_Listeners();
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    var android = new AndroidInitializationSettings('@mipmap/chatcity');
+    var iOS = new IOSInitializationSettings();
+    var initSetttings = new InitializationSettings(android: android, iOS: iOS);
+    flutterLocalNotificationsPlugin.initialize(initSetttings,
+        onSelectNotification: selectNotification);
   }
+
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
 
   Future<void> getAllRooms() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -100,6 +116,7 @@ class _Explore_pageState extends State<Explore_page> {
     setState(() {
       roomData = responseJson["data"];
       _isLoading = false;
+     // createPushSubscription();
     });
   }
 
@@ -287,7 +304,9 @@ class _Explore_pageState extends State<Explore_page> {
                                   children: [
                                     Row(
                                       children: [
-                                        Text(roomData[index]["name"].toString(),
+                                        Text(roomData[index]["name"].toString().length <= 13 ?
+                                        roomData[index]["name"].toString() :
+                                         roomData[index]["name"].toString().substring(0,13) + "..." ,
                                             style: TextStyle(
                                               fontFamily: "SFPro",
                                               fontSize: medium,
@@ -307,7 +326,7 @@ class _Explore_pageState extends State<Explore_page> {
                                       ],
                                     ),
                                     Text(roomData[index]["MessageCreatedTime"].toString()==""?"":
-                                        TimeAgo.timeAgoSinceDate(roomData[index]["MessageCreatedTime"].toString()),
+                                        TimeAgo.timeAgoSinceDate(roomData[index]["MessageCreatedTime"].toString()),maxLines: 2,
                                         style: TextStyle(
                                           fontFamily: "SFPro",
                                           fontSize: small,
@@ -616,6 +635,90 @@ class _Explore_pageState extends State<Explore_page> {
             builder: (_) => new chat_page(roomData)))
             .then((value) => getAllRooms());
       }
+    }
+  }
+
+  /*Future<void> firebaseCloudMessaging_Listeners() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (Platform.isIOS) iOS_Permission();
+
+    //if (Platform.isAndroid) Android_Permission();
+
+    _firebaseMessaging.getToken().then((token) {
+      setState(() {
+        device_token = token;
+        print("fcm token  " + device_token);
+        prefs.setString("fcmToken", device_token.toString());
+      });
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        print('on message ==== $message');
+        showNotification(message);
+      },
+      onResume: (Map<String, dynamic> message) async {
+        print('on resume $message');
+      },
+      onLaunch: (Map<String, dynamic> message) async {
+        print('on launch $message');
+      },
+    );
+  }
+
+  void iOS_Permission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(sound: true, badge: true, alert: true));
+    _firebaseMessaging.onIosSettingsRegistered
+        .listen((IosNotificationSettings settings) {
+      print("Settings registered: $settings");
+
+    });
+  }*/
+
+  void showNotification(Map<String, dynamic> msg) async {
+    //{notification: {title: title, body: test}, data: {notification_type: Welcome, body: body, badge: 1, sound: , title: farhana mam, click_action: FLUTTER_NOTIFICATION_CLICK, message: H R U, category_id: 2, product_id: 1, img_url: }}
+    print(msg);
+    var title = msg['notification']['title'];
+    var msge = msg['data']['message'];
+
+    var android = new AndroidNotificationDetails(
+        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
+        priority: Priority.high, importance: Importance.max);
+    var iOS = new IOSNotificationDetails();
+    var platform = new NotificationDetails(android: android, iOS: iOS);
+    await flutterLocalNotificationsPlugin.show(0, title, msge, platform,
+        payload: msge);
+  }
+
+  /*Future<void> createPushSubscription() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      print("device_token ==== "+ device_token);
+      List<QBSubscription> subscriptions =
+      await QB.subscriptions.create(device_token, QBPushChannelNames.GCM);
+      int length = subscriptions.length;
+
+      if (length > 0) {
+        _id = subscriptions[0].id;
+        prefs.setString("pushId", _id.toString());
+      }
+
+      print("Subscription ------- " + _id.toString());
+    } on PlatformException catch (e) {
+      print("Subscription error ---- " + e.toString());
+    }
+  }*/
+  Future selectNotification(String payload) async {
+    debugPrint("payload : $payload");
+    if (payload != null) {
+      debugPrint('notification payload:------ ${payload}');
+      await Navigator.push(
+        context,
+        new MaterialPageRoute(builder: (context) => chat_page(roomData)),
+      ).then((value) {});
     }
   }
 }

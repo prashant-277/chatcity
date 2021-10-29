@@ -398,6 +398,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     map["email"] = Email_controller.text.toString();
     map["quickboxid"] = qb_Id.toString();
     map["fcm_token"] = device_token.toString();
+    map["device_type"] = Platform.isAndroid ? "android" : "ios";
 
     final response = await http.post(url, body: map);
 
