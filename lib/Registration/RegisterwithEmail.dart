@@ -78,14 +78,25 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
+        return;
       },
+
       onResume: (Map<String, dynamic> message) async {
         print('on resume $message');
+        return;
       },
+
       onLaunch: (Map<String, dynamic> message) async {
         print('on launch $message');
-      },
+        return;
+      },      onBackgroundMessage: myBackgroundMessageHandler
+
     );
+
+  }
+
+  Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
+    print('on background $message');
   }
 
   void iOS_Permission() {

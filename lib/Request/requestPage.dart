@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:chatcity/Explore/chat_page.dart';
+import 'package:chatcity/Explore/privateChat_page.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:page_transition/page_transition.dart';
 import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -206,21 +208,48 @@ class _requestPageState extends State<requestPage> {
                         : Container(
                       child: RefreshIndicator(
                         onRefresh: getMyfriednList,
-                        child: ListView.builder(
+                        child: myfriendlist.toString()=="[]" ?
+                        Container(
+                          height: query.height,
+                          width: query.width,
+                          child: ListView(
+                            children: [
+                              SizedBox(height: query.height/3.5,),
+                              Center(
+                                child: Text("No Data",
+                                  style: TextStyle(
+                                    fontFamily: "SFPro",
+                                  fontSize: medium,
+                                  color: cBlack,
+                                  fontWeight: FontWeight.w400,),),
+                              ),
+                            ],
+                          ),
+                        ): ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
                             itemCount: myfriendlist == []? "": myfriendlist.length,
                             itemBuilder: (context, index) {
                               return Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ListTile(
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        PageTransition(
+                                            type: PageTransitionType.fade,
+                                            alignment: Alignment.bottomCenter,
+                                            duration: Duration(milliseconds: 300),
+                                            child: privateChat_page(myfriendlist[index])));
+                                  },
                                   title: Row(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
+
                                       Text(
-                                          myfriendlist[index]["username"]
-                                              .toString(),
+                                          myfriendlist[index]["username"].toString().length <= 14 ?
+                                          myfriendlist[index]["username"].toString() :
+                                          myfriendlist[index]["username"].toString().substring(0,14) + "..." ,
                                           style: TextStyle(
                                             fontFamily: "SFPro",
                                             fontSize: medium,
@@ -302,7 +331,24 @@ class _requestPageState extends State<requestPage> {
                       child: RefreshIndicator(
                         onRefresh: getInvitaionList,
                         color: cButtoncolor,
-                        child: ListView.builder(
+                        child: requestDetail.toString()=="[]" ?
+                        Container(
+                          height: query.height,
+                          width: query.width,
+                          child: ListView(
+                            children: [
+                              SizedBox(height: query.height/3.5,),
+                              Center(
+                                child: Text("No Data",
+                                  style: TextStyle(
+                                    fontFamily: "SFPro",
+                                    fontSize: medium,
+                                    color: cBlack,
+                                    fontWeight: FontWeight.w400,),),
+                              ),
+                            ],
+                          ),
+                        ): ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
                             itemCount: requestDetail==[]?"":requestDetail.length,
                             itemBuilder: (context, index) {
@@ -316,15 +362,18 @@ class _requestPageState extends State<requestPage> {
                                     children: [
                                       Row(
                                         children: [
-                                          Text(
-                                              requestDetail[index]["name"]
-                                                  .toString(),
-                                              style: TextStyle(
-                                                fontFamily: "SFPro",
-                                                fontSize: medium,
-                                                color: cBlack,
-                                                fontWeight: FontWeight.w400,
-                                              )),
+                                          Container(width: 30.w,
+                                            child: Text(requestDetail[index]["name"].toString().length <= 12 ?
+                                            requestDetail[index]["name"].toString() :
+                                            requestDetail[index]["name"].toString().substring(0,12) + "..." ,
+
+                                                style: TextStyle(
+                                                  fontFamily: "SFPro",
+                                                  fontSize: medium,
+                                                  color: cBlack,
+                                                  fontWeight: FontWeight.w400,
+                                                )),
+                                          ),
                                           Padding(
                                             padding: const EdgeInsets.all(10.0),
                                             child: Image.asset(

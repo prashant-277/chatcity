@@ -212,7 +212,24 @@ class _allRooms_pageState extends State<allRooms_page> {
                       child: _isLoading == true
                           ? SpinKitRipple(color: cfooterpurple)
                           : Container(
-                        child: ListView.builder(
+                        child: myroomList.toString()=="[]" ?
+                        Container(
+                          height: query.height,
+                          width: query.width,
+                          child: ListView(
+                            children: [
+                              SizedBox(height: query.height/3.5,),
+                              Center(
+                                child: Text("No Data",
+                                  style: TextStyle(
+                                    fontFamily: "SFPro",
+                                    fontSize: medium,
+                                    color: cBlack,
+                                    fontWeight: FontWeight.w400,),),
+                              ),
+                            ],
+                          ),
+                        ):ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
                             itemCount: myroomList.length,
                             itemBuilder: (context, index) {
@@ -235,8 +252,9 @@ class _allRooms_pageState extends State<allRooms_page> {
                                     children: [
                                       Row(
                                         children: [
-                                          Text(
-                                              myroomList[index]["name"].toString(),
+                                          Text(myroomList[index]["name"].toString().length <= 12 ?
+                                              myroomList[index]["name"].toString() :
+                                              myroomList[index]["name"].toString().substring(0,12) + "..." ,
                                               style: TextStyle(
                                                 fontFamily: "SFPro",
                                                 fontSize: medium,
@@ -297,7 +315,24 @@ class _allRooms_pageState extends State<allRooms_page> {
                       child: _isLoading == true
                           ? SpinKitRipple(color: cfooterpurple)
                           : Container(
-                        child: ListView.builder(
+                        child: joinedroomList.toString()=="[]" ?
+                        Container(
+                          height: query.height,
+                          width: query.width,
+                          child: ListView(
+                            children: [
+                              SizedBox(height: query.height/3.5,),
+                              Center(
+                                child: Text("No Data",
+                                  style: TextStyle(
+                                    fontFamily: "SFPro",
+                                    fontSize: medium,
+                                    color: cBlack,
+                                    fontWeight: FontWeight.w400,),),
+                              ),
+                            ],
+                          ),
+                        ):ListView.builder(
                             physics: AlwaysScrollableScrollPhysics(),
                             itemCount: joinedroomList.length,
                             itemBuilder: (context, index) {
@@ -316,13 +351,13 @@ class _allRooms_pageState extends State<allRooms_page> {
                                             child: chat_page(joinedroomList[index])));
                                   },
                                   title: Row(
-                                    mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                     children: [
                                       Row(
                                         children: [
-                                          Text(joinedroomList[index]["name"]
-                                              .toString(),
+                                          Text(joinedroomList[index]["name"].toString().length <= 12 ?
+                                          joinedroomList[index]["name"].toString() :
+                                          joinedroomList[index]["name"].toString().substring(0,12) + "..." ,
                                               style: TextStyle(
                                                 fontFamily: "SFPro",
                                                 fontSize: medium,
@@ -340,6 +375,7 @@ class _allRooms_pageState extends State<allRooms_page> {
                                                 color: cfooterGray,
                                                 height: 2.h),
                                           ),
+
                                         ],
                                       ),
                                       Text(joinedroomList[index]["MessageCreatedTime"].toString()==""?"":
@@ -364,6 +400,7 @@ class _allRooms_pageState extends State<allRooms_page> {
                                           height: 40.sp,
                                           placeholder: AssetImage(
                                               "Assets/Images/giphy.gif"))),
+
                                   subtitle: Text(joinedroomList[index]["Message"].toString(),
                                       style: TextStyle(
                                         fontFamily: "SFPro",

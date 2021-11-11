@@ -8,7 +8,6 @@ import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:chatcity/constants.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -240,11 +239,12 @@ class _changePasswordState extends State<changePassword> {
                             Navigator.of(context).pushAndRemoveUntil(
                               MaterialPageRoute(
                                 builder: (BuildContext context) =>
-                                    login_Screen(),
+                                    login_Screen("close"),
                               ),
                               (Route route) => false,
                             );
                           } else {
+                            pr.hide();
                             displayToast(responseJson["message"].toString());
                           }
                         } else {

@@ -1,13 +1,12 @@
 import 'dart:io';
 
 import 'package:chatcity/constants.dart';
-import 'package:chatcity/credentials.dart';
-import 'package:chatcity/dashboard_page.dart';
 import 'package:chatcity/splashScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:sizer/sizer.dart';
+
 class MyHttpOverrides extends HttpOverrides{
   @override
   HttpClient createHttpClient(SecurityContext context){
@@ -16,9 +15,7 @@ class MyHttpOverrides extends HttpOverrides{
   }
 }
 void main() {
-
   HttpOverrides.global=new MyHttpOverrides();
-
   runApp(MyApp());
 }
 

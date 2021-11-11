@@ -81,17 +81,16 @@ class _Explore_pageState extends State<Explore_page> {
     super.initState();
     getAllRooms();
     getUserId();
-    //firebaseCloudMessaging_Listeners();
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-    var android = new AndroidInitializationSettings('@mipmap/chatcity');
+    var android = new AndroidInitializationSettings('@mipmap/chatcity',);
     var iOS = new IOSInitializationSettings();
     var initSetttings = new InitializationSettings(android: android, iOS: iOS);
     flutterLocalNotificationsPlugin.initialize(initSetttings,
-        onSelectNotification: selectNotification);
+        onSelectNotification: selectNotification,);
+    firebaseCloudMessaging_Listeners();
   }
 
   FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
-
 
   Future<void> getAllRooms() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -102,9 +101,9 @@ class _Explore_pageState extends State<Explore_page> {
     print(prefs.getString("userId").toString());
     print(prefs.getString("api_token").toString());
     var map = new Map<String, dynamic>();
-    map["userid"] = prefs.getString("userId").toString();
-    map["type"] = type.toString()=="null" ? "" : type.toString();
 
+    map["userid"] = prefs.getString("userId").toString();
+    map["type"] = type.toString() == "null" ? "" : type.toString();
 
     Map<String, String> headers = {
       "API-token": prefs.getString("api_token").toString()
@@ -116,7 +115,7 @@ class _Explore_pageState extends State<Explore_page> {
     setState(() {
       roomData = responseJson["data"];
       _isLoading = false;
-     // createPushSubscription();
+      // createPushSubscription();
     });
   }
 
@@ -126,6 +125,7 @@ class _Explore_pageState extends State<Explore_page> {
       userId = prefs.getString("userId").toString();
     });
   }
+
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -263,9 +263,7 @@ class _Explore_pageState extends State<Explore_page> {
                               getAllRooms();
                             });
                           }
-                          }
-                        );
-
+                        });
                       },
                       child: Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -288,78 +286,119 @@ class _Explore_pageState extends State<Explore_page> {
                   : Container(
                       height: query.height,
                       width: query.width,
-                      child: ListView.builder(
-                          physics: AlwaysScrollableScrollPhysics(),
-                          itemCount: roomData.length,
-                          itemBuilder: (context, index) {
-                            return Padding(
-                              padding: const EdgeInsets.all(2.0),
-                              child: ListTile(
-                                onTap: () async {
-                                  isConnected(roomData[index]);
-                                },
-                                title: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
+                      child: roomData.toString() == "[]"
+                          ? Container(
+                              height: query.height,
+                              width: query.width,
+                              child: ListView(
+                                children: [
+                                  SizedBox(
+                                    height: query.height / 3.5,
+                                  ),
+                                  Center(
+                                    child: Text(
+                                      "No Data",
+                                      style: TextStyle(
+                                        fontFamily: "SFPro",
+                                        fontSize: medium,
+                                        color: cBlack,
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : ListView.builder(
+                              physics: AlwaysScrollableScrollPhysics(),
+                              itemCount: roomData.length,
+                              itemBuilder: (context, index) {
+                                return Padding(
+                                  padding: const EdgeInsets.all(2.0),
+                                  child: ListTile(
+                                    onTap: () async {
+                                      isConnected(roomData[index]);
+                                    },
+                                    title: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(roomData[index]["name"].toString().length <= 13 ?
-                                        roomData[index]["name"].toString() :
-                                         roomData[index]["name"].toString().substring(0,13) + "..." ,
+                                        Row(
+                                          children: [
+                                            Text(
+                                                roomData[index]["name"]
+                                                            .toString()
+                                                            .length <=
+                                                        13
+                                                    ? roomData[index]["name"]
+                                                        .toString()
+                                                    : roomData[index]["name"]
+                                                            .toString()
+                                                            .substring(0, 13) +
+                                                        "...",
+                                                style: TextStyle(
+                                                  fontFamily: "SFPro",
+                                                  fontSize: medium,
+                                                  color: cBlack,
+                                                  fontWeight: FontWeight.w600,
+                                                )),
+                                            Padding(
+                                                padding:
+                                                    const EdgeInsets.all(8.0),
+                                                child: Image.asset(
+                                                    roomData[index]["type"]
+                                                                .toString() ==
+                                                            "0"
+                                                        ? "Assets/Icons/public.png"
+                                                        : "Assets/Icons/private.png",
+                                                    color: cfooterGray,
+                                                    height: 2.h)),
+                                          ],
+                                        ),
+                                        Text(
+                                            roomData[index]["MessageCreatedTime"]
+                                                        .toString() ==
+                                                    ""
+                                                ? ""
+                                                : TimeAgo.timeAgoSinceDate(
+                                                    roomData[index][
+                                                            "MessageCreatedTime"]
+                                                        .toString()),
+                                            maxLines: 2,
                                             style: TextStyle(
                                               fontFamily: "SFPro",
-                                              fontSize: medium,
-                                              color: cBlack,
-                                              fontWeight: FontWeight.w600,
+                                              fontSize: small,
+                                              color: cGray,
+                                              fontWeight: FontWeight.w500,
                                             )),
-                                        Padding(
-                                          padding: const EdgeInsets.all(8.0),
-                                          child: Image.asset(
-                                              roomData[index]["type"]
-                                                          .toString() == "0"
-                                                  ? "Assets/Icons/public.png"
-                                                  : "Assets/Icons/private.png",
-                                              color: cfooterGray,
-                                              height: 2.h),
-                                        ),
                                       ],
                                     ),
-                                    Text(roomData[index]["MessageCreatedTime"].toString()==""?"":
-                                        TimeAgo.timeAgoSinceDate(roomData[index]["MessageCreatedTime"].toString()),maxLines: 2,
+                                    leading: ClipRRect(
+                                        borderRadius:
+                                            BorderRadius.circular(100.0),
+                                        child: FadeInImage(
+                                            image: NetworkImage(roomData[index]
+                                                    ["image"]
+                                                .toString()),
+                                            fit: BoxFit.cover,
+                                            width: 40.sp,
+                                            height: 40.sp,
+                                            placeholder: AssetImage(
+                                                "Assets/Images/giphy.gif"))),
+                                    subtitle: Text(
+                                        roomData[index]["Message"].toString(),
                                         style: TextStyle(
                                           fontFamily: "SFPro",
                                           fontSize: small,
-                                          color: cGray,
+                                          color: roomData[index]["created_by"]
+                                                      .toString() == userId.toString()
+                                              ? cButtoncolor
+                                              : cGray,
                                           fontWeight: FontWeight.w500,
                                         )),
-                                  ],
-                                ),
-                                leading: ClipRRect(
-                                    borderRadius: BorderRadius.circular(100.0),
-                                    child: FadeInImage(
-                                        image: NetworkImage(roomData[index]
-                                                ["image"]
-                                            .toString()),
-                                        fit: BoxFit.cover,
-                                        width: 40.sp,
-                                        height: 40.sp,
-                                        placeholder: AssetImage(
-                                            "Assets/Images/giphy.gif"))),
-                                subtitle:
-                                    Text(roomData[index]["Message"].toString(),
-                                        style: TextStyle(
-                                          fontFamily: "SFPro",
-                                          fontSize: small,
-
-                                          color: roomData[index]["created_by"].toString()
-                                              == userId.toString() ? cButtoncolor : cGray,
-
-                                          fontWeight: FontWeight.w500,
-                                        )),
-                              ),
-                            );
-                          }),
+                                  ),
+                                );
+                              }),
                     ),
             ),
           )),
@@ -461,7 +500,6 @@ class _Explore_pageState extends State<Explore_page> {
         }
         if (j == 1) {
           getAllRooms();
-
           /*Navigator.push(
                   context,
                   PageTransition(
@@ -472,9 +510,9 @@ class _Explore_pageState extends State<Explore_page> {
               .then((value) => getAllRooms());*/
 
           Navigator.of(context)
-                      .push(new MaterialPageRoute(
-                          builder: (_) => new chat_page(roomData)))
-                      .then((value) => getAllRooms());
+              .push(new MaterialPageRoute(
+                  builder: (_) => new chat_page(roomData)))
+              .then((value) => getAllRooms());
         } else {
           displayToast("You are not a member in this group");
         }
@@ -532,10 +570,9 @@ class _Explore_pageState extends State<Explore_page> {
                       .push(new MaterialPageRoute(
                           builder: (_) => new chat_page(roomData)))
                       .then((value) => getAllRooms());*/
-
                   Navigator.of(context)
                       .push(new MaterialPageRoute(
-                      builder: (_) => new chat_page(roomData)))
+                          builder: (_) => new chat_page(roomData)))
                       .then((value) => getAllRooms());
 
                   displayToast(responseJson["message"].toString());
@@ -587,9 +624,12 @@ class _Explore_pageState extends State<Explore_page> {
                 onPressed: () async {
                   var url = "$url1/joinRoom";
 
-                  print("quick userId ---- "+prefs.getString("userId").toString());
-                  print("quick dialogId ---- "+roomData["dialogId"].toString());
-                  print("quick quickboxid ---- "+prefs.getString("quickboxid").toString());
+                  print("quick userId ---- " +
+                      prefs.getString("userId").toString());
+                  print(
+                      "quick dialogId ---- " + roomData["dialogId"].toString());
+                  print("quick quickboxid ---- " +
+                      prefs.getString("quickboxid").toString());
 
                   var map = new Map<String, dynamic>();
                   map["userid"] = prefs.getString("userId").toString();
@@ -610,7 +650,7 @@ class _Explore_pageState extends State<Explore_page> {
                     Navigator.of(context).pop();
                     Navigator.of(context)
                         .push(new MaterialPageRoute(
-                        builder: (_) => new chat_page(roomData)))
+                            builder: (_) => new chat_page(roomData)))
                         .then((value) => getAllRooms());
                     displayToast(responseJson["message"].toString());
                   } else {
@@ -631,28 +671,28 @@ class _Explore_pageState extends State<Explore_page> {
       } else {
         //getAllRooms();
         Navigator.of(context)
-            .push(new MaterialPageRoute(
-            builder: (_) => new chat_page(roomData)))
+            .push(
+                new MaterialPageRoute(builder: (_) => new chat_page(roomData)))
             .then((value) => getAllRooms());
       }
     }
   }
 
-  /*Future<void> firebaseCloudMessaging_Listeners() async {
+  Future<void> firebaseCloudMessaging_Listeners() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-    if (Platform.isIOS) iOS_Permission();
+    // if (Platform.isIOS) iOS_Permission();
 
     //if (Platform.isAndroid) Android_Permission();
 
-    _firebaseMessaging.getToken().then((token) {
+    /* _firebaseMessaging.getToken().then((token) {
       setState(() {
         device_token = token;
         print("fcm token  " + device_token);
         prefs.setString("fcmToken", device_token.toString());
       });
     });
-
+*/
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message ==== $message');
@@ -664,10 +704,14 @@ class _Explore_pageState extends State<Explore_page> {
       onLaunch: (Map<String, dynamic> message) async {
         print('on launch $message');
       },
+      onBackgroundMessage: (Map<String, dynamic> message) async {
+        print('on Background $message');
+        showNotification(message);
+      },
     );
   }
 
-  void iOS_Permission() {
+  /*void iOS_Permission() {
     _firebaseMessaging.requestNotificationPermissions(
         IosNotificationSettings(sound: true, badge: true, alert: true));
     _firebaseMessaging.onIosSettingsRegistered
@@ -678,15 +722,19 @@ class _Explore_pageState extends State<Explore_page> {
   }*/
 
   void showNotification(Map<String, dynamic> msg) async {
-    //{notification: {title: title, body: test}, data: {notification_type: Welcome, body: body, badge: 1, sound: , title: farhana mam, click_action: FLUTTER_NOTIFICATION_CLICK, message: H R U, category_id: 2, product_id: 1, img_url: }}
     print(msg);
-    var title = msg['notification']['title'];
+    var title = msg['data']['title'];
     var msge = msg['data']['message'];
 
     var android = new AndroidNotificationDetails(
-        'channel id', 'channel NAME', 'CHANNEL DESCRIPTION',
-        priority: Priority.high, importance: Importance.max);
-    var iOS = new IOSNotificationDetails();
+      'channel id',
+      'channel NAME',
+      'CHANNEL DESCRIPTION',
+      priority: Priority.high,
+      importance: Importance.max,
+    );
+
+    var iOS = new IOSNotificationDetails(presentAlert: true);
     var platform = new NotificationDetails(android: android, iOS: iOS);
     await flutterLocalNotificationsPlugin.show(0, title, msge, platform,
         payload: msge);
@@ -711,6 +759,7 @@ class _Explore_pageState extends State<Explore_page> {
       print("Subscription error ---- " + e.toString());
     }
   }*/
+
   Future selectNotification(String payload) async {
     debugPrint("payload : $payload");
     if (payload != null) {
@@ -722,14 +771,17 @@ class _Explore_pageState extends State<Explore_page> {
     }
   }
 }
-class TimeAgo{
-  static String timeAgoSinceDate(String dateString, {bool numericDates = true}) {
-    DateTime notificationDate = DateFormat("yyyy-MM-dd hh:mm:ss").parse(dateString);
+
+class TimeAgo {
+  static String timeAgoSinceDate(String dateString,
+      {bool numericDates = true}) {
+    DateTime notificationDate =
+        DateFormat("yyyy-MM-dd hh:mm:ss").parse(dateString);
     final date2 = DateTime.now();
     final difference = date2.difference(notificationDate);
 
     if (difference.inDays > 8) {
-      return dateString;
+      return dateString.substring(0, 10);
     } else if ((difference.inDays / 7).floor() >= 1) {
       return (numericDates) ? '1 week ago' : 'Last week';
     } else if (difference.inDays >= 2) {
@@ -750,5 +802,4 @@ class TimeAgo{
       return 'Just now';
     }
   }
-
 }

@@ -488,7 +488,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
                                             alignment: Alignment.bottomCenter,
                                             duration:
                                                 Duration(milliseconds: 300),
-                                            child: login_Screen())));
+                                            child: login_Screen(""))));
                             pr.hide();
                           } else {
                             displayToast(responseJson["message"].toString());

@@ -1,7 +1,5 @@
-import 'dart:convert';
+import  'dart:convert';
 import 'dart:io';
-
-//import 'package:device_info/device_info.dart';
 import 'package:chatcity/Registration/emailRegistration_signUp.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
@@ -31,7 +29,11 @@ import 'package:http/http.dart' as http;
 import 'package:chatcity/url.dart';
 
 class login_Screen extends StatefulWidget {
-  const login_Screen({Key key}) : super(key: key);
+  var close;
+
+  login_Screen(this.close);
+
+
 
   @override
   _login_ScreenState createState() => _login_ScreenState();
@@ -87,11 +89,12 @@ class _login_ScreenState extends State<login_Screen> {
         prefs.setString("fcmToken", device_token.toString());
       });
     });
-    
+
 
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
+
       },
       onResume: (Map<String, dynamic> message) async {
         print('on resume $message');
@@ -99,8 +102,13 @@ class _login_ScreenState extends State<login_Screen> {
       onLaunch: (Map<String, dynamic> message) async {
         print('on launch $message');
       },
+      onBackgroundMessage: (Map<String, dynamic> message) async {
+        print('on launch $message');
+
+      },
     );
   }
+
 
   void iOS_Permission() {
     _firebaseMessaging.requestNotificationPermissions(
@@ -152,11 +160,23 @@ class _login_ScreenState extends State<login_Screen> {
     return Scaffold(
         backgroundColor: cwhite,
         resizeToAvoidBottomInset: false,
-        appBar: BaseAppBar(
+        /*appBar: BaseAppBar(
           appBar: AppBar(),
           backgroundColor: cwhite,
           appbartext: "",
-        ),
+          //leadingIcon: Container()
+        ),*/
+
+        appBar: widget.close=="close" ? AppBar(
+          backgroundColor: cwhite,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+        ):
+        BaseAppBar(
+            appBar: AppBar(),
+            backgroundColor: cwhite,
+            appbartext: ""),
+
         body: SingleChildScrollView(
           child: Container(
             height: query.height / 1.16,
@@ -538,7 +558,6 @@ class _login_ScreenState extends State<login_Screen> {
         final ProgressDialog pr = _getProgress(context);
         pr.show();
         createUser(profile["email"].toString(),profile["picture"]["data"]["url"].toString(),profile["id"].toString(),profile["name"].toString(),"facebook");
-
         break;
     }
   }
@@ -554,7 +573,6 @@ class _login_ScreenState extends State<login_Screen> {
       registerwithEmail(userId.toString(), email,photoUrl,uid,displayName,type);
     }
     print("userId " + userId.toString());
-
     return userId;
   }
 
@@ -591,9 +609,7 @@ class _login_ScreenState extends State<login_Screen> {
       displayToast(responseJson["message"].toString());
       pr.hide();
     } else {
-      //displayToast("Please check your mailbox");
       pr.hide();
-
       prefs.setString("api_token", responseJson["data"]["api_token"].toString());
       prefs.setString("userEmail", responseJson["data"]["email"].toString());
       prefs.setString("userId", responseJson["data"]["id"].toString());
@@ -601,7 +617,6 @@ class _login_ScreenState extends State<login_Screen> {
       prefs.setString("quickboxid",responseJson["data"]["quickboxid"].toString());
 
       if (responseJson["data"]["is_profile"].toString() == "1") {
-
         Navigator.pushReplacement(
             context,
             PageTransition(
@@ -610,7 +625,6 @@ class _login_ScreenState extends State<login_Screen> {
                 alignment: Alignment.bottomCenter,
                 child: dashboard_page()));
       } else {
-
         prefs.setString("userEmail", email.toString());
         Navigator.pushReplacement(
             context,

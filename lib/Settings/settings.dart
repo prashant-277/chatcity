@@ -391,9 +391,8 @@ class _settings_pageState extends State<settings_page> {
       // prefs.setString("api_token", "");
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (BuildContext context) => login_Screen(),
-        ),
-        (Route route) => false,
+          builder: (BuildContext context) => login_Screen("close"),
+        ), (Route route) => false,
       );
     }
   }

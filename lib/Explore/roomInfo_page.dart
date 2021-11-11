@@ -55,6 +55,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
 
     print(prefs.getString("userId").toString());
     print(widget.roomId.toString());
+
     var map = new Map<String, dynamic>();
     map["userid"] = prefs.getString("userId").toString();
     map["room_id"] = roomId;
@@ -371,7 +372,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                                               duration:
                                                   Duration(milliseconds: 300),
                                               child: userProfile_page(
-                                                  userList[index])));
+                                                  userList[index],roomdata)));
                                     },
                                     child: Row(
                                       mainAxisAlignment:

@@ -20,9 +20,6 @@ final medium = 14.sp;
 final small = 10.sp;
 
 
-
-//const String APP_ID = "93775";
-
 const String APP_ID = "94233";
 const String AUTH_KEY = "tnNdbyAVxGTKVU9";
 const String AUTH_SECRET = "cfLtErwfE-OnEu5";

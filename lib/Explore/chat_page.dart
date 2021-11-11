@@ -157,7 +157,11 @@ class _chat_pageState extends State<chat_page> {
         appBar: AppBar(),
         imageBack: true,
         colorImage: cwhite,
-        appbartext: widget.roomData["name"].toString(),
+
+
+        appbartext: widget.roomData["name"].toString().length <= 15 ?
+        widget.roomData["name"].toString() :
+        widget.roomData["name"].toString().substring(0,15) + "..." ,
         groupImage: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ClipRRect(
@@ -186,7 +190,7 @@ class _chat_pageState extends State<chat_page> {
               child: IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: () {
-                    Navigator.push(
+                    Navigator.pushReplacement(
                         context,
                         PageTransition(
                             type: PageTransitionType.fade,
