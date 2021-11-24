@@ -86,7 +86,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
     }
   }
 
-  exitRoom() async {
+  Future<void> exitRoom()  async {
     final ProgressDialog pr = _getProgress(context);
     pr.show();
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -107,7 +107,6 @@ class _roomInfo_pageState extends State<roomInfo_page> {
     print("leavegroup " + responseJson.toString());
     if (responseJson["status"].toString() == "success") {
       displayToast(responseJson["message"].toString());
-      removePushSubscription();
       pr.hide();
       setState(() {
         roomId = roomdata["id"].toString();
@@ -120,19 +119,6 @@ class _roomInfo_pageState extends State<roomInfo_page> {
     }
   }
 
-  Future<void> removePushSubscription() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    try {
-      print("subscriptions.remove "+_id.toString());
-
-      await QB.subscriptions.remove(int.parse(prefs.getString("pushId")));
-      print("success --- ");
-
-    } on PlatformException catch (e) {
-      print("remove --- "+e.toString());
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -466,42 +452,3 @@ class _roomInfo_pageState extends State<roomInfo_page> {
 ProgressDialog _getProgress(BuildContext context) {
   return ProgressDialog(context);
 }
-
-/*
-Sign In
-- Registration with email - get OTP
-- SignUp with quickblox registration
-- forget Password
-- terms of service by api
-- login with quickblox login
-- google, facebook, apple
-Explore page
-- search
-- All group list
-  - Chat successfully
-  - Room info page
-  - Add friend
-All rooms page
-- MyRooms list
-- joined Room list
-create Room
-- public room
-  - chat successfully
-- private room
-  - send request to friend
-  - chat successfully
-Request page
-- My friend list
-  - Unfriend
-- join invitaion list
-setting page
-- My profile(Edit - Update)
-- change password
-- Terms and condition
-- shareApp(Just remain to set store link)
-- Logout
-
-- remove join room button and functionality
-- need one api - for public room
-- explore page -
-*/

@@ -19,7 +19,6 @@ import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sizer/sizer.dart';
-
 import 'changePassword.dart';
 import 'myProfile.dart';
 import 'package:chatcity/url.dart';
@@ -334,7 +333,7 @@ class _settings_pageState extends State<settings_page> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10.0)),
                         color: cRed,
-                        onPressed: () {
+                        onPressed: () async {
                           logout();
                         },
                         child: Text(
@@ -373,13 +372,16 @@ class _settings_pageState extends State<settings_page> {
     print("res logout  " + responseJson.toString());
 
     if (responseJson["message"].toString() == "Logged Out") {
-      pr.hide();
       try {
         await QB.auth.logout();
         print("logout");
-      } on PlatformException catch (e) {print("fail");}
+      } on PlatformException catch (e) {
+        print("fail");
+      }
 
       facebookSignIn.logOut();
+
+      _googleSignIn.signOut();
       _googleSignIn.disconnect();
       _auth.signOut();
       SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -389,10 +391,12 @@ class _settings_pageState extends State<settings_page> {
       prefs.remove("userEmail");
       prefs.remove("username");
       // prefs.setString("api_token", "");
+      pr.hide();
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
           builder: (BuildContext context) => login_Screen("close"),
-        ), (Route route) => false,
+        ),
+        (Route route) => false,
       );
     }
   }
@@ -401,4 +405,3 @@ class _settings_pageState extends State<settings_page> {
 ProgressDialog _getProgress(BuildContext context) {
   return ProgressDialog(context);
 }
-

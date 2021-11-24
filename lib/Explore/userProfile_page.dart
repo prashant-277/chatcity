@@ -52,6 +52,9 @@ class _userProfile_pageState extends State<userProfile_page> {
   }
 
   Future<void> getUserDetails() async {
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
+
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
       var url = "$url1/getUserDetails";
@@ -76,6 +79,7 @@ class _userProfile_pageState extends State<userProfile_page> {
       is_Friend = responseJson["data"]["is_Friend"].toString();
       userid = prefs.getString("userId").toString();
       _isLoading = false;
+      pr.hide();
     });
   }
 
@@ -160,6 +164,7 @@ class _userProfile_pageState extends State<userProfile_page> {
                   basicButton(cwhite, () async {
                     if(is_Friend=="0"){
                       addfriend();
+
                     }else{
                       displayToast(name.toString()+" is already your friend");
                     }
@@ -172,20 +177,15 @@ class _userProfile_pageState extends State<userProfile_page> {
                   height: 7.5.h,
                   child: basicButton(
                       cwhite, () async {
-                        //userid ma dialogid che k nai
-                    //mle to chat na mle to create dialog ane pachi chat
 
                     if(userData["dialogId"].toString()=="null"){
+
                       createDialog();
 
                     }else{
-                      Navigator.push(
-                          context,
-                          PageTransition(
-                              type: PageTransitionType.fade,
-                              alignment: Alignment.bottomCenter,
-                              duration: Duration(milliseconds: 300),
-                              child: privateChat_page(userData)));
+                      _dialogId = userData["dialogId"].toString();
+                      updateDialog();
+
                     }
 
 
@@ -211,6 +211,7 @@ class _userProfile_pageState extends State<userProfile_page> {
     var url = "$url1/addRemoveFriends";
 
     var map = new Map<String, dynamic>();
+
     map["login_id"] = prefs.getString("userId").toString();
     map["join_user"] =widget.userList["id"].toString();
     map["join_status"] ="1";
@@ -223,7 +224,8 @@ class _userProfile_pageState extends State<userProfile_page> {
 
     if (responseJson["status"].toString() == "success") {
       displayToast("Add friend successfully");
-      pr.hide();
+
+      pr.hide().then((value) => getUserDetails());
     }else{
       pr.hide();
     }
@@ -231,10 +233,10 @@ class _userProfile_pageState extends State<userProfile_page> {
 
   void createDialog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-   // List<int> occupantsIds = new List<int>.from(Platform.isAndroid ? [int.parse(quickboxid)]:[]);
     List<int> occupantsIds = [int.parse(prefs.getString("quickboxid")), int.parse(quickboxid)];
 
     int dialogType = QBChatDialogTypes.CHAT;
+    print("occupantsIds ======= "+ occupantsIds.toString());
 
     try {
       QBDialog createdDialog = await QB.chat
@@ -244,22 +246,23 @@ class _userProfile_pageState extends State<userProfile_page> {
         _dialogId = createdDialog.id;
         print("_dialogId   "+_dialogId);
 
-
         updateDialog();
-        /*Navigator.push(
+        /* Navigator.push(
             context,
             PageTransition(
                 type: PageTransitionType.fade,
                 alignment: Alignment.bottomCenter,
                 duration: Duration(milliseconds: 300),
                 child: privateChat_page(widget.userList)));*/
+
       } else {
-        print("Else");
+        print("Else--------");
       }
     } on PlatformException catch (e) {
-      print(e);
+      print("qberror--- " + e.toString());
     }
   }
+
   Future<void> updateDialog() async {
     final ProgressDialog pr = _getProgress(context);
     pr.show();
@@ -269,7 +272,13 @@ class _userProfile_pageState extends State<userProfile_page> {
 
 
     var map = new Map<String, dynamic>();
+
+    print("get_user_id " + widget.userList["id"].toString());
+    print("user_id "+prefs.getString("userId").toString());
+    print("_dialogId "+_dialogId.toString());
+
     map["get_user_id"] = widget.userList["id"].toString();
+    map["user_id"] = prefs.getString("userId").toString();
     map["dialogId"] = _dialogId.toString();
 
     Map<String, String> headers = {
@@ -284,14 +293,7 @@ class _userProfile_pageState extends State<userProfile_page> {
 
     if (responseJson["status"].toString() == "success") {
       pr.hide();
-      setState(() {
-        getUserDetails();
-      });
-      if(is_Friend=="0"){
-        addfriend();
-      }else{
-        displayToast(name.toString()+" is already your friend");
-      }
+
       Navigator.push(
             context,
             PageTransition(
@@ -303,7 +305,6 @@ class _userProfile_pageState extends State<userProfile_page> {
       pr.hide();
     }
   }
-
 }
   ProgressDialog _getProgress(BuildContext context) {
     return ProgressDialog(context);

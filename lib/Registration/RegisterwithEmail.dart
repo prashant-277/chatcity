@@ -23,7 +23,6 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:sizer/sizer.dart';
 import 'package:chatcity/url.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 class RegisterwithEmail extends StatefulWidget {
   const RegisterwithEmail({Key key}) : super(key: key);
@@ -35,7 +34,6 @@ class RegisterwithEmail extends StatefulWidget {
 class _RegisterwithEmailState extends State<RegisterwithEmail> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  static final FacebookLogin facebookSignIn = new FacebookLogin();
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   var device_token;
   var device_id;
@@ -76,23 +74,22 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     });
 
     _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print('on message $message');
-        return;
-      },
+        onMessage: (Map<String, dynamic> message) async {
+          print('on message $message');
+          return;
+        },
 
-      onResume: (Map<String, dynamic> message) async {
-        print('on resume $message');
-        return;
-      },
+        onResume: (Map<String, dynamic> message) async {
+          print('on resume $message');
+          return;
+        },
 
-      onLaunch: (Map<String, dynamic> message) async {
-        print('on launch $message');
-        return;
-      },      onBackgroundMessage: myBackgroundMessageHandler
+        onLaunch: (Map<String, dynamic> message) async {
+          print('on launch $message');
+          return;
+        }, onBackgroundMessage: myBackgroundMessageHandler
 
     );
-
   }
 
   Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
@@ -119,7 +116,9 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
 
   @override
   Widget build(BuildContext context) {
-    var query = MediaQuery.of(context).size;
+    var query = MediaQuery
+        .of(context)
+        .size;
     return Scaffold(
       backgroundColor: cwhite,
       resizeToAvoidBottomInset: false,
@@ -205,7 +204,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
                           child: basicButton(cwhite, () async {
                             if (_formKey.currentState.validate()) {
                               SharedPreferences prefs =
-                                  await SharedPreferences.getInstance();
+                              await SharedPreferences.getInstance();
 
                               isRegistered(Email_controller.text.toString());
                             }
@@ -439,7 +438,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     });
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
-        await googleUser.authentication;
+    await googleUser.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
@@ -452,32 +451,8 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     print("signed in " + user.displayName);
     return user;
   }
-
-  Future<void> initiateFacebookLogin() async {
-    final facebookLoginResult = await facebookSignIn.logIn(['email']);
-
-    switch (facebookLoginResult.status) {
-      case FacebookLoginStatus.error:
-        onLoginStatusChanged(false);
-        print(facebookLoginResult.errorMessage);
-        break;
-      case FacebookLoginStatus.cancelledByUser:
-        onLoginStatusChanged(false);
-        break;
-      case FacebookLoginStatus.loggedIn:
-        var graphResponse = await http.get(
-            'https://graph.facebook.com/v2.12/me?fields=name,first_name,last_name,email,picture.height(200)&access_token=${facebookLoginResult.accessToken.token}');
-
-        var profile = json.decode(graphResponse.body);
-
-        print("profile******* " + profile.toString());
-        print("user Id +++++ " + profile["id"].toString());
-        onLoginStatusChanged(true, profileData: profile);
-
-        break;
-    }
-  }
 }
+
 
 ProgressDialog _getProgress(BuildContext context) {
   return ProgressDialog(context);

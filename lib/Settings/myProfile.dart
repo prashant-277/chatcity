@@ -22,7 +22,11 @@ class myProfile extends StatefulWidget {
 class _myProfileState extends State<myProfile> {
 
   final url1 = url.basicUrl;
-  String name, image, email,phonenumber,birthdate = "";
+  String name,
+      image,
+      email,
+      phonenumber,
+      birthdate = "";
   bool _isLoading = true;
 
   @override
@@ -46,7 +50,7 @@ class _myProfileState extends State<myProfile> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res getUserDetails  " + responseJson.toString());
 
@@ -57,12 +61,14 @@ class _myProfileState extends State<myProfile> {
       phonenumber = responseJson["data"]["phone"].toString();
       birthdate = responseJson["data"]["dob"].toString();
       _isLoading = false;
-
     });
   }
+
   @override
   Widget build(BuildContext context) {
-    var query = MediaQuery.of(context).size;
+    var query = MediaQuery
+        .of(context)
+        .size;
     return Scaffold(
       resizeToAvoidBottomInset: false,
 
@@ -98,7 +104,7 @@ class _myProfileState extends State<myProfile> {
                           "Assets/Images/giphy.gif"))),
               Padding(
                 padding: const EdgeInsets.all(10.0),
-                child: Text(name.toString(),
+                child: Text(name.toString() == "null" ? "" : name.toString(),
                     style: TextStyle(
                         fontFamily: "SFPro",
                         fontWeight: FontWeight.w600,
@@ -136,7 +142,8 @@ class _myProfileState extends State<myProfile> {
                     ),
                     Container(
                       width: 200.sp,
-                      child: Text(email.toString(),
+                      child: Text(
+                          email.toString() == "null" ? "" : email.toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontWeight: FontWeight.w400,
@@ -166,7 +173,9 @@ class _myProfileState extends State<myProfile> {
                     ),
                     Container(
                       width: 200.sp,
-                      child: Text(phonenumber.toString(),
+                      child: Text(
+                          phonenumber.toString() == "null" ? "" : phonenumber
+                              .toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
                               fontWeight: FontWeight.w400,
@@ -218,7 +227,8 @@ class _myProfileState extends State<myProfile> {
                             type: PageTransitionType.fade,
                             alignment: Alignment.bottomCenter,
                             duration: Duration(milliseconds: 300),
-                            child: edit_Profile())).then((value) => getUserDetails());
+                            child: edit_Profile())).then((value) =>
+                        getUserDetails());
                   }, "Edit Profile", cButtoncolor)),
             ],
           ),

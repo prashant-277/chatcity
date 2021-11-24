@@ -75,6 +75,7 @@ class _Explore_pageState extends State<Explore_page> {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   var device_token;
   int _id;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
   void initState() {
@@ -84,13 +85,12 @@ class _Explore_pageState extends State<Explore_page> {
     flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
     var android = new AndroidInitializationSettings('@mipmap/chatcity',);
     var iOS = new IOSInitializationSettings();
-    var initSetttings = new InitializationSettings(android: android, iOS: iOS);
+    var initSetttings = new InitializationSettings(android, iOS);
     flutterLocalNotificationsPlugin.initialize(initSetttings,
         onSelectNotification: selectNotification,);
     firebaseCloudMessaging_Listeners();
   }
 
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   Future<void> getAllRooms() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -696,13 +696,15 @@ class _Explore_pageState extends State<Explore_page> {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message ==== $message');
-        showNotification(message);
       },
       onResume: (Map<String, dynamic> message) async {
         print('on resume $message');
+        showNotification(message);
+
       },
       onLaunch: (Map<String, dynamic> message) async {
         print('on launch $message');
+        showNotification(message);
       },
       onBackgroundMessage: (Map<String, dynamic> message) async {
         print('on Background $message');
@@ -723,19 +725,18 @@ class _Explore_pageState extends State<Explore_page> {
 
   void showNotification(Map<String, dynamic> msg) async {
     print(msg);
-    var title = msg['data']['title'];
-    var msge = msg['data']['message'];
+    var title = msg['title'];
+    var msge = msg['body'];
 
     var android = new AndroidNotificationDetails(
       'channel id',
       'channel NAME',
       'CHANNEL DESCRIPTION',
-      priority: Priority.high,
-      importance: Importance.max,
+
     );
 
     var iOS = new IOSNotificationDetails(presentAlert: true);
-    var platform = new NotificationDetails(android: android, iOS: iOS);
+    var platform = new NotificationDetails(android, iOS);
     await flutterLocalNotificationsPlugin.show(0, title, msge, platform,
         payload: msge);
   }

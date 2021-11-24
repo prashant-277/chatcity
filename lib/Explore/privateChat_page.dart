@@ -46,6 +46,7 @@ class _privateChat_pageState extends State<privateChat_page> {
     });
     getDialogMessages();
     //createPushSubscription();
+    print("userlist --- " + widget.userList.toString());
   }
 
   @override
@@ -75,7 +76,9 @@ class _privateChat_pageState extends State<privateChat_page> {
       });
 
       return messages;
-    } on PlatformException catch (e) {}
+    } on PlatformException catch (e) {
+      print("sdsds"+ e.toString());
+    }
   }
 
   @override

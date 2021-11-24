@@ -46,7 +46,7 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
   TextEditingController password_controller = TextEditingController();
 
   bool show = true;
-
+  String username;
   String gender;
 
   void onTap() {
@@ -57,7 +57,10 @@ class _emailRegistration_signUpState extends State<emailRegistration_signUp> {
   @override
   void initState() {
     super.initState();
-    username_controller.text = widget.social == "social" ? widget.responseJson["username"].toString() : "" ;
+
+  //  username = widget.responseJson["username"].toString()=="null"? "" : widget.responseJson["username"].toString();
+
+    username_controller.text = widget.social == "social" ? username : "" ;
     password_controller.text = widget.social == "social" ? "00000" : null;
   }
 

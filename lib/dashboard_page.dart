@@ -46,7 +46,7 @@ class _dashboard_pageState extends State<dashboard_page> {
   Future<void> login() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     print(prefs.getString("userEmail").toString());
-    print(int.parse(prefs.getString("quickboxid")));
+
     print(USER_PASSWORD);
 
     try {

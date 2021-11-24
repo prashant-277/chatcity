@@ -190,7 +190,7 @@ class _chat_pageState extends State<chat_page> {
               child: IconButton(
                   padding: EdgeInsets.zero,
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.push(
                         context,
                         PageTransition(
                             type: PageTransitionType.fade,

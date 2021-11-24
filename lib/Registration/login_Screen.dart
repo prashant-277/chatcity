@@ -1,4 +1,4 @@
-import  'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 import 'package:chatcity/Registration/emailRegistration_signUp.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
@@ -32,8 +32,6 @@ class login_Screen extends StatefulWidget {
   var close;
 
   login_Screen(this.close);
-
-
 
   @override
   _login_ScreenState createState() => _login_ScreenState();
@@ -90,11 +88,9 @@ class _login_ScreenState extends State<login_Screen> {
       });
     });
 
-
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
-
       },
       onResume: (Map<String, dynamic> message) async {
         print('on resume $message');
@@ -102,13 +98,8 @@ class _login_ScreenState extends State<login_Screen> {
       onLaunch: (Map<String, dynamic> message) async {
         print('on launch $message');
       },
-      onBackgroundMessage: (Map<String, dynamic> message) async {
-        print('on launch $message');
-
-      },
     );
   }
-
 
   void iOS_Permission() {
     _firebaseMessaging.requestNotificationPermissions(
@@ -127,6 +118,7 @@ class _login_ScreenState extends State<login_Screen> {
       print("Settings registered: $settings");
     });
   }
+
   /*Future<String> getDeviceId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -167,16 +159,14 @@ class _login_ScreenState extends State<login_Screen> {
           //leadingIcon: Container()
         ),*/
 
-        appBar: widget.close=="close" ? AppBar(
-          backgroundColor: cwhite,
-          elevation: 0,
-          automaticallyImplyLeading: false,
-        ):
-        BaseAppBar(
-            appBar: AppBar(),
-            backgroundColor: cwhite,
-            appbartext: ""),
-
+        appBar: widget.close == "close"
+            ? AppBar(
+                backgroundColor: cwhite,
+                elevation: 0,
+                automaticallyImplyLeading: false,
+              )
+            : BaseAppBar(
+                appBar: AppBar(), backgroundColor: cwhite, appbartext: ""),
         body: SingleChildScrollView(
           child: Container(
             height: query.height / 1.16,
@@ -261,7 +251,7 @@ class _login_ScreenState extends State<login_Screen> {
 
                             SharedPreferences prefs =
                                 await SharedPreferences.getInstance();
-                            var url = "$url1/login";
+                              var url = "$url1/login";
 
                             var map = new Map<String, dynamic>();
                             map["username"] =
@@ -269,7 +259,8 @@ class _login_ScreenState extends State<login_Screen> {
                             map["password"] =
                                 password_controller.text.toString();
                             map["fcm_token"] = device_token.toString();
-                            map["device_type"] = Platform.isAndroid ? "android" : "ios";
+                            map["device_type"] =
+                                Platform.isAndroid ? "android" : "ios";
 
                             final response = await http.post(url, body: map);
 
@@ -356,7 +347,8 @@ class _login_ScreenState extends State<login_Screen> {
                                   onTap: () {
                                     _handleSignIn()
                                         .then((FirebaseUser user) async {
-                                      createUser(user.email,user.photoUrl, user.uid, user.displayName,"google");
+                                      createUser(user.email, user.photoUrl,
+                                          user.uid, user.displayName, "google");
                                     });
                                   },
                                 ),
@@ -407,11 +399,12 @@ class _login_ScreenState extends State<login_Screen> {
                                           print(credential);
                                         } else {
                                           final credential =
-                                              await SignInWithApple.getAppleIDCredential(
+                                              await SignInWithApple
+                                                  .getAppleIDCredential(
                                             scopes: [
                                               AppleIDAuthorizationScopes.email,
-                                              AppleIDAuthorizationScopes.fullName,
-
+                                              AppleIDAuthorizationScopes
+                                                  .fullName,
                                             ],
                                             webAuthenticationOptions:
                                                 WebAuthenticationOptions(
@@ -431,7 +424,13 @@ class _login_ScreenState extends State<login_Screen> {
                                               _getProgress(context);
                                           pr.show();
 
-                                          createUser(credential.email.toString(),"",credential.userIdentifier.toString(),credential.givenName.toString(),"apple");
+                                          createUser(
+                                              credential.email.toString(),
+                                              "",
+                                              credential.userIdentifier
+                                                  .toString(),
+                                              credential.givenName.toString(),
+                                              "apple");
 
                                           final signInWithAppleEndpoint = Uri(
                                             scheme: 'https',
@@ -515,13 +514,13 @@ class _login_ScreenState extends State<login_Screen> {
   }
 
   Future<FirebaseUser> _handleSignIn() async {
+
     _auth.app.options.catchError((error) {
       print("error---->$error");
     });
     final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     final GoogleSignInAuthentication googleAuth =
         await googleUser.authentication;
-
     final AuthCredential credential = GoogleAuthProvider.getCredential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
@@ -530,12 +529,15 @@ class _login_ScreenState extends State<login_Screen> {
     final FirebaseUser user =
         (await _auth.signInWithCredential(credential)).user;
 
-    print("signed in " + user.displayName);
+    print(user.email);
+    print("signed in " + user.displayName + user.email.toString());
     return user;
   }
 
   Future<void> initiateFacebookLogin() async {
-    final facebookLoginResult = await facebookSignIn.logIn(['email','public_profile']);
+
+    final facebookLoginResult =
+        await facebookSignIn.logIn(['email', 'public_profile']);
 
     switch (facebookLoginResult.status) {
       case FacebookLoginStatus.error:
@@ -551,54 +553,73 @@ class _login_ScreenState extends State<login_Screen> {
 
         var profile = json.decode(graphResponse.body);
 
+
         print("profile******* " + profile.toString());
         print("user Id +++++ " + profile["id"].toString());
         onLoginStatusChanged(true, profileData: profile);
 
-        final ProgressDialog pr = _getProgress(context);
-        pr.show();
-        createUser(profile["email"].toString(),profile["picture"]["data"]["url"].toString(),profile["id"].toString(),profile["name"].toString(),"facebook");
+
+        createUser(
+            profile["email"].toString(),
+            profile["picture"]["data"]["url"].toString(),
+            profile["id"].toString(),
+            profile["name"].toString(),
+            "facebook");
         break;
     }
   }
 
-  Future<int> createUser(String email, String photoUrl, String uid, String displayName, String type) async {
+  Future<int> createUser(String email, String photoUrl, String uid,
+      String displayName, String type) async {
+    final ProgressDialog pr = _getProgress(context);
+    pr.show();
     int userId;
     try {
       QBUser user = await QB.users.createUser(email, USER_PASSWORD);
       userId = user.id;
-      registerwithEmail(userId.toString(), email,photoUrl,uid,displayName,type);
+      registerwithEmail(
+          userId.toString(), email, photoUrl, uid, displayName, type);
+      pr.hide();
     } on PlatformException catch (e) {
-
-      registerwithEmail(userId.toString(), email,photoUrl,uid,displayName,type);
+      registerwithEmail(
+          userId.toString(), email, photoUrl, uid, displayName, type);
+      pr.hide();
     }
     print("userId " + userId.toString());
     return userId;
   }
 
-  Future<void> registerwithEmail(String qb_Id, String email, String photoUrl, String uid, String displayName, String type) async {
+  Future<void> registerwithEmail(String qb_Id, String email, String photoUrl,
+      String uid, String displayName, String type) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final ProgressDialog pr = _getProgress(context);
     pr.show();
     var url = "$url1/registerWithMail";
 
-    print("entered data " + email.toString() + qb_Id.toString() + uid.toString() + displayName.toString() + photoUrl.toString() + type.toString());
+    print("entered data " + " " +
+        email.toString() +" " +
+        qb_Id.toString() +" " +
+        uid.toString() +" " +
+        displayName.toString() +" " +
+        photoUrl.toString() +" " +
+        type.toString());
     var map = new Map<String, dynamic>();
     print(email.toString());
     print(qb_Id.toString());
     print(displayName.toString());
     print(type.toString());
     print(device_token.toString());
-    map["email"] = email.toString();
-    qb_Id.toString()=="null"? "" : map["quickboxid"] = qb_Id.toString();
-    map["google_id"] = type=="google" ? uid.toString() : "";
-    map["facebook_id"] = type=="facebook" ? uid.toString() : "";
-    map["apple_id"] = type=="apple"? uid.toString() : "";
-    map["username"] = displayName.toString();
-    map['type'] = type.toString();
-    map["fcm_token"] = device_token.toString();
+    print(uid.toString());
+    map["email"] = email.toString()=="null" ? "" : email.toString();
+    map["quickboxid"] = qb_Id.toString()=="null"?"":qb_Id.toString();
+    map["google_id"] = type == "google" ? uid.toString() : "";
+    map["facebook_id"] = type == "facebook" ? uid.toString() : "";
+    map["facebook_id"] = type == "facebook" ? uid.toString() : "";
+    map["apple_id"] = type == "apple" ? uid.toString() : "";
+    map["username"] = displayName.toString()=="null"?"":displayName.toString();
+    map['type'] = type.toString()=="null"?"":type.toString();
+    map["fcm_token"] = device_token.toString()=="null"? "" : device_token.toString();
     map["device_type"] = Platform.isAndroid ? "android" : "ios";
-
 
     final response = await http.post(url, body: map);
 
@@ -610,11 +631,13 @@ class _login_ScreenState extends State<login_Screen> {
       pr.hide();
     } else {
       pr.hide();
-      prefs.setString("api_token", responseJson["data"]["api_token"].toString());
+      prefs.setString(
+          "api_token", responseJson["data"]["api_token"].toString());
       prefs.setString("userEmail", responseJson["data"]["email"].toString());
       prefs.setString("userId", responseJson["data"]["id"].toString());
       prefs.setString("username", responseJson["data"]["username"].toString());
-      prefs.setString("quickboxid",responseJson["data"]["quickboxid"].toString());
+      prefs.setString(
+          "quickboxid", responseJson["data"]["quickboxid"].toString());
 
       if (responseJson["data"]["is_profile"].toString() == "1") {
         Navigator.pushReplacement(
@@ -632,7 +655,8 @@ class _login_ScreenState extends State<login_Screen> {
                 type: PageTransitionType.fade,
                 duration: Duration(milliseconds: 300),
                 alignment: Alignment.bottomCenter,
-                child: emailRegistration_signUp(responseJson["data"], "social")));
+                child:
+                    emailRegistration_signUp(responseJson["data"], "social")));
       }
     }
   }

@@ -8,6 +8,7 @@ import 'package:sizer/sizer.dart';
 import 'package:http/http.dart' as http;
 import 'package:chatcity/url.dart';
 import 'package:html2md/html2md.dart' as html2md;
+import 'package:webview_flutter/webview_flutter.dart';
 
 class TermsofService extends StatefulWidget {
   const TermsofService({Key key}) : super(key: key);
@@ -17,7 +18,7 @@ class TermsofService extends StatefulWidget {
 }
 
 class _TermsofServiceState extends State<TermsofService> {
-  bool _isLoading = true;
+  //bool _isLoading = true;
   final url1 = url.basicUrl;
 
   List data = [];
@@ -25,7 +26,7 @@ class _TermsofServiceState extends State<TermsofService> {
   @override
   void initState() {
     super.initState();
-    termsofservice();
+    //termsofservice();
   }
 
   Future<void> termsofservice() async {
@@ -34,13 +35,13 @@ class _TermsofServiceState extends State<TermsofService> {
     var map = new Map<String, dynamic>();
     map["pageid"] = "1";
 
-    final response = await http.post(url, body: map);
+    final response = await http.post(Uri.parse(url), body: map);
     final responseJson = json.decode(response.body);
     print("res getPage  " + responseJson.toString());
 
     setState(() {
       data = responseJson["data"];
-      _isLoading = false;
+     // _isLoading = false;
     });
   }
 
@@ -56,24 +57,19 @@ class _TermsofServiceState extends State<TermsofService> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(15.0),
-        child: _isLoading == true
-            ? SpinKitRipple(color: cfooterpurple)
-            : ListView(
-                shrinkWrap: true,
-                children: [
-                  Text(
-                    html2md.convert(data[0]["page_body"].toString()),
-                    textAlign: TextAlign.start,
-                    style: TextStyle(
-                      color: cBlack,
-                      fontSize: medium,
-                      fontFamily: "SFPro",
-                      height: 1.0.sp,
-                    ),
-                  ),
-                ],
+        child: Container(
+          height: query.height,
+              width: query.width,
+              child: WebView(
+                initialUrl: 'https://chessmafia.com/php/chatcity/terms',
+                javascriptMode: JavascriptMode.unrestricted,
               ),
+            ),
       ),
     );
   }
 }
+//4256
+//1021
+//1021
+//2388
