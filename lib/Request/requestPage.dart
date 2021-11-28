@@ -11,6 +11,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:progress_dialog/progress_dialog.dart';
+import 'package:quickblox_sdk/chat/constants.dart';
+import 'package:quickblox_sdk/models/qb_dialog.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../constants.dart';
@@ -31,6 +33,7 @@ class _requestPageState extends State<requestPage> {
   List requestDetail = [];
   List myfriendlist = [];
   bool _isLoading = true;
+  String _dialogId;
 
   Future<bool> _onWillPop() {
     return showDialog(
@@ -232,14 +235,38 @@ class _requestPageState extends State<requestPage> {
                               return Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: ListTile(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        PageTransition(
-                                            type: PageTransitionType.fade,
-                                            alignment: Alignment.bottomCenter,
-                                            duration: Duration(milliseconds: 300),
-                                            child: privateChat_page(myfriendlist[index])));
+                                  onTap: () async {
+
+                                    SharedPreferences prefs = await SharedPreferences.getInstance();
+                                    List<int> occupantsIds = [
+                                      int.parse(prefs.getString("quickboxid")),
+                                      int.parse(myfriendlist[index]["quickboxid"])
+                                    ];
+
+                                    int dialogType = QBChatDialogTypes.CHAT;
+                                    print("occupantsIds ======= " + occupantsIds.toString());
+
+                                    try {
+                                      QBDialog createdDialog = await QB.chat
+                                          .createDialog(occupantsIds, myfriendlist[index]["username"], dialogType: dialogType);
+
+                                      if (createdDialog != null) {
+                                        _dialogId = createdDialog.id;
+                                        print("_dialogId   " + _dialogId);
+
+                                        Navigator.push(
+                                            context,
+                                            PageTransition(
+                                                type: PageTransitionType.fade,
+                                                alignment: Alignment.bottomCenter,
+                                                duration: Duration(milliseconds: 300),
+                                                child: privateChat_page(myfriendlist[index],_dialogId)));
+                                      } else {
+                                        print("Else--------");
+                                      }
+                                    } on PlatformException catch (e) {
+                                      print("qberror--- " + e.toString());
+                                    }
                                   },
                                   title: Row(
                                     mainAxisAlignment:

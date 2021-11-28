@@ -47,6 +47,8 @@ class _friend_invitePageState extends State<friend_invitePage> {
   final url1 = url.basicUrl;
   String _dialogId;
   bool _isLoading = true;
+  TextEditingController search_ctrl = TextEditingController();
+  int search = 0;
 
   @override
   void initState() {
@@ -92,7 +94,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
 
           },
         ),
-        appBar: commanAppBar(
+        appBar: search == 0? commanAppBar(
           appBar: AppBar(),
           fontsize: medium,
           appbartext: "Invite your friend",
@@ -101,15 +103,60 @@ class _friend_invitePageState extends State<friend_invitePage> {
           groupImage: Container(),
           imageIcon: Container(),
           widgets: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: IconButton(
-                  onPressed: () {},
-                  icon: Image.asset(
-                    "Assets/Icons/search.png",
-                    width: 5.w,
-                  )),
-            )
+            FlatButton(
+                highlightColor: Colors.transparent,
+                color: Colors.transparent,
+                splashColor: Colors.transparent,
+                onPressed: () {
+                  setState(() {
+                    search = 1;
+                  });
+                },
+                child: Image.asset(
+                  "Assets/Icons/search.png",
+                  height: 15.sp,
+                ))
+          ],
+        ): AppBar(
+          automaticallyImplyLeading: false,
+          title: TextField(
+            controller: search_ctrl,
+            maxLines: 1,
+            autofocus: true,
+            cursorColor: cwhite,
+            style: TextStyle(
+                fontFamily: "SFPro", fontSize: medium, color: cwhite),
+            decoration: InputDecoration(
+                border: InputBorder.none,
+                focusedBorder: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                errorBorder: InputBorder.none,
+                disabledBorder: InputBorder.none,
+                contentPadding: EdgeInsets.only(
+                    left: 25, bottom: 11, top: 11, right: 15),
+                hintText: "Search...",
+                hintStyle: TextStyle(
+                    fontFamily: "SFPro",
+                    color: cwhite,
+                    fontSize: medium,
+                    decoration: TextDecoration.none)),
+            cursorHeight: 20.sp,
+            onChanged: (value) {
+              setState(() {
+                searchData();
+              });
+            },
+          ),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  setState(() {
+                    search = 0;
+                    getFriendlist();
+                    search_ctrl.text = "";
+                  });
+                },
+                icon: Icon(Icons.cancel_outlined))
           ],
         ),
         body: Scaffold(
@@ -147,19 +194,17 @@ class _friend_invitePageState extends State<friend_invitePage> {
                       itemCount: userList.length,
                       itemBuilder: (context, index) {
                         return ListTile(
-                          //selectedTileColor: Color(0xFFD1C4E9),
-
                           contentPadding: EdgeInsets.zero,
                           onTap: () {
                             setState(() {
-                              if (select.contains(index)) {
-                                select.remove(index);
+                              if (select.contains(userList[index]["id"])) {
+                                select.remove(userList[index]["id"]);
                                 oopID.remove(int.parse(
                                     userList[index]["quickboxid"].toString()));
                                 userIDs.remove(int.parse(
                                     userList[index]["id"].toString()));
                               } else {
-                                select.add(index);
+                                select.add(userList[index]["id"]);
                                 oopID.add(int.parse(
                                     userList[index]["quickboxid"].toString()));
                                 userIDs.add(int.parse(
@@ -185,7 +230,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.only(right: 20.0),
-                                  child: select.contains(index)
+                                  child: select.contains(userList[index]["id"])
                                       ? Image.asset("Assets/Icons/selected.png",
                                           width: 16.sp)
                                       : Container(),
@@ -287,6 +332,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
       }
     } on PlatformException catch (e) {
       print(e);
+      displayToast("Room is not creating, Try after sometime");
     }
   }
 
@@ -359,6 +405,34 @@ class _friend_invitePageState extends State<friend_invitePage> {
         print("Not Uploaded");
       }
     });
+  }
+  Future<void> searchData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var url = "$url1/SearchFriend";
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+    map["search"] = search_ctrl.text.toString();
+
+    Map<String, String> headers = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    final response = await http.post(url, body: map, headers: headers);
+    final responseJson = json.decode(response.body);
+    print("res SearchFriend  " + responseJson.toString());
+
+    if (responseJson["status"].toString() == "success") {
+      setState(() {
+        userList = responseJson["data"];
+
+        if (search_ctrl.text.toString() == "") {
+          getFriendlist();
+        }
+      });
+      //displayToast(responseJson["message"].toString());
+
+    }
   }
 }
 

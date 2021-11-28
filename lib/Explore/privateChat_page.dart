@@ -6,6 +6,7 @@ import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:quickblox_sdk/chat/constants.dart';
 import 'package:quickblox_sdk/models/qb_message.dart';
 import 'package:quickblox_sdk/models/qb_sort.dart';
@@ -18,9 +19,9 @@ import 'package:chatcity/url.dart';
 class privateChat_page extends StatefulWidget {
   var userList;
 
-  privateChat_page(this.userList);
+  var dialogId;
 
-
+  privateChat_page(this.userList, this.dialogId);
 
   @override
   _privateChat_pageState createState() => _privateChat_pageState();
@@ -36,17 +37,74 @@ class _privateChat_pageState extends State<privateChat_page> {
   final url1 = url.basicUrl;
   Timer mytimer;
 
+  int count = 0;
+
   _scrollToBottom() {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    setState(() {
+      count = 1;
+    });
   }
+
   @override
   void initState() {
     super.initState();
-    mytimer = Timer.periodic(Duration(milliseconds: 3000), (timer) {
-    });
+    mytimer = Timer.periodic(Duration(milliseconds: 3000), (timer) {});
     getDialogMessages();
-    //createPushSubscription();
     print("userlist --- " + widget.userList.toString());
+    getUserDetails();
+    /*if (widget.userList["friends"].toString() == "0") {
+      addfriend();
+    } else {
+      print("else friends");
+    }*/
+  }
+
+  Future<void> addfriend() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    var url = "$url1/addRemoveFriends";
+
+    var map = new Map<String, dynamic>();
+
+    map["login_id"] = prefs.getString("userId").toString();
+    map["join_user"] = widget.userList["id"].toString();
+    map["join_status"] = "1";
+
+    final response = await http.post(url, body: map);
+
+    final responseJson = json.decode(response.body);
+    print("addRemoveFriends-- " + responseJson.toString());
+    if (responseJson["status"].toString() == "success") {
+      setState(() {
+        getUserDetails();
+      });
+    } else {}
+  }
+
+  Future<void> getUserDetails() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    var url = "$url1/getUserDetails";
+
+    var map = new Map<String, dynamic>();
+    map["userid"] = prefs.getString("userId").toString();
+    map["get_user_id"] = widget.userList["id"].toString();
+
+    Map<String, String> headers = {
+      "API-token": prefs.getString("api_token").toString()
+    };
+
+    final response = await http.post(url, body: map, headers: headers);
+    final responseJson = json.decode(response.body);
+    print("res getUserDetails  " + responseJson.toString());
+
+    if (responseJson["data"]["is_Friend"] == "0") {
+      setState(() {
+        addfriend();
+      });
+    } else {
+      print("else friends");
+    }
   }
 
   @override
@@ -64,8 +122,8 @@ class _privateChat_pageState extends State<privateChat_page> {
     sort.ascending = true;
 
     try {
-      List<QBMessage> messages = await QB.chat
-          .getDialogMessages(widget.userList["dialogId"].toString());
+      List<QBMessage> messages =
+          await QB.chat.getDialogMessages(widget.dialogId);
       int countMessages = messages.length;
 
       if (countMessages > 0) {
@@ -77,7 +135,7 @@ class _privateChat_pageState extends State<privateChat_page> {
 
       return messages;
     } on PlatformException catch (e) {
-      print("sdsds"+ e.toString());
+      print("sdsds" + e.toString());
     }
   }
 
@@ -89,10 +147,9 @@ class _privateChat_pageState extends State<privateChat_page> {
         appBar: AppBar(),
         imageBack: true,
         colorImage: cwhite,
-
-        appbartext: widget.userList["username"].toString().length <= 20 ?
-        widget.userList["username"].toString() :
-        widget.userList["username"].toString().substring(0,20) + "..." ,
+        appbartext: widget.userList["username"].toString().length <= 20
+            ? widget.userList["username"].toString()
+            : widget.userList["username"].toString().substring(0, 20) + "...",
         groupImage: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ClipRRect(
@@ -106,35 +163,36 @@ class _privateChat_pageState extends State<privateChat_page> {
         ),
         imageIcon: Container(),
         fontsize: medium,
-
       ),
       body: Container(
           child: _isLoading == true
               ? SpinKitRipple(color: cfooterpurple)
               : StreamBuilder(
-              stream: Stream.periodic(Duration(seconds: 1))
-                  .asyncMap((i) => getDialogMessages()),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  WidgetsBinding.instance
-                      .addPostFrameCallback((_) => _scrollToBottom());
-                  return ListView.builder(
-                    controller: _scrollController,
-                    itemCount: snapshot.data.length,
-                    padding: EdgeInsets.only(top: 5, bottom: 75),
-                    itemBuilder: (context, index) {
-                      return Container(
-                        padding: EdgeInsets.only(
-                            left: 13, right: 13, top: 8, bottom: 8),
-                        child: Row(
-                          mainAxisAlignment:
-                          snapshot.data[index].senderId.toString() ==
-                              widget.userList["quickboxid"].toString()
-                              ? MainAxisAlignment.start
-                              : MainAxisAlignment.end,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            snapshot.data[index].senderId.toString() ==
+                  stream: Stream.periodic(Duration(seconds: 1))
+                      .asyncMap((i) => getDialogMessages()),
+                  builder: (context, snapshot) {
+                    if (snapshot.hasData) {
+                      if (count == 0) {
+                        WidgetsBinding.instance
+                            .addPostFrameCallback((_) => _scrollToBottom());
+                      }
+                      return ListView.builder(
+                        controller: _scrollController,
+                        itemCount: snapshot.data.length,
+                        padding: EdgeInsets.only(top: 5, bottom: 75),
+                        itemBuilder: (context, index) {
+                          return Container(
+                            padding: EdgeInsets.only(
+                                left: 13, right: 13, top: 8, bottom: 8),
+                            child: Row(
+                              mainAxisAlignment: snapshot.data[index].senderId
+                                          .toString() ==
+                                      widget.userList["quickboxid"].toString()
+                                  ? MainAxisAlignment.start
+                                  : MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                /*snapshot.data[index].senderId.toString() ==
                                 widget.userList["quickboxid"].toString()
                                 ? ClipRRect(
                             borderRadius: BorderRadius.circular(100.0),
@@ -147,7 +205,7 @@ class _privateChat_pageState extends State<privateChat_page> {
                                 height: 18.sp,
                                 placeholder: AssetImage("Assets/Images/giphy.gif")))
                                 : Text(""),
-                            /*ClipRRect(
+                            */ /*ClipRRect(
                             borderRadius:
                             BorderRadius.circular(100.0),
                             child: FadeInImage(
@@ -156,60 +214,65 @@ class _privateChat_pageState extends State<privateChat_page> {
                                 width: 18.sp,
                                 height: 18.sp,
                                 placeholder: AssetImage(
-                                    "Assets/Images/giphy.gif"))),*/
+                                    "Assets/Images/giphy.gif"))),*/ /*
 
                             SizedBox(
                               width: 2.w,
+                            ),*/
+                                Container(
+                                  decoration: BoxDecoration(
+                                    borderRadius: snapshot.data[index].senderId
+                                                .toString() !=
+                                            widget.userList["quickboxid"]
+                                                .toString()
+                                        ? BorderRadius.only(
+                                            bottomLeft: Radius.circular(15),
+                                            bottomRight: Radius.circular(15),
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(1))
+                                        : BorderRadius.only(
+                                            bottomLeft: Radius.circular(15),
+                                            bottomRight: Radius.circular(15),
+                                            topLeft: Radius.circular(1),
+                                            topRight: Radius.circular(15)),
+                                    gradient: snapshot.data[index].senderId
+                                                .toString() !=
+                                            widget.userList["quickboxid"]
+                                                .toString()
+                                        ? LinearGradient(colors: [
+                                            Color(0xff382177),
+                                            Color(0xff9760A4)
+                                          ])
+                                        : LinearGradient(colors: [gray, gray]),
+                                  ),
+                                  padding: EdgeInsets.all(10),
+                                  child: Text(
+                                    snapshot.data[index].body.toString(),
+                                    style: TextStyle(
+                                        fontSize: small,
+                                        fontFamily: "SFPro",
+                                        fontWeight: FontWeight.w400,
+                                        color: snapshot.data[index].senderId
+                                                    .toString() !=
+                                                widget.userList["quickboxid"]
+                                                    .toString()
+                                            ? cwhite
+                                            : cBlack),
+                                  ),
+                                ),
+                              ],
                             ),
-                            Container(
-                              decoration: BoxDecoration(
-                                borderRadius: snapshot.data[index].senderId
-                                    .toString() !=
-                                    widget.userList["quickboxid"].toString()
-                                    ? BorderRadius.only(
-                                    bottomLeft: Radius.circular(15),
-                                    bottomRight: Radius.circular(15),
-                                    topLeft: Radius.circular(15),
-                                    topRight: Radius.circular(1))
-                                    : BorderRadius.only(
-                                    bottomLeft: Radius.circular(15),
-                                    bottomRight: Radius.circular(15),
-                                    topLeft: Radius.circular(1),
-                                    topRight: Radius.circular(15)),
-                                gradient: snapshot.data[index].senderId
-                                    .toString() !=
-                                    widget.userList["quickboxid"].toString()
-                                    ? LinearGradient(colors: [
-                                  Color(0xff382177),
-                                  Color(0xff9760A4)
-                                ])
-                                    : LinearGradient(colors: [gray, gray]),
-                              ),
-                              padding: EdgeInsets.all(10),
-                              child: Text(
-                                snapshot.data[index].body.toString(),
-                                style: TextStyle(
-                                    fontSize: small,
-                                    color: snapshot.data[index].senderId
-                                        .toString() !=
-                                        widget.userList["quickboxid"].toString()
-                                        ? cwhite
-                                        : cBlack),
-                              ),
-                            ),
-                          ],
-                        ),
+                          );
+                        },
                       );
-                    },
-                  );
-                }
-                return Center(
-                    child: Text(
-                      "Loading...",
+                    }
+                    return Center(
+                        child: Text(
+                      "No messages...",
                       style: TextStyle(
                           color: cBlack, fontFamily: "SFPro", fontSize: medium),
                     ));
-              })),
+                  })),
       bottomSheet: Container(
           color: cwhite,
           height: 55.sp,
@@ -224,7 +287,7 @@ class _privateChat_pageState extends State<privateChat_page> {
                 Container(
                   width: MediaQuery.of(context).size.width / 1.25,
                   decoration:
-                  BoxDecoration(borderRadius: BorderRadius.circular(50.0)),
+                      BoxDecoration(borderRadius: BorderRadius.circular(50.0)),
                   height: 35.sp,
                   child: TextField(
                     controller: chat_controller,
@@ -240,13 +303,13 @@ class _privateChat_pageState extends State<privateChat_page> {
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(50.0),
                           borderSide:
-                          BorderSide(color: cChatbackground, width: 1)),
+                              BorderSide(color: cChatbackground, width: 1)),
                       contentPadding:
-                      EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                          EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(50.0)),
                           borderSide:
-                          BorderSide(color: cChatbackground, width: 1)),
+                              BorderSide(color: cChatbackground, width: 1)),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(50.0),
                         borderSide: BorderSide(
@@ -263,16 +326,18 @@ class _privateChat_pageState extends State<privateChat_page> {
                   ),
                 ),
                 InkWell(
-                  onTap: chat_controller.text.length==0 ? (){} :  () {
-                    FocusScopeNode currentFocus = FocusScope.of(context);
-                    if (!currentFocus.hasPrimaryFocus) {
-                      currentFocus.unfocus();
-                    }
-                    setState(() {
-                      chat_controller.clear();
-                    });
-                    isConnected();
-                  },
+                  onTap: chat_controller.text.length == 0
+                      ? () {}
+                      : () {
+                          FocusScopeNode currentFocus = FocusScope.of(context);
+                          if (!currentFocus.hasPrimaryFocus) {
+                            currentFocus.unfocus();
+                          }
+                          setState(() {
+                            chat_controller.clear();
+                          });
+                          isConnected();
+                        },
                   child: Image.asset(
                     "Assets/Icons/send.png",
                     height: 5.0.h,
@@ -292,6 +357,7 @@ class _privateChat_pageState extends State<privateChat_page> {
       print(e);
     }
   }
+
   void connect() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
@@ -314,11 +380,12 @@ class _privateChat_pageState extends State<privateChat_page> {
       properties["testProperty2"] = "testPropertyValue2";
       properties["testProperty3"] = "testPropertyValue3";
 
-      await QB.chat.sendMessage(widget.userList["dialogId"],
+      await QB.chat.sendMessage(widget.dialogId,
           body: chatmessage, saveToHistory: true, properties: properties);
       print("rec -------------");
       //createNotification();
       //saveLastMessage();
+      count = 0;
     } on PlatformException catch (e) {
       print("send " + e.toString());
     }
@@ -351,12 +418,11 @@ class _privateChat_pageState extends State<privateChat_page> {
 
   Widget get_Image(String senderId) {
     var url;
-      if (widget.userList["quickboxid"].toString() != senderId.toString()) {
-        url =widget.userList["image"].toString();
+    if (widget.userList["quickboxid"].toString() != senderId.toString()) {
+      url = widget.userList["image"].toString();
 
-        print("image ---- " + widget.userList["image"].toString());
-
-      }
+      print("image ---- " + widget.userList["image"].toString());
+    }
     return ClipRRect(
         borderRadius: BorderRadius.circular(100.0),
         child: FadeInImage(
@@ -368,5 +434,4 @@ class _privateChat_pageState extends State<privateChat_page> {
             height: 18.sp,
             placeholder: AssetImage("Assets/Images/giphy.gif")));
   }
-
 }

@@ -19,32 +19,33 @@ class testPage extends StatefulWidget {
 }
 
 class _testPageState extends State<testPage> {
-
   String _dialogId;
-
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("test"),
-      ),
-      body: Container(
-        height: 500,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            FlatButton(onPressed: (){init();}, child: Text("Init")),
+        appBar: AppBar(
+          title: Text("test"),
+        ),
+        body: Container(
+          height: 500,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              /*FlatButton(onPressed: (){init();}, child: Text("Init")),
             FlatButton(onPressed: (){createUser();}, child: Text("createUser")),
             FlatButton(onPressed: (){login();}, child: Text("Login")),
-            FlatButton(onPressed: (){connect();}, child: Text("Connect")),
-            FlatButton(onPressed: (){createDialog();}, child: Text("create dialog")),
-            FlatButton(onPressed: (){sendMessage();}, child: Text("send message")),
-            FlatButton(onPressed: (){logout();}, child: Text("logout")),
-          ],
-        ),
-      )
-    );
+            FlatButton(onPressed: (){connect();}, child: Text("Connect")),*/
+              FlatButton(
+                  onPressed: () {
+                    createDialog();
+                  },
+                  child: Text("create dialog")),
+              // FlatButton(onPressed: (){sendMessage();}, child: Text("send message")),
+              // FlatButton(onPressed: (){logout();}, child: Text("logout")),
+            ],
+          ),
+        ));
   }
 
   void init() async {
@@ -54,22 +55,21 @@ class _testPageState extends State<testPage> {
       print(e);
     }
   }
+
   Future<int> createUser() async {
     int userId;
     try {
       QBUser user = await QB.users.createUser("test2@gmail.com", USER_PASSWORD);
       userId = user.id;
-
     } on PlatformException catch (e) {}
     print("userId " + userId.toString());
     return userId;
   }
 
-
   Future<void> login() async {
     try {
-      QBLoginResult result = await QB.auth.login(
-          "abc@gmail.com", USER_PASSWORD);
+      QBLoginResult result =
+          await QB.auth.login("abc@gmail.com", USER_PASSWORD);
 
       QBUser qbUser = result.qbUser;
       QBSession qbSession = result.qbSession;
@@ -81,7 +81,6 @@ class _testPageState extends State<testPage> {
       print(qbUser.id.toString());
     } on PlatformException catch (e) {
       print(e);
-
     }
   }
 
@@ -95,14 +94,11 @@ class _testPageState extends State<testPage> {
   }
 
   void createDialog() async {
-    List<int> occupantsIds = List.from([130787759]);
-    String dialogName = "Test" + DateTime
-        .now()
-        .millisecond
-        .toString();
+    List<int> occupantsIds = List.from([132079020,132078978]);
+    String dialogName = "Test" + DateTime.now().millisecond.toString();
     String dialogPhoto = "some photo url";
 
-    int dialogType = QBChatDialogTypes.PUBLIC_CHAT;
+    int dialogType = QBChatDialogTypes.CHAT;
 
     try {
       QBDialog createdDialog = await QB.chat.createDialog(
@@ -119,8 +115,7 @@ class _testPageState extends State<testPage> {
   }
 
   void sendMessage() async {
-    String messageBody =
-        "Hello from flutter prashant" + "\n From user: ";
+    String messageBody = "Hello from flutter prashant" + "\n From user: ";
 
     try {
       Map<String, String> properties = Map();
@@ -130,7 +125,9 @@ class _testPageState extends State<testPage> {
 
       await QB.chat.sendMessage(_dialogId,
           body: messageBody, saveToHistory: true, properties: properties);
-    } on PlatformException catch (e) {print(e);}
+    } on PlatformException catch (e) {
+      print(e);
+    }
   }
 
   Future<void> logout() async {

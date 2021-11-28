@@ -228,79 +228,6 @@ class _createPublic_roomState extends State<createPublic_room> {
     );
   }
 
-  Future<void> login() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    try {
-      QBLoginResult result = await QB.auth
-          .login(prefs.getString("userEmail").toString(), USER_PASSWORD);
-
-      QBUser qbUser = result.qbUser;
-      QBSession qbSession = result.qbSession;
-
-      qbSession.applicationId = int.parse(APP_ID);
-
-      DataHolder.getInstance().setSession(qbSession);
-      DataHolder.getInstance().setUser(qbUser);
-
-      print("user id login" + qbUser.id.toString());
-      isConnected();
-    } on PlatformException catch (e) {
-      print(e);
-    }
-  }
-
-  void isConnected() async {
-    try {
-      bool connected = await QB.chat.isConnected();
-      connected == true ? createDialog() : connect();
-    } on PlatformException catch (e) {
-      print("false");
-    }
-  }
-
-  void connect() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    try {
-      await QB.chat
-          .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
-
-      print(int.parse(prefs.getString("quickboxid")));
-      createDialog();
-    } on PlatformException catch (e) {
-      print("disconnect " + e.toString());
-    }
-  }
-
-  void createDialog() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-
-    List<int> occupantsIds = new List<int>.from(Platform.isAndroid ? [int.parse(prefs.getString("quickboxid"))]:[]);
-    String dialogName = groupname_controller.text.toString();
-
-    int dialogType = QBChatDialogTypes.PUBLIC_CHAT;
-
-    try {
-      QBDialog createdDialog = await QB.chat
-          .createDialog(occupantsIds, dialogName, dialogType: dialogType);
-
-      if (createdDialog != null) {
-        _dialogId = createdDialog.id;
-        prefs.setString("_dialogId", _dialogId);
-
-        createRoom();
-
-        print("Dialog id" + _dialogId);
-      } else {
-        print("Else");
-      }
-    } on PlatformException catch (e) {
-      print("not create " + e.toString());
-
-    }
-  }
-
   void imageSelectorCameraD1() async {
     Navigator.pop(context);
     var imageFile1 = await ImagePicker.pickImage(
@@ -337,6 +264,80 @@ class _createPublic_roomState extends State<createPublic_room> {
     setState(() {
       _image1 = imageFile1;
     });
+  }
+
+ /* Future<void> login() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      QBLoginResult result = await QB.auth
+          .login(prefs.getString("userEmail").toString(), USER_PASSWORD);
+
+      QBUser qbUser = result.qbUser;
+      QBSession qbSession = result.qbSession;
+
+      qbSession.applicationId = int.parse(APP_ID);
+
+      DataHolder.getInstance().setSession(qbSession);
+      DataHolder.getInstance().setUser(qbUser);
+
+      print("user id login" + qbUser.id.toString());
+      isConnected();
+    } on PlatformException catch (e) {
+      print(e);
+    }
+  }*/
+
+  void isConnected() async {
+    try {
+      bool connected = await QB.chat.isConnected();
+      connected == true ? createDialog() : connect();
+    } on PlatformException catch (e) {
+      print("false");
+    }
+  }
+
+  void connect() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    try {
+      await QB.chat
+          .connect(int.parse(prefs.getString("quickboxid")), USER_PASSWORD);
+
+      print(int.parse(prefs.getString("quickboxid")));
+      createDialog();
+    } on PlatformException catch (e) {
+      print("disconnect " + e.toString());
+    }
+  }
+
+  void createDialog() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    //List<int> occupantsIds = new List<int>.from(Platform.isAndroid ? [int.parse(prefs.getString("quickboxid"))]:[]);
+    List<int> occupantsIds =
+        new List<int>.from([int.parse(prefs.getString("quickboxid"))]);
+    String dialogName = groupname_controller.text.toString();
+
+    int dialogType = QBChatDialogTypes.PUBLIC_CHAT;
+
+    try {
+      QBDialog createdDialog = await QB.chat
+          .createDialog(occupantsIds, dialogName, dialogType: dialogType);
+
+      if (createdDialog != null) {
+        _dialogId = createdDialog.id;
+        prefs.setString("_dialogId", _dialogId);
+
+        createRoom();
+
+        print("Dialog id" + _dialogId);
+      } else {
+        print("Else");
+      }
+    } on PlatformException catch (e) {
+      print("not create " + e.toString());
+      displayToast("Room is not creating, Try after sometime");
+    }
   }
 
   Future<void> createRoom() async {
@@ -399,5 +400,5 @@ class _createPublic_roomState extends State<createPublic_room> {
 }
 
 ProgressDialog _getProgress(BuildContext context) {
-  return ProgressDialog(context,isDismissible: false);
+  return ProgressDialog(context, isDismissible: false);
 }

@@ -251,7 +251,7 @@ class _login_ScreenState extends State<login_Screen> {
 
                             SharedPreferences prefs =
                                 await SharedPreferences.getInstance();
-                              var url = "$url1/login";
+                            var url = "$url1/login";
 
                             var map = new Map<String, dynamic>();
                             map["username"] =
@@ -514,7 +514,6 @@ class _login_ScreenState extends State<login_Screen> {
   }
 
   Future<FirebaseUser> _handleSignIn() async {
-
     _auth.app.options.catchError((error) {
       print("error---->$error");
     });
@@ -535,7 +534,6 @@ class _login_ScreenState extends State<login_Screen> {
   }
 
   Future<void> initiateFacebookLogin() async {
-
     final facebookLoginResult =
         await facebookSignIn.logIn(['email', 'public_profile']);
 
@@ -553,11 +551,9 @@ class _login_ScreenState extends State<login_Screen> {
 
         var profile = json.decode(graphResponse.body);
 
-
         print("profile******* " + profile.toString());
         print("user Id +++++ " + profile["id"].toString());
         onLoginStatusChanged(true, profileData: profile);
-
 
         createUser(
             profile["email"].toString(),
@@ -596,12 +592,18 @@ class _login_ScreenState extends State<login_Screen> {
     pr.show();
     var url = "$url1/registerWithMail";
 
-    print("entered data " + " " +
-        email.toString() +" " +
-        qb_Id.toString() +" " +
-        uid.toString() +" " +
-        displayName.toString() +" " +
-        photoUrl.toString() +" " +
+    print("entered data " +
+        " " +
+        email.toString() +
+        " " +
+        qb_Id.toString() +
+        " " +
+        uid.toString() +
+        " " +
+        displayName.toString() +
+        " " +
+        photoUrl.toString() +
+        " " +
         type.toString());
     var map = new Map<String, dynamic>();
     print(email.toString());
@@ -610,15 +612,17 @@ class _login_ScreenState extends State<login_Screen> {
     print(type.toString());
     print(device_token.toString());
     print(uid.toString());
-    map["email"] = email.toString()=="null" ? "" : email.toString();
-    map["quickboxid"] = qb_Id.toString()=="null"?"":qb_Id.toString();
+    map["email"] = email.toString() == "null" ? "" : email.toString();
+    map["quickboxid"] = qb_Id.toString() == "null" ? "" : qb_Id.toString();
     map["google_id"] = type == "google" ? uid.toString() : "";
     map["facebook_id"] = type == "facebook" ? uid.toString() : "";
     map["facebook_id"] = type == "facebook" ? uid.toString() : "";
     map["apple_id"] = type == "apple" ? uid.toString() : "";
-    map["username"] = displayName.toString()=="null"?"":displayName.toString();
-    map['type'] = type.toString()=="null"?"":type.toString();
-    map["fcm_token"] = device_token.toString()=="null"? "" : device_token.toString();
+    map["username"] =
+        displayName.toString() == "null" ? "" : displayName.toString();
+    map['type'] = type.toString() == "null" ? "" : type.toString();
+    map["fcm_token"] =
+        device_token.toString() == "null" ? "" : device_token.toString();
     map["device_type"] = Platform.isAndroid ? "android" : "ios";
 
     final response = await http.post(url, body: map);

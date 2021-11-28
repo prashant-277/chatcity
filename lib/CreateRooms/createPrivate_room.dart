@@ -203,12 +203,18 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                       child: basicButton(cwhite, () async {
                         if (_formKey.currentState.validate()) {
 
-                          Navigator.pushReplacement(context,
-                              PageTransition(
-                                  type: PageTransitionType.fade,
-                                  alignment: Alignment.bottomCenter,
-                                  duration: Duration(milliseconds: 300),
-                                  child: friend_invitePage(groupname_controller.text.toString(),document_path1)));
+                          if(_image1 == null){
+                            displayToast("The image field is required");
+                          }else{
+                            Navigator.pushReplacement(context,
+                                PageTransition(
+                                    type: PageTransitionType.fade,
+                                    alignment: Alignment.bottomCenter,
+                                    duration: Duration(milliseconds: 300),
+                                    child: friend_invitePage(groupname_controller.text.toString(),document_path1)));
+                          }
+
+
 
 /*                          SharedPreferences prefs = await SharedPreferences.getInstance();
 

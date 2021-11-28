@@ -326,15 +326,9 @@ class _Explore_pageState extends State<Explore_page> {
                                         Row(
                                           children: [
                                             Text(
-                                                roomData[index]["name"]
-                                                            .toString()
-                                                            .length <=
-                                                        13
-                                                    ? roomData[index]["name"]
-                                                        .toString()
-                                                    : roomData[index]["name"]
-                                                            .toString()
-                                                            .substring(0, 13) +
+                                                roomData[index]["name"].toString().length <= 13
+                                                    ? roomData[index]["name"].toString()
+                                                    : roomData[index]["name"].toString().substring(0, 13) +
                                                         "...",
                                                 style: TextStyle(
                                                   fontFamily: "SFPro",
@@ -346,9 +340,7 @@ class _Explore_pageState extends State<Explore_page> {
                                                 padding:
                                                     const EdgeInsets.all(8.0),
                                                 child: Image.asset(
-                                                    roomData[index]["type"]
-                                                                .toString() ==
-                                                            "0"
+                                                    roomData[index]["type"].toString() == "0"
                                                         ? "Assets/Icons/public.png"
                                                         : "Assets/Icons/private.png",
                                                     color: cfooterGray,
@@ -655,6 +647,7 @@ class _Explore_pageState extends State<Explore_page> {
                     displayToast(responseJson["message"].toString());
                   } else {
                     Navigator.of(context).pop();
+
                     displayToast(responseJson["message"].toString());
                   }
                 },
@@ -732,34 +725,17 @@ class _Explore_pageState extends State<Explore_page> {
       'channel id',
       'channel NAME',
       'CHANNEL DESCRIPTION',
+      playSound: true,
+      channelShowBadge: true,
+
 
     );
 
-    var iOS = new IOSNotificationDetails(presentAlert: true);
+    var iOS = new IOSNotificationDetails(presentAlert: true,presentSound: true,presentBadge: true);
     var platform = new NotificationDetails(android, iOS);
     await flutterLocalNotificationsPlugin.show(0, title, msge, platform,
         payload: msge);
   }
-
-  /*Future<void> createPushSubscription() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    try {
-      print("device_token ==== "+ device_token);
-      List<QBSubscription> subscriptions =
-      await QB.subscriptions.create(device_token, QBPushChannelNames.GCM);
-      int length = subscriptions.length;
-
-      if (length > 0) {
-        _id = subscriptions[0].id;
-        prefs.setString("pushId", _id.toString());
-      }
-
-      print("Subscription ------- " + _id.toString());
-    } on PlatformException catch (e) {
-      print("Subscription error ---- " + e.toString());
-    }
-  }*/
 
   Future selectNotification(String payload) async {
     debugPrint("payload : $payload");

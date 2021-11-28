@@ -28,17 +28,13 @@ class userProfile_page extends StatefulWidget {
 
   userProfile_page(this.userList, this.roomdata);
 
-
   @override
   _userProfile_pageState createState() => _userProfile_pageState();
 }
 
 class _userProfile_pageState extends State<userProfile_page> {
   final url1 = url.basicUrl;
-  String name,
-      image,
-      email,
-      quickboxid,is_Friend,userid = "";
+  String name, image, email, quickboxid, is_Friend, userid = "";
   var userData;
   bool _isLoading = true;
   String _dialogId;
@@ -57,7 +53,7 @@ class _userProfile_pageState extends State<userProfile_page> {
 
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
-      var url = "$url1/getUserDetails";
+    var url = "$url1/getUserDetails";
 
     var map = new Map<String, dynamic>();
     map["userid"] = prefs.getString("userId").toString();
@@ -85,9 +81,7 @@ class _userProfile_pageState extends State<userProfile_page> {
 
   @override
   Widget build(BuildContext context) {
-    var query = MediaQuery
-        .of(context)
-        .size;
+    var query = MediaQuery.of(context).size;
     return Scaffold(
       appBar: commanAppBar(
         appBar: AppBar(),
@@ -101,121 +95,113 @@ class _userProfile_pageState extends State<userProfile_page> {
       body: _isLoading == true
           ? SpinKitRipple(color: cfooterpurple)
           : Container(
-        height: query.height,
-        width: query.width,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 25),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              ClipRRect(
-                  borderRadius:
-                  BorderRadius.circular(100.0),
-                  child: FadeInImage(
-                      image: NetworkImage(image.toString()),
-                      fit: BoxFit.cover,
-                      width: 90.sp,
-                      height: 90.sp,
-                      placeholder: AssetImage(
-                          "Assets/Images/giphy.gif"))),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Text(name.toString(),
-                    style: TextStyle(
-                        fontFamily: "SFPro",
-                        fontWeight: FontWeight.w700,
-                        color: cBlack,
-                        fontSize: medium)),
-              ),
-              SizedBox(height: 2.h),
-              Container(
-                height: 45.sp,
-                width: query.width,
-                decoration: BoxDecoration(
-                    color: cChatbackground,
-                    border: Border.all(color: gray, width: 0),
-                    borderRadius: BorderRadius.circular(10.0)),
-                child: Row(
+              height: query.height,
+              width: query.width,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12.0, horizontal: 25),
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
+                    ClipRRect(
+                        borderRadius: BorderRadius.circular(100.0),
+                        child: FadeInImage(
+                            image: NetworkImage(image.toString()),
+                            fit: BoxFit.cover,
+                            width: 90.sp,
+                            height: 90.sp,
+                            placeholder:
+                                AssetImage("Assets/Images/giphy.gif"))),
                     Padding(
-                      padding: const EdgeInsets.only(left: 20.0, right: 10),
-                      child: Image.asset(
-                        "Assets/Icons/email.png",
-                        width: 7.w,
-                      ),
-                    ),
-                    Expanded(
-                      child: Text(email.toString(),
+                      padding: const EdgeInsets.all(10.0),
+                      child: Text(name.toString(),
                           style: TextStyle(
                               fontFamily: "SFPro",
-                              fontWeight: FontWeight.w400,
+                              fontWeight: FontWeight.w700,
                               color: cBlack,
                               fontSize: medium)),
                     ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 4.h),
-              userid == widget.userList["id"].toString() ? Container() : Container(
-                  width: 90.w,
-                  height: 7.5.h,
-                  child:
-                  basicButton(cwhite, () async {
-                    if(is_Friend=="0"){
-                      addfriend();
+                    SizedBox(height: 2.h),
+                    Container(
+                      height: 45.sp,
+                      width: query.width,
+                      decoration: BoxDecoration(
+                          color: cChatbackground,
+                          border: Border.all(color: gray, width: 0),
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding:
+                                const EdgeInsets.only(left: 20.0, right: 10),
+                            child: Image.asset(
+                              "Assets/Icons/email.png",
+                              width: 7.w,
+                            ),
+                          ),
+                          Expanded(
+                            child: Text(email.toString(),
+                                style: TextStyle(
+                                    fontFamily: "SFPro",
+                                    fontWeight: FontWeight.w400,
+                                    color: cBlack,
+                                    fontSize: medium)),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    userid == widget.userList["id"].toString()
+                        ? Container()
+                        : Container(
+                            width: 90.w,
+                            height: 7.5.h,
+                            child: basicButton(cwhite, () async {
+                              if (is_Friend == "0") {
 
-                    }else{
-                      displayToast(name.toString()+" is already your friend");
-                    }
+                                addfriend();
 
+                              } else {
+                                displayToast(name.toString() +
+                                    " is already your friend");
+                              }
+                            }, "+ Add friend", cgreen)),
+                    SizedBox(height: 2.h),
+                    userid == widget.userList["id"].toString()
+                        ? Container()
+                        : Container(
+                            width: 90.w,
+                            height: 7.5.h,
+                            child: basicButton(cwhite, () async {
 
-                  }, "+ Add friend", cgreen)),
-              SizedBox(height: 2.h),
-              userid == widget.userList["id"].toString() ? Container() : Container(
-                  width: 90.w,
-                  height: 7.5.h,
-                  child: basicButton(
-                      cwhite, () async {
+                              createDialog();
 
-                    if(userData["dialogId"].toString()=="null"){
-
-                      createDialog();
-
-                    }else{
-                      _dialogId = userData["dialogId"].toString();
-                      updateDialog();
-
-                    }
-
-
-                  }, "Open private chat", cButtoncolor)),
-              SizedBox(height: 2.h),
-              /*userid == widget.userList["id"].toString() ? Container() :   Container(
+                            }, "Open private chat", cButtoncolor)),
+                    SizedBox(height: 2.h),
+                    /*userid == widget.userList["id"].toString() ? Container() :   Container(
                   width: 90.w,
                   height: 7.5.h,
                   child: basicButton(cwhite, () async {}, "Block", cOrange)),*/
-            ],
-          ),
-        ),
-      ),
+                  ],
+                ),
+              ),
+            ),
     );
   }
 
-  Future<void>  addfriend() async {
+  Future<void> addfriend() async {
     final ProgressDialog pr = _getProgress(context);
     pr.show();
 
-    SharedPreferences prefs =
-        await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     var url = "$url1/addRemoveFriends";
 
     var map = new Map<String, dynamic>();
 
     map["login_id"] = prefs.getString("userId").toString();
-    map["join_user"] =widget.userList["id"].toString();
-    map["join_status"] ="1";
-
+    map["join_user"] = widget.userList["id"].toString();
+    map["join_status"] = "1";
 
     final response = await http.post(url, body: map);
 
@@ -225,18 +211,24 @@ class _userProfile_pageState extends State<userProfile_page> {
     if (responseJson["status"].toString() == "success") {
       displayToast("Add friend successfully");
 
-      pr.hide().then((value) => getUserDetails());
-    }else{
+      setState(() {
+        getUserDetails();
+      });
+      pr.hide();
+    } else {
       pr.hide();
     }
   }
 
   void createDialog() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<int> occupantsIds = [int.parse(prefs.getString("quickboxid")), int.parse(quickboxid)];
+    List<int> occupantsIds = [
+      int.parse(prefs.getString("quickboxid")),
+      int.parse(quickboxid)
+    ];
 
     int dialogType = QBChatDialogTypes.CHAT;
-    print("occupantsIds ======= "+ occupantsIds.toString());
+    print("occupantsIds ======= " + occupantsIds.toString());
 
     try {
       QBDialog createdDialog = await QB.chat
@@ -244,16 +236,16 @@ class _userProfile_pageState extends State<userProfile_page> {
 
       if (createdDialog != null) {
         _dialogId = createdDialog.id;
-        print("_dialogId   "+_dialogId);
+        print("_dialogId   " + _dialogId);
 
-        updateDialog();
-        /* Navigator.push(
+        Navigator.push(
             context,
             PageTransition(
                 type: PageTransitionType.fade,
                 alignment: Alignment.bottomCenter,
                 duration: Duration(milliseconds: 300),
-                child: privateChat_page(widget.userList)));*/
+                child: privateChat_page(widget.userList,_dialogId))).then((value) => getUserDetails());
+
 
       } else {
         print("Else--------");
@@ -263,7 +255,7 @@ class _userProfile_pageState extends State<userProfile_page> {
     }
   }
 
-  Future<void> updateDialog() async {
+/*Future<void> updateDialog() async {
     final ProgressDialog pr = _getProgress(context);
     pr.show();
 
@@ -304,8 +296,9 @@ class _userProfile_pageState extends State<userProfile_page> {
     }else{
       pr.hide();
     }
-  }
+  }*/
 }
-  ProgressDialog _getProgress(BuildContext context) {
-    return ProgressDialog(context);
-  }
+
+ProgressDialog _getProgress(BuildContext context) {
+  return ProgressDialog(context);
+}

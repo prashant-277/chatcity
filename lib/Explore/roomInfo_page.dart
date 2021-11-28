@@ -270,10 +270,13 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                                     });
                                   });
                                 },
-                                side: BorderSide(color: gray, width: 2),
+
+                                /*side: BorderSide(color: gray, width: 2),
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4)),
+                                */
                                 checkColor: cwhite,
+
                                 activeColor: cfooterpurple,
                               ),
                             ],
@@ -346,7 +349,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                             child: ListView.builder(
                                 physics: AlwaysScrollableScrollPhysics(),
                                 shrinkWrap: true,
-                                itemCount: userList.length,
+                                itemCount: userList==null ? "" :userList.length,
                                 itemBuilder: (context, index) {
                                   return InkWell(
                                     onTap: () {

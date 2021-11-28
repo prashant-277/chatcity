@@ -5,8 +5,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 void displayToast(String message) {
   Fluttertoast.showToast(
       msg: message,
-      toastLength: Toast.LENGTH_LONG,
-      gravity: ToastGravity.BOTTOM,
+      toastLength: Toast.LENGTH_SHORT,
+      gravity: ToastGravity.CENTER,
       backgroundColor: cButtoncolor,
       textColor: Colors.white,
       fontSize: medium);

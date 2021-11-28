@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:chatcity/Explore/roomInfo_page.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
+import 'package:chatcity/Widgets/toastDisplay.dart';
 import 'package:chatcity/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -31,9 +32,13 @@ class _chat_pageState extends State<chat_page> {
 
   _scrollToBottom() {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+    setState(() {
+      count=1;
+    });
   }
 
   final url1 = url.basicUrl;
+  int count = 0;
 
   List message = [];
   List userList = [];
@@ -157,8 +162,16 @@ class _chat_pageState extends State<chat_page> {
         appBar: AppBar(),
         imageBack: true,
         colorImage: cwhite,
-
-
+        onPressed: (){
+          Navigator.push(
+              context,
+              PageTransition(
+                  type: PageTransitionType.fade,
+                  alignment: Alignment.bottomCenter,
+                  duration: Duration(milliseconds: 300),
+                  child: roomInfo_page(widget.roomData["id"],
+                      widget.roomData["dialogId"])));
+        },
         appbartext: widget.roomData["name"].toString().length <= 15 ?
         widget.roomData["name"].toString() :
         widget.roomData["name"].toString().substring(0,15) + "..." ,
@@ -210,8 +223,10 @@ class _chat_pageState extends State<chat_page> {
                       .asyncMap((i) => getDialogMessages()),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      WidgetsBinding.instance
-                          .addPostFrameCallback((_) => _scrollToBottom());
+                      if(count==0) {
+                        WidgetsBinding.instance
+                            .addPostFrameCallback((_) => _scrollToBottom());
+                      }
                       return ListView.builder(
                         controller: _scrollController,
                         itemCount: snapshot.data.length,
@@ -291,7 +306,7 @@ class _chat_pageState extends State<chat_page> {
                     }
                     return Center(
                         child: Text(
-                      "Loading...",
+                      "No messages...",
                       style: TextStyle(
                           color: cBlack, fontFamily: "SFPro", fontSize: medium),
                     ));
@@ -383,10 +398,12 @@ class _chat_pageState extends State<chat_page> {
       await QB.chat.sendMessage(widget.roomData["dialogId"],
           body: chatmessage, saveToHistory: true, properties: properties);
       print("rec -------------");
+      count=0;
       //createNotification();
       saveLastMessage();
     } on PlatformException catch (e) {
       print("send " + e.toString());
+      displayToast("Message not sent, Try after sometime");
     }
   }
 
