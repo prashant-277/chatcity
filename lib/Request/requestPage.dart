@@ -27,7 +27,7 @@ class requestPage extends StatefulWidget {
   _requestPageState createState() => _requestPageState();
 }
 
-class _requestPageState extends State<requestPage> {
+class _requestPageState extends State<requestPage>{
   int current_tab = 0;
   final url1 = url.basicUrl;
   List requestDetail = [];
@@ -126,8 +126,10 @@ class _requestPageState extends State<requestPage> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
+
     var query = MediaQuery.of(context).size;
     return WillPopScope(
       onWillPop: _onWillPop,
@@ -157,6 +159,7 @@ class _requestPageState extends State<requestPage> {
           ],
         ),
         body: DefaultTabController(
+
           length: 2,
           child: Column(
             children: <Widget>[
@@ -205,6 +208,7 @@ class _requestPageState extends State<requestPage> {
               Expanded(
                 child: TabBarView(
                   physics: NeverScrollableScrollPhysics(),
+
                   children: [
                     _isLoading == true
                         ? SpinKitRipple(color: cfooterpurple)

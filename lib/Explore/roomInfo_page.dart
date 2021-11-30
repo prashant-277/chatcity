@@ -81,11 +81,47 @@ class _roomInfo_pageState extends State<roomInfo_page> {
       print("Success");
       Navigator.pop(context,true);
       Navigator.pop(context,true);
+      Navigator.pop(context,true);
     } on PlatformException catch (e) {
       print(e);
     }
   }
 
+  Future<bool> exitRoomdialog() {
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        content: Text('Do you want to exit from this room?',
+            style: TextStyle(
+                fontFamily: "SFPro",
+                fontWeight: FontWeight.w600,
+                color: cBlack,
+                fontSize: 14.sp)),
+        actions: <Widget>[
+          FlatButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text('No',
+                style: TextStyle(
+                    fontFamily: "SFPro",
+                    fontWeight: FontWeight.w600,
+                    color: cBlack,
+                    fontSize: 14.sp)),
+          ),
+          FlatButton(
+            onPressed: () {
+              exitRoom();
+            },
+            child: Text('Yes',
+                style: TextStyle(
+                    fontFamily: "SFPro",
+                    fontWeight: FontWeight.w600,
+                    color: cBlack,
+                    fontSize: 14.sp)),
+          ),
+        ],
+      ),
+    );
+  }
   Future<void> exitRoom()  async {
     final ProgressDialog pr = _getProgress(context);
     pr.show();
@@ -166,7 +202,7 @@ class _roomInfo_pageState extends State<roomInfo_page> {
                 }
               },*/
               onTap: () {
-                exitRoom();
+                exitRoomdialog();
               },
               child: Container(
                 //width: query.width * 0.17,

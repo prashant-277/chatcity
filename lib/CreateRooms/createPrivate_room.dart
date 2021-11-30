@@ -38,6 +38,7 @@ class _createPrivate_roomState extends State<createPrivate_room> {
   TextEditingController groupname_controller = TextEditingController();
   String _dialogId;
 
+
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;
@@ -74,6 +75,8 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                       icon: _image1 == null
                           ? Image.asset("Assets/Icons/placeholder.png")
                           : Container(
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(100.0),color: gray),
+
                               width: query.width / 1,
                               child: ClipRRect(
                                 borderRadius: new BorderRadius.circular(100.0),
@@ -85,7 +88,7 @@ class _createPrivate_roomState extends State<createPrivate_room> {
                                     : Image.file(_image1,
                                         height: 100.sp,
 
-                                        fit: BoxFit.fill),
+                                        fit: BoxFit.fitHeight),
                               ),
                             ),
                       iconSize: 100.sp,

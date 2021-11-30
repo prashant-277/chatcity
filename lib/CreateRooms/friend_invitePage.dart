@@ -38,7 +38,7 @@ class friend_invitePage extends StatefulWidget {
   _friend_invitePageState createState() => _friend_invitePageState();
 }
 
-class _friend_invitePageState extends State<friend_invitePage> {
+class _friend_invitePageState extends State<friend_invitePage>{
   List select = [];
   List oopID = [];
   List userIDs = [];
@@ -49,6 +49,7 @@ class _friend_invitePageState extends State<friend_invitePage> {
   bool _isLoading = true;
   TextEditingController search_ctrl = TextEditingController();
   int search = 0;
+
 
   @override
   void initState() {
@@ -193,63 +194,71 @@ class _friend_invitePageState extends State<friend_invitePage> {
                       physics: AlwaysScrollableScrollPhysics(),
                       itemCount: userList.length,
                       itemBuilder: (context, index) {
-                        return ListTile(
-                          contentPadding: EdgeInsets.zero,
-                          onTap: () {
-                            setState(() {
-                              if (select.contains(userList[index]["id"])) {
-                                select.remove(userList[index]["id"]);
-                                oopID.remove(int.parse(
-                                    userList[index]["quickboxid"].toString()));
-                                userIDs.remove(int.parse(
-                                    userList[index]["id"].toString()));
-                              } else {
-                                select.add(userList[index]["id"]);
-                                oopID.add(int.parse(
-                                    userList[index]["quickboxid"].toString()));
-                                userIDs.add(int.parse(
-                                    userList[index]["id"].toString()));
-                              }
-                              print(oopID);
-                              print(userIDs);
-                            });
-                          },
-                          title: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 20.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(userList[index]["username"].toString(),
-                                      style: TextStyle(
-                                        fontFamily: "SFPro",
-                                        fontSize: medium,
-                                        color: cBlack,
-                                        fontWeight: FontWeight.w400,
-                                      )),
+                        return Column(
+                          children: [
+                            ListTile(
+                              tileColor: select.contains(userList[index]["id"]) ? Colors.green[200] : cwhite,
+                              contentPadding: EdgeInsets.zero,
+                              onTap: () {
+                                setState(() {
+                                  if (select.contains(userList[index]["id"])) {
+                                    select.remove(userList[index]["id"]);
+                                    oopID.remove(int.parse(
+                                        userList[index]["quickboxid"].toString()));
+                                    userIDs.remove(int.parse(
+                                        userList[index]["id"].toString()));
+
+
+                                  } else {
+                                    select.add(userList[index]["id"]);
+                                    oopID.add(int.parse(
+                                        userList[index]["quickboxid"].toString()));
+                                    userIDs.add(int.parse(
+                                        userList[index]["id"].toString()));
+                                  }
+                                  print(oopID);
+                                  print(userIDs);
+                                });
+                              },
+                              title: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20.0),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Expanded(
+                                      child: Text(userList[index]["username"].toString(),
+                                          style: TextStyle(
+                                            fontFamily: "SFPro",
+                                            fontSize: medium,
+                                            color: cBlack,
+                                            fontWeight: FontWeight.w400,
+                                          )),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(right: 20.0),
+                                      child: select.contains(userList[index]["id"])
+                                          ? Image.asset("Assets/Icons/selected.png",
+                                              width: 16.sp)
+                                          : Container(),
+                                    )
+                                  ],
                                 ),
-                                Padding(
-                                  padding: const EdgeInsets.only(right: 20.0),
-                                  child: select.contains(userList[index]["id"])
-                                      ? Image.asset("Assets/Icons/selected.png",
-                                          width: 16.sp)
-                                      : Container(),
-                                )
-                              ],
+                              ),
+                              leading: Padding(
+                                  padding: const EdgeInsets.only(left: 30.0),
+                                  child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(100.0),
+                                      child: FadeInImage(
+                                          image: NetworkImage(
+                                              userList[index]["image"].toString()),
+                                          fit: BoxFit.cover,
+                                          width: 30.sp,
+                                          height: 30.sp,
+                                          placeholder: AssetImage(
+                                              "Assets/Images/giphy.gif")))),
                             ),
-                          ),
-                          leading: Padding(
-                              padding: const EdgeInsets.only(left: 30.0),
-                              child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(100.0),
-                                  child: FadeInImage(
-                                      image: NetworkImage(
-                                          userList[index]["image"].toString()),
-                                      fit: BoxFit.cover,
-                                      width: 30.sp,
-                                      height: 30.sp,
-                                      placeholder: AssetImage(
-                                          "Assets/Images/giphy.gif")))),
+                            SizedBox(height: 0.2.h,)
+                          ],
                         );
                       },
                     ),

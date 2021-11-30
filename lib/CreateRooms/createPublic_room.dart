@@ -83,6 +83,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                       icon: _image1 == null
                           ? Image.asset("Assets/Icons/placeholder.png")
                           : Container(
+                        decoration: BoxDecoration(borderRadius: BorderRadius.circular(100.0),color: gray),
                               width: query.width / 1,
                               child: ClipRRect(
                                 borderRadius: new BorderRadius.circular(100.0),
@@ -94,7 +95,7 @@ class _createPublic_roomState extends State<createPublic_room> {
                                     : Image.file(_image1,
                                         height: query.height / 1,
                                         width: query.width / 1,
-                                        fit: BoxFit.fill),
+                                        fit: BoxFit.fitHeight),
                               ),
                             ),
                       iconSize: 100.sp,
