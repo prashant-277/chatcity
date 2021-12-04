@@ -50,7 +50,7 @@ class _edit_ProfileState extends State<edit_Profile> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res getUserDetails  " + responseJson.toString());
 

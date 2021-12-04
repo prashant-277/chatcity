@@ -34,7 +34,7 @@ class RegisterwithEmail extends StatefulWidget {
 class _RegisterwithEmailState extends State<RegisterwithEmail> {
   final GoogleSignIn _googleSignIn = GoogleSignIn();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  //FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   var device_token;
   var device_id;
 
@@ -45,72 +45,10 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
   bool isLoggedIn = false;
   var profileData;
 
-  @override
-  void initState() {
-    super.initState();
-    firebaseCloudMessaging_Listeners();
-  }
-
   void onLoginStatusChanged(bool isLoggedIn, {profileData}) {
     setState(() {
       this.isLoggedIn = isLoggedIn;
       this.profileData = profileData;
-    });
-  }
-
-  Future<void> firebaseCloudMessaging_Listeners() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    if (Platform.isIOS) iOS_Permission();
-
-    if (Platform.isAndroid) Android_Permission();
-
-    _firebaseMessaging.getToken().then((token) {
-      setState(() {
-        device_token = token;
-        print("fcm token  " + device_token);
-        prefs.setString("fcmToken", device_token.toString());
-      });
-    });
-
-    _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          print('on message $message');
-          return;
-        },
-
-        onResume: (Map<String, dynamic> message) async {
-          print('on resume $message');
-          return;
-        },
-
-        onLaunch: (Map<String, dynamic> message) async {
-          print('on launch $message');
-          return;
-        }, onBackgroundMessage: myBackgroundMessageHandler
-
-    );
-  }
-
-  Future<dynamic> myBackgroundMessageHandler(Map<String, dynamic> message) {
-    print('on background $message');
-  }
-
-  void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
-  }
-
-  void Android_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
     });
   }
 
@@ -366,7 +304,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     var map = new Map<String, dynamic>();
     map["email"] = email.toString();
 
-    final response = await http.post(url, body: map);
+    final response = await http.post(Uri.parse(url), body: map);
     final responseJson = json.decode(response.body);
     print("veryfyEmail -- " + responseJson.toString());
     if (response.statusCode == 200) {
@@ -410,7 +348,7 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
     map["fcm_token"] = device_token.toString();
     map["device_type"] = Platform.isAndroid ? "android" : "ios";
 
-    final response = await http.post(url, body: map);
+    final response = await http.post(Uri.parse(url), body: map);
 
     final responseJson = json.decode(response.body);
     print("registerWithMail-- " + responseJson.toString());
@@ -430,26 +368,6 @@ class _RegisterwithEmailState extends State<RegisterwithEmail> {
               alignment: Alignment.bottomCenter,
               child: otpSent_successfully(responseJson)));
     }
-  }
-
-  Future<FirebaseUser> _handleSignIn() async {
-    _auth.app.options.catchError((error) {
-      print("error---->$error");
-    });
-    final GoogleSignInAccount googleUser = await _googleSignIn.signIn();
-    final GoogleSignInAuthentication googleAuth =
-    await googleUser.authentication;
-
-    final AuthCredential credential = GoogleAuthProvider.getCredential(
-      accessToken: googleAuth.accessToken,
-      idToken: googleAuth.idToken,
-    );
-
-    final FirebaseUser user =
-        (await _auth.signInWithCredential(credential)).user;
-
-    print("signed in " + user.displayName);
-    return user;
   }
 }
 

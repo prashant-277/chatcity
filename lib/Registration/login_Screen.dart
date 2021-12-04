@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:chatcity/Explore/Explore_page.dart';
+import 'package:chatcity/Explore/chat_page.dart';
 import 'package:chatcity/Registration/emailRegistration_signUp.dart';
 import 'package:chatcity/Widgets/appbarCustom.dart';
 import 'package:chatcity/Widgets/buttons.dart';
@@ -13,6 +15,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:progress_dialog/progress_dialog.dart';
@@ -44,6 +47,7 @@ class _login_ScreenState extends State<login_Screen> {
   FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   var device_token;
   var device_id;
+  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   bool show = true;
   final _formKey = GlobalKey<FormState>();
@@ -69,6 +73,16 @@ class _login_ScreenState extends State<login_Screen> {
   @override
   void initState() {
     super.initState();
+    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
+    var android = new AndroidInitializationSettings(
+      '@mipmap/chatcity',
+    );
+    var iOS = new IOSInitializationSettings();
+    var initSetttings = new InitializationSettings(android: android, iOS: iOS);
+    flutterLocalNotificationsPlugin.initialize(
+      initSetttings,
+      onSelectNotification: selectNotification,
+    );
     firebaseCloudMessaging_Listeners();
     //getDeviceId();
   }
@@ -77,8 +91,6 @@ class _login_ScreenState extends State<login_Screen> {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     if (Platform.isIOS) iOS_Permission();
-
-    if (Platform.isAndroid) Android_Permission();
 
     _firebaseMessaging.getToken().then((token) {
       setState(() {
@@ -91,12 +103,19 @@ class _login_ScreenState extends State<login_Screen> {
     _firebaseMessaging.configure(
       onMessage: (Map<String, dynamic> message) async {
         print('on message $message');
+        showNotification(message);
       },
       onResume: (Map<String, dynamic> message) async {
+        showNotification(message);
         print('on resume $message');
       },
       onLaunch: (Map<String, dynamic> message) async {
+        showNotification(message);
         print('on launch $message');
+      },
+      onBackgroundMessage: (Map<String, dynamic> message) async {
+        print('on Background $message');
+        showNotification(message);
       },
     );
   }
@@ -110,25 +129,42 @@ class _login_ScreenState extends State<login_Screen> {
     });
   }
 
-  void Android_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-    });
+
+  void showNotification(Map<String, dynamic> msg) async {
+    print(msg);
+    var title = msg['title'];
+    var msge = msg['body'];
+
+    var android = new AndroidNotificationDetails(
+      'fcm_default_channel',
+      'channel NAME',
+      'CHANNEL DESCRIPTION',
+      playSound: true,
+      channelShowBadge: true,
+    );
+    var iOS = new IOSNotificationDetails(
+        presentAlert: true, presentSound: true, presentBadge: true);
+    var platform = new NotificationDetails(android: android, iOS: iOS);
+    await flutterLocalNotificationsPlugin.show(0, title, msge, platform, payload: msge);
+  }
+
+  Future selectNotification(String payload) async {
+    debugPrint("payload : $payload");
+    if (payload != null) {
+      debugPrint('notification payload:------ ${payload}');
+      await Navigator.push(
+        context,
+        new MaterialPageRoute(builder: (context) => Explore_page()),
+      ).then((value) {});
+    }
   }
 
   /*Future<String> getDeviceId() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-
     DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-
     if (Platform.isIOS) {
       IosDeviceInfo iosDeviceInfo = await deviceInfo.iosInfo;
-
       print("Device id---------" + iosDeviceInfo.identifierForVendor);
-
       setState(() {
         device_id = iosDeviceInfo.identifierForVendor;
         prefs.setString("deviceId", device_id);
@@ -137,13 +173,11 @@ class _login_ScreenState extends State<login_Screen> {
     } else if (Platform.isAndroid) {
       AndroidDeviceInfo androidDeviceInfo = await deviceInfo.androidInfo;
       print("Device id---------" + androidDeviceInfo.androidId.toString());
-
       setState(() {
         device_id = androidDeviceInfo.androidId;
         prefs.setString("deviceId", device_id);
       });
       return androidDeviceInfo.androidId; // unique ID on Android
-
     }
   }*/
   @override
@@ -262,7 +296,7 @@ class _login_ScreenState extends State<login_Screen> {
                             map["device_type"] =
                                 Platform.isAndroid ? "android" : "ios";
 
-                            final response = await http.post(url, body: map);
+                            final response = await http.post(Uri.parse(url), body: map);
 
                             final responseJson = json.decode(response.body);
                             print("login-- " + responseJson.toString());
@@ -625,7 +659,7 @@ class _login_ScreenState extends State<login_Screen> {
         device_token.toString() == "null" ? "" : device_token.toString();
     map["device_type"] = Platform.isAndroid ? "android" : "ios";
 
-    final response = await http.post(url, body: map);
+    final response = await http.post(Uri.parse(url), body: map);
 
     final responseJson = json.decode(response.body);
     print("registerWithMail-- " + responseJson.toString());

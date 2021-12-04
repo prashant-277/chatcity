@@ -68,7 +68,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.guava:guava:27.0.1-android'
     implementation 'com.facebook.android:facebook-android-sdk:[5,11)'
-   // implementation 'com.google.firebase:firebase-messaging:18.0.0'
+    implementation 'com.google.firebase:firebase-messaging:18.0.0'
 
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test:runner:1.2.0'

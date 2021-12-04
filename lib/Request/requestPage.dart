@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -94,7 +95,7 @@ class _requestPageState extends State<requestPage>{
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res myinvitationList  " + responseJson.toString());
 
@@ -116,7 +117,7 @@ class _requestPageState extends State<requestPage>{
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res getFriendList  " + responseJson.toString());
 
@@ -313,7 +314,7 @@ class _requestPageState extends State<requestPage>{
                                           map["join_status"] = "0";
 
                                           final response =
-                                              await http.post(url, body: map);
+                                              await http.post(Uri.parse(url), body: map);
 
                                           final responseJson =
                                               json.decode(response.body);
@@ -495,7 +496,7 @@ class _requestPageState extends State<requestPage>{
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res invitationResponse  " + responseJson.toString());
 

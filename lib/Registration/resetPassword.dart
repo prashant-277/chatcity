@@ -284,7 +284,7 @@ class _resetPasswordState extends State<resetPassword> {
                           map["email"] = widget.emailotp.toString();
                           map["password"] = _confirmpswdCtrl.text.toString();
 
-                          final response = await http.post(url, body: map);
+                          final response = await http.post(Uri.parse(url), body: map);
 
                           final responseJson = json.decode(response.body);
                           print("forgotPassword-- " + responseJson.toString());

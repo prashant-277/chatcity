@@ -72,23 +72,13 @@ class _Explore_pageState extends State<Explore_page> {
   bool _isLoading = true;
   var type;
   var userId;
-  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   var device_token;
-  int _id;
-  FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   @override
   void initState() {
     super.initState();
     getAllRooms();
     getUserId();
-    flutterLocalNotificationsPlugin = new FlutterLocalNotificationsPlugin();
-    var android = new AndroidInitializationSettings('@mipmap/chatcity',);
-    var iOS = new IOSInitializationSettings();
-    var initSetttings = new InitializationSettings(android, iOS);
-    flutterLocalNotificationsPlugin.initialize(initSetttings,
-        onSelectNotification: selectNotification,);
-    firebaseCloudMessaging_Listeners();
   }
 
 
@@ -109,7 +99,7 @@ class _Explore_pageState extends State<Explore_page> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res getAllRooms  " + responseJson.toString());
     setState(() {
@@ -409,7 +399,7 @@ class _Explore_pageState extends State<Explore_page> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res searchRooms  " + responseJson.toString());
 
@@ -471,7 +461,7 @@ class _Explore_pageState extends State<Explore_page> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res joinedRoomsList  " + responseJson.toString());
 
@@ -551,7 +541,7 @@ class _Explore_pageState extends State<Explore_page> {
                 };
 
                 final response =
-                    await http.post(url, body: map, headers: headers);
+                    await http.post(Uri.parse(url), body: map, headers: headers);
                 final responseJson = json.decode(response.body);
                 print("res joinRoom  " + responseJson.toString());
 
@@ -633,7 +623,7 @@ class _Explore_pageState extends State<Explore_page> {
                   };
 
                   final response =
-                      await http.post(url, body: map, headers: headers);
+                      await http.post(Uri.parse(url), body: map, headers: headers);
                   final responseJson = json.decode(response.body);
                   print("res joinRoom  " + responseJson.toString());
 
@@ -647,7 +637,6 @@ class _Explore_pageState extends State<Explore_page> {
                     displayToast(responseJson["message"].toString());
                   } else {
                     Navigator.of(context).pop();
-
                     displayToast(responseJson["message"].toString());
                   }
                 },
@@ -668,83 +657,6 @@ class _Explore_pageState extends State<Explore_page> {
                 new MaterialPageRoute(builder: (_) => new chat_page(roomData)))
             .then((value) => getAllRooms());
       }
-    }
-  }
-
-  Future<void> firebaseCloudMessaging_Listeners() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-
-    // if (Platform.isIOS) iOS_Permission();
-
-    //if (Platform.isAndroid) Android_Permission();
-
-    /* _firebaseMessaging.getToken().then((token) {
-      setState(() {
-        device_token = token;
-        print("fcm token  " + device_token);
-        prefs.setString("fcmToken", device_token.toString());
-      });
-    });
-*/
-    _firebaseMessaging.configure(
-      onMessage: (Map<String, dynamic> message) async {
-        print('on message ==== $message');
-      },
-      onResume: (Map<String, dynamic> message) async {
-        print('on resume $message');
-        showNotification(message);
-
-      },
-      onLaunch: (Map<String, dynamic> message) async {
-        print('on launch $message');
-        showNotification(message);
-      },
-      onBackgroundMessage: (Map<String, dynamic> message) async {
-        print('on Background $message');
-        showNotification(message);
-      },
-    );
-  }
-
-  /*void iOS_Permission() {
-    _firebaseMessaging.requestNotificationPermissions(
-        IosNotificationSettings(sound: true, badge: true, alert: true));
-    _firebaseMessaging.onIosSettingsRegistered
-        .listen((IosNotificationSettings settings) {
-      print("Settings registered: $settings");
-
-    });
-  }*/
-
-  void showNotification(Map<String, dynamic> msg) async {
-    print(msg);
-    var title = msg['title'];
-    var msge = msg['body'];
-
-    var android = new AndroidNotificationDetails(
-      'channel id',
-      'channel NAME',
-      'CHANNEL DESCRIPTION',
-      playSound: true,
-      channelShowBadge: true,
-
-
-    );
-
-    var iOS = new IOSNotificationDetails(presentAlert: true,presentSound: true,presentBadge: true);
-    var platform = new NotificationDetails(android, iOS);
-    await flutterLocalNotificationsPlugin.show(0, title, msge, platform,
-        payload: msge);
-  }
-
-  Future selectNotification(String payload) async {
-    debugPrint("payload : $payload");
-    if (payload != null) {
-      debugPrint('notification payload:------ ${payload}');
-      await Navigator.push(
-        context,
-        new MaterialPageRoute(builder: (context) => chat_page(roomData)),
-      ).then((value) {});
     }
   }
 }

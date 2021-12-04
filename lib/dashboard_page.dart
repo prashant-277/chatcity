@@ -26,7 +26,7 @@ class dashboard_page extends StatefulWidget {
   _dashboard_pageState createState() => _dashboard_pageState();
 }
 
-class _dashboard_pageState extends State<dashboard_page> {
+class _dashboard_pageState extends State<dashboard_page>{
   int index = 0;
   @override
   void initState() {
@@ -78,7 +78,6 @@ class _dashboard_pageState extends State<dashboard_page> {
       print("=== " + e.toString());
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -63,7 +63,7 @@ class _userProfile_pageState extends State<userProfile_page> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res getUserDetails  " + responseJson.toString());
     setState(() {
@@ -203,7 +203,7 @@ class _userProfile_pageState extends State<userProfile_page> {
     map["join_user"] = widget.userList["id"].toString();
     map["join_status"] = "1";
 
-    final response = await http.post(url, body: map);
+    final response = await http.post(Uri.parse(url), body: map);
 
     final responseJson = json.decode(response.body);
     print("addRemoveFriends-- " + responseJson.toString());

@@ -206,7 +206,7 @@ class _forgetOtpState extends State<forgetOtp> {
                           var map = new Map<String, dynamic>();
                           map["email"] = widget.emailotp.toString();
 
-                          final response = await http.post(url, body: map);
+                          final response = await http.post(Uri.parse(url), body: map);
 
                           final responseJson = json.decode(response.body);
                           print("forgotPassword-- " + responseJson.toString());

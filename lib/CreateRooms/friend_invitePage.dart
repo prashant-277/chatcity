@@ -69,7 +69,7 @@ class _friend_invitePageState extends State<friend_invitePage>{
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res getUserList  " + responseJson.toString());
 
@@ -427,7 +427,7 @@ class _friend_invitePageState extends State<friend_invitePage>{
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res SearchFriend  " + responseJson.toString());
 

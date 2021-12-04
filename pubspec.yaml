@@ -50,7 +50,6 @@ dependencies:
   firebase_messaging:
   firebase_core:
   flutter_local_notifications:
-  device_info:
   webview_flutter:
 
 dev_dependencies:

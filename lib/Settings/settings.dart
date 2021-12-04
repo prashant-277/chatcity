@@ -147,8 +147,8 @@ class _settings_pageState extends State<settings_page> {
                                     _firebaseMessaging.subscribeToTopic("chat");
                                     displayToast("Enable Push notifications");
                                   } else {
-                                    _firebaseMessaging
-                                        .unsubscribeFromTopic("chat");
+                                     _firebaseMessaging
+                                         .unsubscribeFromTopic("chat");
                                     displayToast("Disable Push notifications");
                                   }
                                 });
@@ -367,7 +367,7 @@ class _settings_pageState extends State<settings_page> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res logout  " + responseJson.toString());
 

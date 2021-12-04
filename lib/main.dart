@@ -2,6 +2,9 @@ import 'dart:io';
 
 import 'package:chatcity/constants.dart';
 import 'package:chatcity/splashScreen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quickblox_sdk/quickblox_sdk.dart';
@@ -14,8 +17,13 @@ class MyHttpOverrides extends HttpOverrides{
       ..badCertificateCallback = (X509Certificate cert, String host, int port)=> true;
   }
 }
+// Future<void> firebaseMessagingBackgroundHandler(message) async {
+//   print(message);
+// }
 
-void main() {
+Future<void> main() async {
+  // FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   HttpOverrides.global=new MyHttpOverrides();
   runApp(MyApp());
 }

@@ -19,6 +19,7 @@ class _otpSent_successfullyState extends State<otpSent_successfully> {
     super.initState();
     print(widget.responseJson.toString());
   }
+
   @override
   Widget build(BuildContext context) {
     var query = MediaQuery.of(context).size;

@@ -33,7 +33,7 @@ class _chat_pageState extends State<chat_page> {
   _scrollToBottom() {
     _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
     setState(() {
-      count=1;
+      count = 1;
     });
   }
 
@@ -113,7 +113,7 @@ class _chat_pageState extends State<chat_page> {
         "API-token": prefs.getString("api_token").toString()
       };
 
-      final response = await http.post(url, body: map, headers: headers);
+      final response = await http.post(Uri.parse(url), body: map, headers: headers);
       final responseJson = json.decode(response.body);
       print("res showRoomDetails  " + responseJson.toString());
       print("res showRoomDetails occupantsId " +
@@ -139,7 +139,7 @@ class _chat_pageState extends State<chat_page> {
         "API-token": prefs.getString("api_token").toString()
       };
 
-      final response = await http.post(url, body: map, headers: headers);
+      final response = await http.post(Uri.parse(url), body: map, headers: headers);
       final responseJson = json.decode(response.body);
       print("res showRoomDetails  " + responseJson.toString());
 
@@ -162,19 +162,19 @@ class _chat_pageState extends State<chat_page> {
         appBar: AppBar(),
         imageBack: true,
         colorImage: cwhite,
-        onPressed: (){
+        onPressed: () {
           Navigator.push(
               context,
               PageTransition(
                   type: PageTransitionType.fade,
                   alignment: Alignment.bottomCenter,
                   duration: Duration(milliseconds: 300),
-                  child: roomInfo_page(widget.roomData["id"],
-                      widget.roomData["dialogId"])));
+                  child: roomInfo_page(
+                      widget.roomData["id"], widget.roomData["dialogId"])));
         },
-        appbartext: widget.roomData["name"].toString().length <= 15 ?
-        widget.roomData["name"].toString() :
-        widget.roomData["name"].toString().substring(0,15) + "..." ,
+        appbartext: widget.roomData["name"].toString().length <= 15
+            ? widget.roomData["name"].toString()
+            : widget.roomData["name"].toString().substring(0, 15) + "...",
         groupImage: Padding(
           padding: const EdgeInsets.all(8.0),
           child: ClipRRect(
@@ -223,7 +223,7 @@ class _chat_pageState extends State<chat_page> {
                       .asyncMap((i) => getDialogMessages()),
                   builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      if(count==0) {
+                      if (count == 0) {
                         WidgetsBinding.instance
                             .addPostFrameCallback((_) => _scrollToBottom());
                       }
@@ -364,16 +364,18 @@ class _chat_pageState extends State<chat_page> {
                   ),
                 ),
                 InkWell(
-                  onTap: chat_controller.text.length==0 ? (){} :  () {
-                    FocusScopeNode currentFocus = FocusScope.of(context);
-                    if (!currentFocus.hasPrimaryFocus) {
-                      currentFocus.unfocus();
-                    }
-                    setState(() {
-                      chat_controller.clear();
-                    });
-                    isConnected();
-                  },
+                  onTap: chat_controller.text.length == 0
+                      ? () {}
+                      : () {
+                          FocusScopeNode currentFocus = FocusScope.of(context);
+                          if (!currentFocus.hasPrimaryFocus) {
+                            currentFocus.unfocus();
+                          }
+                          setState(() {
+                            chat_controller.clear();
+                          });
+                          isConnected();
+                        },
                   child: Image.asset(
                     "Assets/Icons/send.png",
                     height: 5.0.h,
@@ -398,7 +400,7 @@ class _chat_pageState extends State<chat_page> {
       await QB.chat.sendMessage(widget.roomData["dialogId"],
           body: chatmessage, saveToHistory: true, properties: properties);
       print("rec -------------");
-      count=0;
+      count = 0;
       //createNotification();
       saveLastMessage();
     } on PlatformException catch (e) {
@@ -509,12 +511,12 @@ class _chat_pageState extends State<chat_page> {
       "API-token": prefs.getString("api_token").toString()
     };
 
-    final response = await http.post(url, body: map, headers: headers);
+    final response = await http.post(Uri.parse(url), body: map, headers: headers);
     final responseJson = json.decode(response.body);
     print("res sendMessage  " + responseJson.toString());
   }
 
-  /*Future<void> createPushSubscription() async {
+/*Future<void> createPushSubscription() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
 
     try {

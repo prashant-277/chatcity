@@ -94,7 +94,7 @@ class _forgotPasswordState extends State<forgotPassword> {
                           var map = new Map<String, dynamic>();
                           map["email"] = email_controller.text.toString();
 
-                          final response = await http.post(url, body: map);
+                          final response = await http.post(Uri.parse(url), body: map);
 
                           final responseJson = json.decode(response.body);
                           print("forgotPassword-- " + responseJson.toString());
